@@ -1,5 +1,20 @@
 # -*- coding: latin-1 -*-
 
+"""
+    turgorgrowth.tools
+    ~~~~~~~~~~~~~
+
+    This module provides tools to help for the validation of the outputs:
+
+        * plot of multiple variables on the same graph,
+        * set up of loggers,
+        * quantitative comparison test,
+        * and progress-bar to follow the evolution of long simulations.
+
+    :license: CeCILL-C, see LICENSE for details.
+
+"""
+
 import os
 import sys
 import types
@@ -13,21 +28,6 @@ import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
-
-"""
-    turgorgrowth.tools
-    ~~~~~~~~~~~~~
-
-    This module provides tools to help for the validation of the outputs: 
-    
-        * plot of multiple variables on the same graph, 
-        * set up of loggers,
-        * quantitative comparison test,
-        * and progress-bar to follow the evolution of long simulations.  
-
-    :license: CeCILL-C, see LICENSE for details.
-    
-"""
 
 OUTPUTS_INDEXES = ['t', 'plant', 'axis', 'metamer', 'organ', 'element']  #: All the possible indexes of Turgor_Growth outputs
 
@@ -49,43 +49,27 @@ def plot_turgorgrowth_ouputs(outputs, x_name, y_name, x_label='', y_label='', ti
     """Plot `outputs`, with x=`x_name` and y=`y_name`.
 
     The general algorithm is:
-
         * find the scale of `outputs` and keep only the needed columns,
         * apply `filters` to `outputs` and make groups according to the scale,
         * plot each group as a new line,
         * save or display the plot.
 
-    :Parameters:
-
-        - `outputs` (:class:`pandas.DataFrame`) - The outputs of Turgor_Growth.
-
-        - `x_name` (:class:`str`) - x axis of the plot.
-
-        - `y_name` (:class:`str`) - y axis of the plot.
-
-        - `x_label` (:class:`str`) - The x label of the plot. Default is ''.
-
-        - `y_label` (:class:`str`) - The y label of the plot. Default is ''.
-
-        - `title` (:class:`str`) - the title of the plot. If None (default), create
-          a title which is the concatenation of `y_name` and each scales which cardinality is one.
-
-        - `filters` (:class:`dict`) - A dictionary whose keys are the columns of
-          `outputs` for which we want to apply a specific filter.
+    :param pandas.DataFrame outputs: The outputs of Turgor_Growth.
+    :param str x_name: x axis of the plot.
+    :param str y_name: y axis of the plot.
+    :param str x_label: The x label of the plot. Default is ''.
+    :param str y_label: The y label of the plot. Default is ''.
+    :param str title: the title of the plot. If None (default), create a title which is the concatenation of `y_name` and each scales which cardinality is one.
+    :param dict filters: A dictionary whose keys are the columns of `outputs` for which we want to apply a specific filter.
           These columns can be one or more element of :const:`OUTPUTS_INDEXES`.
-          The value associated to each key is a criteria that the rows of `outputs`
-          must satisfy to be plotted. The values can be either one value or a list of values.
+          The value associated to each key is a criteria that the rows of `outputs` must satisfy to be plotted. The values can be either one value or a list of values.
           If no value is given for any column, then all rows are plotted (default).
-
-        - `colors` (:class:`list`) - The colors for lines. If empty, let matplotlib default line colors.
-
-        - `linestyles` (:class:`list`) - The styles for lines. If empty, let matplotlib default line styles.
-
-        - `plot_filepath` (:class:`str`) - The file path to save the plot.
-          If `None`, do not save the plot but display it.
-
-        - `explicit_label` (:class:`bool`) - True: makes the line label from concatenation of each scale id (default).
-                                           - False: makes the line label from concatenation of scales containing several distinct elements.
+    :param str plot_filepath: path to save the graphs. If `None`, do not save the plot but display it.
+    :param list colors: The colors for lines. If empty, let matplotlib default line colors.
+    :param list linestyles: The styles for lines. If empty, let matplotlib default line styles.
+    :param bool explicit_label: True: makes the line label from concatenation of each scale id (default).
+                                False: makes the line label from concatenation of scales containing several distinct elements.
+    :param dict kwargs: kwargs passed to matplotlib plot function.
 
     :Examples:
 
@@ -94,7 +78,6 @@ def plot_turgorgrowth_ouputs(outputs, x_name, y_name, x_label='', y_label='', ti
     >>> plot(turgorgrowth_output_df, x_name = 't', y_name = 'Conc_Sucrose', x_label='Time (Hour)', y_label=u'[Sucrose] (µmol g$^{-1}$ mstruct)', title='{} = f({})'.format('Conc_Sucrose', 't'), filters={'plant': 1, 'axis': 'MS', 'organ': 'Lamina', 'element': 1})
 
     """
-
     # finds the scale of `outputs`
     group_keys = [key for key in OUTPUTS_INDEXES if key in outputs and key != x_name and key != y_name]
 
@@ -118,7 +101,7 @@ def plot_turgorgrowth_ouputs(outputs, x_name, y_name, x_label='', y_label='', ti
             else:
                 values = value
                 # handle strings too
-                if isinstance(values, types.StringTypes):
+                if isinstance(values, str):
                     values = [values]
             # select data from outputs
             outputs = outputs[outputs[key].isin(values)]
@@ -205,27 +188,12 @@ def setup_logging(config_filepath='logging.json', level=logging.INFO,
                   remove_old_logs=False):
     """Setup logging configuration.
 
-    :Parameters:
-
-        - `config_filepath` (:class:`str`) - the file path of the logging
-          configuration.
-
-        - `level` (:class:`int`) - the global level of the logging. Use either
-          `logging.DEBUG`, `logging.INFO`, `logging.WARNING`, `logging.ERROR` or
-          `logging.CRITICAL`.
-
-        - `log_model` (:class:`bool`) - if `True`, log the messages from :mod:`turgorgrowth.model`.
-          `False` otherwise.
-
-        - `log_compartments` (:class:`bool`) - if `True`, log the values of the compartments.
-          `False` otherwise.
-
-        - `log_derivatives` (:class:`bool`) - if `True`, log the values of the derivatives.
-          `False` otherwise.
-          
-        - `remove_old_logs` (:class:`bool`) - if `True`, remove all files in the logs directory 
-           documented in `config_filepath`. 
-
+    :param str config_filepath: the file path of the logging configuration.
+    :param int level: the global level of the logging. Use either `logging.DEBUG`, `logging.INFO`, `logging.WARNING`, `logging.ERROR` or `logging.CRITICAL`.
+    :param bool log_model: if `True`, log the messages from :mod:`turgorgrowth.model`. `False` otherwise.
+    :param bool log_compartments: if `True`, log the values of the compartments. `False` otherwise.
+    :param bool log_derivatives: if `True`, log the values of the derivatives. `False` otherwise.
+    :param bool remove_old_logs: if `True` remove old logs. `False` otherwise.
     """
     if os.path.exists(config_filepath):
         with open(config_filepath, 'r') as f:
@@ -246,32 +214,20 @@ def setup_logging(config_filepath='logging.json', level=logging.INFO,
     logging.getLogger('turgorgrowth.derivatives').disabled = not log_derivatives  # set to False to log the derivatives
 
 
-def compare_actual_to_desired(data_dirpath, actual_data_df, desired_data_filename, actual_data_filename=None, precision=4):
-    """Compare 
+def compare_actual_to_desired(data_dirpath, actual_data_df, desired_data_filename, actual_data_filename=None, precision=4, overwrite_desired_data=False):
+    """Compare:
+            * difference = actual_data_df - desired_data_df
+    to
+            * tolerance = 10**-precision * (1 + abs(desired_data_df))
+    where desired_data_df = pd.read_csv(os.path.join(data_dirpath, desired_data_filename))
+    If difference > tolerance, then raise an AssertionError.
     
-            difference = actual_data_df - desired_data_df
-         
-       to
-       
-            tolerance = 10**-precision * (1 + abs(desired_data_df))
-        
-        where
-        
-            desired_data_df = pd.read_csv(os.path.join(data_dirpath, desired_data_filename))
-            
-        If difference > tolerance, then raise an AssertionError.
-    
-    :Parameters:
-
-        - `data_dirpath` (:class:`str`) - The path of the directory where to find the data to compare.
-
-        - `actual_data_df` (:class:`pandas.DataFrame`) - The computed data.
-
-        - `desired_data_filename` (:class:`str`) - The file name of the expected data.
-
-        - `actual_data_filename` (:class:`str`) - If not None, save the computed data to `actual_data_filename`, in directory `data_dirpath`. Default is None.
-        
-        - `precision` (:class:`int`) - The precision to use for the comparison. Default is `4`.
+    :param str data_dirpath: The path of the directory where to find the data to compare.
+    :param pandas.DataFrame actual_data_df: The computed data.
+    :param str desired_data_filename: The file name of the expected data.
+    :param str actual_data_filename: If not None, save the computed data to `actual_data_filename`, in directory `data_dirpath`. Default is None.
+    :param int precision: The precision to use for the comparison. Default is `4`.
+    :param bool overwrite_desired_data: If True the comparison between actual and desired data is not run. Instead, the desired data will be overwritten using actual data. To be used with caution.
 
     """
     
@@ -287,17 +243,22 @@ def compare_actual_to_desired(data_dirpath, actual_data_df, desired_data_filenam
         actual_data_filepath = os.path.join(data_dirpath, actual_data_filename)
         actual_data_df.to_csv(actual_data_filepath, na_rep='NA', index=False, float_format='%.{}f'.format(precision))
 
-    # keep only numerical data (np.testing can compare only numerical data) 
-    for column in ('axis', 'organ', 'element', 'is_growing'):
-        if column in desired_data_df.columns:
-            del desired_data_df[column]
-            del actual_data_df[column]
+    if overwrite_desired_data:
+        warnings.warn('!!! Unit test is running with overwrite_desired_data !!!')
+        desired_data_filepath = os.path.join(data_dirpath, desired_data_filename)
+        actual_data_df.to_csv(desired_data_filepath, na_rep='NA', index=False)
+    else:
+        # keep only numerical data (np.testing can compare only numerical data)
+        for column in ('axis', 'organ', 'element', 'is_growing'):
+            if column in desired_data_df.columns:
+                del desired_data_df[column]
+                del actual_data_df[column]
 
-    # convert the actual outputs to floats
-    actual_data_df = actual_data_df.astype(np.float)
-    
-    # compare actual data to desired data
-    np.testing.assert_allclose(actual_data_df.values, desired_data_df.values, relative_tolerance, absolute_tolerance)
+        # convert the actual outputs to floats
+        actual_data_df = actual_data_df.astype(np.float)
+
+        # compare actual data to desired data
+        np.testing.assert_allclose(actual_data_df.values, desired_data_df.values, relative_tolerance, absolute_tolerance)
 
 
 class ProgressBarError(Exception): pass

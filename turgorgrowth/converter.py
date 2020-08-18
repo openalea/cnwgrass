@@ -1,9 +1,3 @@
-# -*- coding: latin-1 -*-
-import numpy as np
-import pandas as pd
-
-from turgorgrowth import model, simulation
-
 """
     turgorgrowth.converter
     ~~~~~~~~~~~~~~~~~
@@ -13,6 +7,11 @@ from turgorgrowth import model, simulation
 
     :license: CeCILL-C, see LICENSE for details.
 """
+
+import numpy as np
+import pandas as pd
+
+from turgorgrowth import model, simulation
 
 #: the columns of the outputs dataframe at PLANT scale
 PLANTS_VARIABLES = simulation.Simulation.PLANTS_INDEXES + simulation.Simulation.PLANTS_RUN_VARIABLES
@@ -30,7 +29,7 @@ HIDDENZONE_VARIABLES = simulation.Simulation.HIDDENZONE_INDEXES + simulation.Sim
 ELEMENTS_VARIABLES = simulation.Simulation.ELEMENTS_INDEXES + simulation.Simulation.ELEMENTS_RUN_VARIABLES
 
 #: the mapping of the Turgor-Growth organ classes to organ names in MTG
-TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING = {model.Internode: 'internode', model.Lamina: 'blade', model.Sheath: 'sheath',  model.HiddenZone: 'hiddenzone'}
+TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING = {model.Internode: 'internode', model.Lamina: 'blade', model.Sheath: 'sheath',  model.HiddenZone: 'hiddenzone', model.Roots: 'roots'}
 
 #: the mapping of the name of each element, from Dataframe to Turgor-Growth
 DATAFRAME_TO_TURGORGROWTH_ELEMENTS_NAMES_MAPPING = {'HiddenElement': 'enclosed_element', 'StemElement': 'exposed_element', 'LeafElement1': 'exposed_element'}
@@ -40,15 +39,11 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None):
     """
     If `elements_inputs` and `hiddenzones_inputs` are not `None`, converts `elements_inputs` and `hiddenzones_inputs` to a :class:`population <model.Population>`.
 
-    :Parameters:
-        - `hiddenzones_inputs` (:class:`pandas.DataFrame`) - Hidden zone inputs, with one line per hidden zone.
-        - `elements_inputs` (:class:`pandas.DataFrame`) - Element inputs, with one line per element.
+    :param pandas.DataFrame hiddenzones_inputs: Hidden zone inputs, with one line per hidden zone.
+    :param pandas.DataFrame elements_inputs: Element inputs, with one line per element.
 
-    :Returns:
-        If `elements_inputs` and `hiddenzones_inputs` are not `None`, returns a :class:`population <model.Population>`,
-    :Returns Type:
-        :class:`tuple`.
-
+    :return: If `elements_inputs` and `hiddenzones_inputs` are not `None`, returns a :class:`population <model.Population>`
+    :rtype: (model.Population, dict)
     """
 
     convert_dataframes_to_population = elements_inputs is not None and hiddenzones_inputs is not None
@@ -110,7 +105,7 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None):
                         if len(hiddenzone_inputs) == 0:
                             continue
                         hiddenzone_inputs = hiddenzone_inputs.loc[:, simulation.Simulation.HIDDENZONE_STATE]
-                        hiddenzone_dict = hiddenzone_inputs.loc[hiddenzone_inputs.first_valid_index()].to_dict()
+                        hiddenzone_dict = hiddenzone_inputs.loc[hiddenzone_inputs.first_valid_index()].dropna().to_dict()
                         # create a new hidden zone
                         hiddenzone = model.HiddenZone(TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING[model.HiddenZone], **hiddenzone_dict)
                         phytomer.hiddenzone = hiddenzone
@@ -164,14 +159,14 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None):
                                     mapping_topology['successor'][phytomer.internode.exposed_element] = phytomer.sheath.enclosed_element
                                 else:
                                     mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.enclosed_element
-                                    mapping_topology['successor'][phytomer.internode.enclosed_element] = phytomer.sheath.enclosed_element
+                                    mapping_topology['successor'][phytomer.internode.enclosed_element].append(phytomer.sheath.enclosed_element)
 
                             elif phytomer.hiddenzone:
                                 mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.hiddenzone
                                 mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.enclosed_element
                             else:
                                 mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = last_elongated_internode
-                            mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.enclosed_element)
+                                mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.enclosed_element)
 
                 plant.axes.append(axis)
 
@@ -181,24 +176,14 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None):
 def to_dataframes(population=None):
     """
     Convert a Turgor-Growth :class:`population <model.Population>` to Pandas dataframes.
-
     If `population` is not None, convert `population` to Pandas dataframes.
 
-    :Parameters:
+    :param model.Population population: The Turgor-Growth population to convert.
 
-        - `population` (:class:`model.Population`) - The Turgor-Growth population to convert.
-
-    :Returns:
-        If `population` is not None, return :class:`dataframes <pandas.DataFrame>` describing the internal state and compartments of the population at each scale:
-
-            * hidden zones: plant index, axis id, phytomer index, state parameters, state variables, intermediate variables, fluxes and integrative variables of each hidden zone (see :mod:`HIDDENZONE_VARIABLES`)
-            * element scale: plant index, axis id, phytomer index, organ type, element type, state parameters, state variables, intermediate variables, fluxes and integrative variables of each element (see :mod:`ELEMENTS_VARIABLES`)
-
-    :Returns Type:
-        :class:`tuple` of :class:`pandas.DataFrame`
-        or
-        :class:`pandas.DataFrame`
-
+    :return: If `population` is not None, return :class:`dataframes <pandas.DataFrame>` describing the internal state and compartments of the population at each scale:
+                 * hidden zones: plant index, axis id, phytomer index, state parameters, state variables, intermediate variables, fluxes and integrative variables of each hidden zone (see :mod:`HIDDENZONE_VARIABLES`)
+                 * element scale: plant index, axis id, phytomer index, organ type, element type, state parameters, state variables, intermediate variables, fluxes and integrative variables of each element (see :mod:`ELEMENTS_VARIABLES`)
+    :rtype: (pandas.DataFrame, pandas.DataFrame)
     """
 
     convert_population_to_dataframes = population is not None

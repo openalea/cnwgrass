@@ -1,4 +1,3 @@
-# -*- coding: latin-1 -*-
 """
     turgorgrowth
     ~~~~~~~
@@ -17,7 +16,7 @@
     :license: CeCILL-C, see LICENSE for details.
 """
 
-__version__  = '1.0.0'
+__version__ = '1.0.0'
 
 # Add a do-nothing handler to prevent an error message being output to sys.stderr in the absence of logging configuration
 import logging
