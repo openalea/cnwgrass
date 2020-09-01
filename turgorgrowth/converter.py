@@ -181,8 +181,10 @@ def to_dataframes(population=None):
     :param model.Population population: The Turgor-Growth population to convert.
 
     :return: If `population` is not None, return :class:`dataframes <pandas.DataFrame>` describing the internal state and compartments of the population at each scale:
-                 * hidden zones: plant index, axis id, phytomer index, state parameters, state variables, intermediate variables, fluxes and integrative variables of each hidden zone (see :mod:`HIDDENZONE_VARIABLES`)
-                 * element scale: plant index, axis id, phytomer index, organ type, element type, state parameters, state variables, intermediate variables, fluxes and integrative variables of each element (see :mod:`ELEMENTS_VARIABLES`)
+                 * hidden zones: plant index, axis id, phytomer index, state parameters, state variables, intermediate variables,
+                 fluxes and integrative variables of each hidden zone (see :mod:`HIDDENZONE_VARIABLES`)
+                 * element scale: plant index, axis id, phytomer index, organ type, element type, state parameters, state variables, intermediate variables,
+                 fluxes and integrative variables of each element (see :mod:`ELEMENTS_VARIABLES`)
     :rtype: (pandas.DataFrame, pandas.DataFrame)
     """
 

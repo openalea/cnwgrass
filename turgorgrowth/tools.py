@@ -17,7 +17,6 @@
 
 import os
 import sys
-import types
 from itertools import cycle
 import warnings
 import logging

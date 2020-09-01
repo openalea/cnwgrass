@@ -1,3 +1,4 @@
+# -*- coding: latin-1 -*-
 """
     turgorgrowth.parameters
     ~~~~~~~~~~~~~~~~~~
@@ -93,9 +94,9 @@ class HiddenZoneParameters(OrganParameters):
 
         self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: 0.9 Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.phi_initial = {'x': 1E-09, 'y': 1E-09, 'z': 0.4E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        self.tend = 2500000  # 300 * 3600 * 24 / 12   #: Lamina age when extensibility reaches 0 (s at 12°c). Calculated from elongwheat parameter for phase 2
-        self.tmax = 2000000  # 190 * 3600 * 24 / 12   #: Lamina age when organ extensibility is reduced by half of the initial value (s at 12°c). Calculated from elongwheat parameter for phase 2
-        self.tbase = -25 * 3600 * 24 / 12  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.tend = 2500000  # 300 * 3600 * 24 / 12   #: Lamina age when extensibility reaches 0 (s at 12°C). Calculated from elongwheat parameter for phase 2
+        self.tmax = 2000000  # 190 * 3600 * 24 / 12   #: Lamina age when organ extensibility is reduced by half of the initial value (s at 12°C). Calculated from elongwheat parameter for phase 2
+        self.tbase = -25 * 3600 * 24 / 12  #: beginning of leaf elongation in automate growth (s at 12°C); fitted from adapted data from Fournier 2005
         L0 = abs((1 + (self.tend / (self.tend - self.tmax))) * (min(1.0, float(-self.tbase) / float(self.tend - self.tbase)) ** ((self.tend - self.tbase) / (self.tend - self.tmax))))  #: Leaf length at t=0 in automate growth (beta function) (m)
         FITTED_L0 = 0.01557936  #: Fitted value of leaf length at t=0 after rescaling the beta function with L0 (m); Fournier 2005 sur courbe corrigee
         self.OFFSET_LEAF = FITTED_L0 - L0  #: Offset used for the final fitting of the beta function (m)
