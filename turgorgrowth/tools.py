@@ -44,7 +44,7 @@ class DataWarning(UserWarning):
 warnings.simplefilter('always', DataWarning)
 
 
-def plot_turgorgrowth_ouputs(outputs, x_name, y_name, x_label='', y_label='', title=None, filters={}, plot_filepath=None, colors=[], linestyles=[], explicit_label=True, kwargs={}):
+def plot_turgorgrowth_ouputs(outputs, x_name, y_name, x_label='', y_label='', x_lim = None, title=None, filters={}, plot_filepath=None, colors=[], linestyles=[], explicit_label=True, kwargs={}):
     """Plot `outputs`, with x=`x_name` and y=`y_name`.
 
     The general algorithm is:
@@ -164,6 +164,13 @@ def plot_turgorgrowth_ouputs(outputs, x_name, y_name, x_label='', y_label='', ti
 
         # plot the line
         ax.plot(outputs_group[x_name], outputs_group[y_name], **kwargs)
+
+    ##ax.set_ylim(bottom=0.)
+
+    if x_lim is not None:
+        ax.set_xlim(left=0, right=x_lim)
+    else:
+        ax.set_xlim(left=0)
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
