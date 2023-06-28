@@ -161,7 +161,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
 
     returned_dataframes = []
 
-    # plants
+    # # plants
     # if plants_df is not None:
     #     pp_plants_df = pd.concat([plants_df, pd.DataFrame(columns=PLANTS_POSTPROCESSING_VARIABLES)], sort=False)
     #     pp_plants_df = pp_plants_df.reindex(PLANTS_RUN_POSTPROCESSING_VARIABLES, axis=1, copy=False)
@@ -216,14 +216,6 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         pp_elements_df[['plant', 'metamer']] = pp_elements_df[['plant', 'metamer']].astype(int)
         returned_dataframes.append(pp_elements_df)
 
-    """
-    # organ
-    if organs_df is not None:
-        pp_organ_df = pd.concat([organs_df, pd.DataFrame(columns=ORGANS_POSTPROCESSING_VARIABLES)], sort=True)
-        pp_organ_df = pp_organ_df.reindex(columns=ORGANS_RUN_POSTPROCESSING_VARIABLES, copy=False)
-        pp_organ_df[['plant']] = pp_organ_df[['plant']].astype(int)
-        returned_dataframes.append(pp_organ_df)
-    """
     # organs
     if organs_df is not None and axes_df is not None:
         axes_df = axes_df[axes_df['axis'] == 'MS'].copy()  # TODO : Temporary !
@@ -290,7 +282,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = { 'phi_length': u'Extensibility parameter for length (Mpa-1)', 'length_leaf_emerged': u'length of emerged part of the growing leaf (m)', 'Growth':u'Growth (g H2O)', 'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
+        graph_variables_hiddenzones = {'phi_length': u'Extensibility parameter  for length (Mpa-1)', 'length_leaf_emerged': u'length of emerged part of the growing leaf (m)', 'Growth':u'Growth (g H2O)', 'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',
                                        'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_flux': u'Water flow Xylem (g)', 'water_outflow': u'Water flow HZ to emerged lamina (g)',
                                        'resistance': u'Resistance (MPa s g$^{-1}$)', 'thickness': u'Thickness (m)', 'volume': u'Volume m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids'}
@@ -342,8 +334,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 5) Soil
     if soil_df is not None:
-        graph_variables_soil = {'total_water_potential': u'Total water potential (MPa)',
-                                  'resistance': u'Resistance (MPa s g$^{-1}$)', 'water_flux': u'Water flow with Xylem (g)'}
+        graph_variables_soil = {'soil_water_potential': u'Total water potential of soil (MPa)'}
         for variable_name, variable_label in graph_variables_soil.items():
             graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
             turgorgrowth_tools.plot_turgorgrowth_ouputs(soil_df,

@@ -174,6 +174,7 @@ class HiddenZoneParameters(OrganParameters):
         # self.phi_initial = {'x': 0.4E-06, 'y': 0.1E-06, 'z': 0.1E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         #V4
         # self.phi_initial = {'x': 0.4E-06, 'y': 0.1E-06, 'z': 0.2E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+
         self.phi_initial = {'x': 1E-09, 'y': 1E-09, 'z': 1E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         self.tend = 2500000  # 300 * 3600 * 24 / 12   #: Lamina age when extensibility reaches 0 (s at 12°C). Calculated from elongwheat parameter for phase 2
@@ -214,6 +215,7 @@ class HiddenZoneInitCompartments(object):
         self.leaf_pseudostem_length = 4E-6   #: m
         self.leaf_L = 4E-6                   #: m
         self.leaf_Lmax = 0.1331              #: m
+        self.lamina_Lmax = 0.0991            #: m
         self.leaf_is_growing = True          #:
         self.thickness = 1E-3                #: m
         self.width = 0.01                    #: m

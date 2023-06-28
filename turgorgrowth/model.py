@@ -484,7 +484,7 @@ class HiddenZone(Organ):
                  total_water_potential=INIT_COMPARTMENTS.total_water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length, leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness,
                  width=INIT_COMPARTMENTS.width, turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_content=INIT_COMPARTMENTS.water_content,
                  Tr=INIT_COMPARTMENTS.Tr, green_area=INIT_COMPARTMENTS.green_area, water_flux=INIT_COMPARTMENTS.water_flux, water_outflow=INIT_COMPARTMENTS.water_outflow, cohorts=None, cohorts_replications=None,
-                 leaf_Lmax=INIT_COMPARTMENTS.leaf_Lmax, leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing):
+                 leaf_Lmax=INIT_COMPARTMENTS.leaf_Lmax, leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, lamina_Lmax=INIT_COMPARTMENTS.lamina_Lmax):
 
         super(HiddenZone, self).__init__(label)
 
@@ -503,6 +503,7 @@ class HiddenZone(Organ):
         self.leaf_pseudo_age = leaf_pseudo_age   #: °Cd
         self.leaf_L = leaf_L                     #: m
         self.leaf_Lmax = leaf_Lmax               #: m
+        self.lamina_Lmax = lamina_Lmax          #: m
         self.leaf_is_growing = leaf_is_growing   #:
         self.mstruct = mstruct                   #: g
         self.age = age   #: °Cd
@@ -657,14 +658,6 @@ class HiddenZone(Organ):
         :rtype: float
         """
 
-        """
-        # Calculate if leaf has emerged from its pseudostem
-        if leaf_L > leaf_pseudostem_length :
-            water_outflow = (leaf_L - leaf_pseudostem_length) * water_content
-        else:
-            water_outflow = 0
-        """
-
         return water_flux - water_outflow
 
     @staticmethod
@@ -705,7 +698,6 @@ class HiddenZone(Organ):
         :return: Delta of turgor water potential (MPa)
         :rtype: float
         """
-        ##epsilon_x, epsilon_y, epsilon_z = [1000*water_content]*3  # #HiddenZone.PARAMETERS.epsilon['x'], HiddenZone.PARAMETERS.epsilon['y'], HiddenZone.PARAMETERS.epsilon['z']
         epsilon_x, epsilon_y, epsilon_z = HiddenZone.PARAMETERS.epsilon['x'], HiddenZone.PARAMETERS.epsilon['y'], HiddenZone.PARAMETERS.epsilon['z']
         elastic_component = (epsilon_x * epsilon_y * epsilon_z) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)   #: Elastic reversible growth (MPa)
         plastic_component = (phi['x'] + phi['y'] + phi['z']) * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)  #: Plastic irreversible growth
@@ -736,10 +728,6 @@ class HiddenZone(Organ):
                                                                              phi[epsilon_dimension] * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) *\
                                                                             organ_dimensions[mapping_dimensions[epsilon_dimension]]
         return delta_organ_dimensions
-
-    # COMPARTMENTS
-
-
 
 
 class PhotosyntheticOrgan(Organ):
@@ -869,6 +857,8 @@ class PhotosyntheticOrganElement(object):
         # intermediate variables
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.osmotic_water_potential = osmotic_water_potential  #: MPa
+        self.total_water_potential = total_water_potential #: MPa
+        # self.total_water_potential = None      #: MPa
         self.length = length  #: m
 
         # state variables
@@ -879,7 +869,7 @@ class PhotosyntheticOrganElement(object):
 
         # other fluxes
         self.volume = None  #: m3
-        self.total_water_potential = None      #: MPa
+        # self.total_water_potential = None      #: MPa
         self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
 
         # Integrated variables
@@ -1059,11 +1049,8 @@ class PhotosyntheticOrganElement(object):
 
         for epsilon_dimension, epsilon_value in epsilon_dict:
             delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
+
         return delta_organ_dimensions
-
-    # COMPARTMENTS
-
-
 
 
 class LaminaElement(PhotosyntheticOrganElement):
@@ -1083,110 +1070,7 @@ class LaminaElement(PhotosyntheticOrganElement):
 
         # intermediate variable
         # fluxes to xylem
-    """
-        # other fluxes
-        self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
-        self.osmotic_water_potential = None  #: MPa
-        self.turgor_water_potential = None    #: MPa
 
-    # Model equations for water flux
-
-
-    @staticmethod
-    def calculate_initial_water_content(hiddenzone_osmotic_water_potential, sucrose, amino_acids, proteins, temperature):
-        Initial water content of photosynthetic element at emergence
-        calculated in order that the resulting osmotic pressure of the element will be similar to that of the hidden zone
-
-        :param float hiddenzone_osmotic_water_potential: the osmotic pressure of the hidden zone (MPa)
-        :param float sucrose: amount of sucrose in the element (µmol C)
-        :param float amino_acids: amount of amino acids in the element (µmol N)
-        :param float proteins: amount of proteins in the element (µmol N)
-        :param float temperature: element temperature (°C)
-
-        :return: element initial water content (g)
-        :rtype: float
-        
-        temperature_K = temperature + PARAMETERS.CELSIUS_2_KELVIN
-
-        sucrose = ((sucrose * 1E-6) / PARAMETERS.NB_C_SUCROSE) * PARAMETERS.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-        proteins = ((proteins * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-
-        initial_water_content = (- PARAMETERS.R * temperature_K * (sucrose + amino_acids + proteins)) / (hiddenzone_osmotic_water_potential * Xylem.PARAMETERS.VSTORAGE)
-        return initial_water_content
-
-    @staticmethod
-    def calculate_osmotic_water_potential(sucrose, amino_acids, proteins, volume, temperature):
-        Osmotic water potential of the organ calculated according to metabolites
-
-        :param float sucrose: µmol C under the form of sucrose
-        :param float amino_acids: µmol N under the form of amino acids
-        :param float proteins:µmol N under the form of proteins
-        :param float volume: (m3)
-        :param float temperature: degree Celsius
-
-        :return: Osmotic water potential (MPa)
-        :rtype: float
-        
-        temperature_K = temperature + PARAMETERS.CELSIUS_2_KELVIN
-
-        sucrose = ((sucrose * 1E-6) / PARAMETERS.NB_C_SUCROSE) * PARAMETERS.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-        non_chloroplastic_proteins = proteins / 1
-        proteins = ((non_chloroplastic_proteins * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-
-        osmotic_water_potential = - PARAMETERS.R * temperature_K * ((sucrose + amino_acids + proteins) / (volume * Xylem.PARAMETERS.VSTORAGE)) * 1E-6
-        return osmotic_water_potential
-
-    @staticmethod
-    def calculate_resistance(organ_dimensions):
-        Resistance of water flow between the lamina and xylem
-        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
-
-        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-        
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
-        return resistance
-    
-    @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, delta_water_content):
-        Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
-        Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
-
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
-        :param float delta_water_content: delta water content integrated over delta t (g)
-
-        :return: Delta of turgor water potential (MPa)
-        :rtype: float
-        
-        epsilon_z, epsilon_x, epsilon_y = LaminaElement.PARAMETERS.epsilon['z'], LaminaElement.PARAMETERS.epsilon['x'], LaminaElement.PARAMETERS.epsilon['y']
-        elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
-        organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
-        delta_turgor_water_potential = ((1 / (PARAMETERS.RHO_WATER * organ_volume)) * delta_water_content) * elastic_component  #: (MPa)
-
-        return delta_turgor_water_potential
-
-    @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions):
-        Delta of lamina dimensions according to turgor water potential, dimensions, and elasticity
-
-        :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
-        :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
-        :rtype: dict
-        
-        delta_organ_dimensions = {}
-        epsilon_dict = LaminaElement.PARAMETERS.epsilon.items()
-        mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
-
-        for epsilon_dimension, epsilon_value in epsilon_dict:
-            delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-        return delta_organ_dimensions
-        
-    """
 
 class InternodeElement(PhotosyntheticOrganElement):
     """
@@ -1205,38 +1089,7 @@ class InternodeElement(PhotosyntheticOrganElement):
 
         # intermediate variable
         # fluxes to xylem
-    """
-        # other fluxes
-        self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
-        self.osmotic_water_potential = osmotic_water_potential  #: MPa
-        self.turgor_water_potential = turgor_water_potential    #: MPa
 
-    # Model equations for water flux
-
-
-    @staticmethod
-    def calculate_initial_water_content(hiddenzone_osmotic_water_potential, sucrose, amino_acids, proteins, temperature):
-        Initial water content of photosynthetic element at emergence
-        calculated in order that the resulting osmotic pressure of the element will be similar to that of the hidden zone
-
-        :param float hiddenzone_osmotic_water_potential: the osmotic pressure of the hidden zone (MPa)
-        :param float sucrose: amount of sucrose in the element (µmol C)
-        :param float amino_acids: amount of amino acids in the element (µmol N)
-        :param float proteins: amount of proteins in the element (µmol N)
-        :param float temperature: element temperature (°C)
-
-        :return: element initial water content (g)
-        :rtype: float
-        
-        temperature_K = temperature + PARAMETERS.CELSIUS_2_KELVIN
-
-        sucrose = ((sucrose * 1E-6) / PARAMETERS.NB_C_SUCROSE) * PARAMETERS.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-        proteins = ((proteins * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-
-        initial_water_content = (- PARAMETERS.R * temperature_K * (sucrose + amino_acids + proteins)) / (hiddenzone_osmotic_water_potential * Xylem.PARAMETERS.VSTORAGE)
-        return initial_water_content
-    """
     @staticmethod
     def calculate_initial_water_potential(resistance_dict, xylem_total_water_potential):
         """ Initial water potential of emerging internode calculated in order that the influx from the hiddenzone matches the outflux towards the next organ
@@ -1249,92 +1102,6 @@ class InternodeElement(PhotosyntheticOrganElement):
 
         initial_water_potential = xylem_total_water_potential
         return initial_water_potential
-
-        """
-        numerator, denominator = 0, 0
-        for element in resistance_dict.keys():
-            other_element_resistances = sum([resistance_dict[other_element] for other_element in resistance_dict.keys() if other_element != element])
-            numerator += element.total_water_potential * other_element_resistances
-            denominator += other_element_resistances
-        
-        initial_water_potential = numerator / denominator
-        return initial_water_potential
-        """
-
-    """
-    @staticmethod
-    def calculate_osmotic_water_potential(sucrose, amino_acids, proteins, volume, temperature):
-        Osmotic water potential of the organ calculated according to metabolites
-
-        :param float sucrose: µmol C under the form of sucrose
-        :param float amino_acids: µmol N under the form of amino acids
-        :param float proteins: µmol N under the form of proteins
-        :param float volume: (m3)
-        :param float temperature: degree Celsius
-
-        :return: Osmotic water potential (MPa)
-        :rtype: float
-        
-        temperature_K = temperature + PARAMETERS.CELSIUS_2_KELVIN
-
-        sucrose = ((sucrose * 1E-6) / PARAMETERS.NB_C_SUCROSE) * PARAMETERS.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-        non_chloroplastic_proteins = proteins / 1
-        proteins = ((non_chloroplastic_proteins * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-
-        osmotic_water_potential = - PARAMETERS.R * temperature_K * ((sucrose + amino_acids + proteins) / (volume * Xylem.PARAMETERS.VSTORAGE)) * 1E-6
-        return osmotic_water_potential
-
-    @staticmethod
-    def calculate_resistance(organ_dimensions):
-        Resistance of water flow between the lamina and xylem
-        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
-
-        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
-        return resistance
-
-    @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, delta_water_content):
-        Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
-        Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
-
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'width', 'thickness'] (m)
-        :param float delta_water_content: delta water content integrated over delta t (g)
-
-        :return: Delta of turgor water potential (MPa)
-        :rtype: float
-        
-        epsilon_z, epsilon_x, epsilon_y = InternodeElement.PARAMETERS.epsilon['z'], InternodeElement.PARAMETERS.epsilon['x'], InternodeElement.PARAMETERS.epsilon['y']
-        elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
-        organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
-        delta_turgor_water_potential = ((1 / (PARAMETERS.RHO_WATER * organ_volume)) * delta_water_content) * elastic_component  #: (MPa)
-
-        return delta_turgor_water_potential
-
-    @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions):
-        Delta of internode dimensions according to turgor water potential, dimensions, and elasticity
-
-        :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'width', 'thickness'] (m)
-
-        :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
-        :rtype: dict
-        
-
-        delta_organ_dimensions = {}
-        epsilon_dict = InternodeElement.PARAMETERS.epsilon.items()
-        mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
-
-        for epsilon_dimension, epsilon_value in epsilon_dict:
-            delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-        return delta_organ_dimensions
-    """
 
 
 class SheathElement(PhotosyntheticOrganElement):
@@ -1354,38 +1121,7 @@ class SheathElement(PhotosyntheticOrganElement):
 
         # intermediate variable
         # fluxes to xylem
-    """
-        # other fluxes
-        self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
-        self.osmotic_water_potential = None  #: MPa
-        self.turgor_water_potential = None    #: MPa
 
-    # Model equations for water flux
-
-    @staticmethod
-    def calculate_initial_water_content(hiddenzone_osmotic_water_potential, sucrose, amino_acids, proteins, temperature):
-        Initial water content of photosynthetic element at emergence
-        calculated in order that the resulting osmotic pressure of the element will be similar to that of the hidden zone
-
-        :param float hiddenzone_osmotic_water_potential: the osmotic pressure of the hidden zone (MPa)
-        :param float sucrose: amount of sucrose in the element (µmol C)
-        :param float amino_acids: amount of amino acids in the element (µmol N)
-        :param float proteins: amount of proteins in the element (µmol N)
-        :param float temperature: element temperature (°C)
-
-        :return: element initial water content (g)
-        :rtype: float
-        
-        temperature_K = temperature + PARAMETERS.CELSIUS_2_KELVIN
-
-        sucrose = ((sucrose * 1E-6) / PARAMETERS.NB_C_SUCROSE) * PARAMETERS.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-        proteins = ((proteins * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-
-        initial_water_content = (- PARAMETERS.R * temperature_K * (sucrose + amino_acids + proteins)) / (hiddenzone_osmotic_water_potential * Xylem.PARAMETERS.VSTORAGE)
-        return initial_water_content
-
-    """
     @staticmethod
     def calculate_initial_water_potential(resistance_dict, xylem_total_water_potential):
         """
@@ -1397,88 +1133,6 @@ class SheathElement(PhotosyntheticOrganElement):
         :rtype: float
         """
 
-        """
-        nominator, denominator = 0, 0
-        for element in resistance_dict.keys():
-            other_element_resistances = sum([resistance_dict[other_element] for other_element in resistance_dict.keys() if other_element != element])
-            nominator += element.total_water_potential * other_element_resistances
-            denominator += other_element_resistances
-
-        initial_water_potential = nominator / denominator
-        """
         initial_water_potential = xylem_total_water_potential
         return initial_water_potential
 
-    """
-    @staticmethod
-    def calculate_osmotic_water_potential(sucrose, amino_acids, proteins, volume, temperature):
-        Osmotic water potential of the organ calculated according to metabolites
-
-        :param float sucrose: µmol C under the form of sucrose
-        :param float amino_acids: µmol N under the form of amino acids
-        :param float proteins: µmol N under the form of proteins
-        :param float volume: (m3)
-        :param float temperature: degree Celsius
-
-        :return: Osmotic water potential (MPa)
-        :rtype: float
-        
-        temperature_K = temperature + PARAMETERS.CELSIUS_2_KELVIN
-
-        sucrose = ((sucrose * 1E-6) / PARAMETERS.NB_C_SUCROSE) * PARAMETERS.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-        non_chloroplastic_proteins = proteins / 1
-        proteins = ((non_chloroplastic_proteins * 1E-6) / PARAMETERS.AMINO_ACIDS_N_RATIO) * PARAMETERS.VANT_HOFF_AMINO_ACIDS
-
-        osmotic_water_potential = (- PARAMETERS.R * temperature_K * (sucrose + amino_acids + proteins)) / (volume * Xylem.PARAMETERS.VSTORAGE) * 1E-6
-        return osmotic_water_potential
-
-    @staticmethod
-    def calculate_resistance(organ_dimensions, R_xylem):
-        Resistance of water flow between the lamina and xylem
-        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
-
-        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
-        return resistance
-
-    @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, delta_water_content):
-        Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
-        Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
-
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'width', 'thickness'] (m)
-        :param float delta_water_content: delta water content integrated over delta t (g)
-
-        :return: Delta of turgor water potential (MPa)
-        :rtype: float
-        
-        epsilon_z, epsilon_x, epsilon_y = SheathElement.PARAMETERS.epsilon['z'], SheathElement.PARAMETERS.epsilon['x'], SheathElement.PARAMETERS.epsilon['y']
-        elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
-        organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
-        delta_turgor_water_potential = ((1 / (PARAMETERS.RHO_WATER * organ_volume)) * delta_water_content) * elastic_component  #: (MPa)
-
-        return delta_turgor_water_potential
-
-    @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions):
-        Delta of sheath dimensions according to turgor water potential, dimensions, and elasticity
-
-        :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'width', 'thickness'] (m)
-
-        :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
-        :rtype: dict
-        
-        delta_organ_dimensions = {}
-        epsilon_dict = SheathElement.PARAMETERS.epsilon.items()
-        mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
-
-        for epsilon_dimension, epsilon_value in epsilon_dict:
-            delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-        return delta_organ_dimensions
-    """

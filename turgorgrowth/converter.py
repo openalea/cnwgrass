@@ -150,64 +150,64 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs
                         # create a new hidden zone
                         hiddenzone = model.HiddenZone(TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING[model.HiddenZone], **hiddenzone_dict)
                         phytomer.hiddenzone = hiddenzone
-                        # Topology
-                        mapping_topology['predecessor'][phytomer.hiddenzone] = last_elongated_internode
-                        mapping_topology['successor'][last_elongated_internode].append(phytomer.hiddenzone)
+                        # # Topology
+                        # mapping_topology['predecessor'][phytomer.hiddenzone] = last_elongated_internode
+                        # mapping_topology['successor'][last_elongated_internode].append(phytomer.hiddenzone)
 
-                    # Topoly of elements
-                    if phytomer.lamina and phytomer.lamina.exposed_element:
-                        if phytomer.sheath:
-                            if phytomer.sheath.exposed_element:
-                                mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.sheath.exposed_element
-                                mapping_topology['successor'][phytomer.sheath.exposed_element] = phytomer.lamina.exposed_element
-                            elif phytomer.sheath.enclosed_element:
-                                mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.sheath.enclosed_element
-                                mapping_topology['successor'][phytomer.sheath.enclosed_element] = phytomer.lamina.exposed_element
-                        else:
-                            mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.hiddenzone
-                            mapping_topology['successor'][phytomer.hiddenzone] = phytomer.lamina.exposed_element
-
-                    if phytomer.internode:
-                        if phytomer.internode.enclosed_element:
-                            mapping_topology['predecessor'][phytomer.internode.enclosed_element] = last_elongated_internode
-                            mapping_topology['successor'][last_elongated_internode].append(phytomer.internode.enclosed_element)
-                            last_elongated_internode = phytomer.internode.enclosed_element
-                            mapping_topology['successor'][phytomer.internode.enclosed_element] = []
-
-                        if phytomer.internode.exposed_element:
-                            if phytomer.internode.enclosed_element:
-                                mapping_topology['predecessor'][phytomer.internode.exposed_element] = phytomer.internode.enclosed_element
-                                mapping_topology['successor'][phytomer.internode.enclosed_element] = phytomer.internode.exposed_element
-                            else:
-                                mapping_topology['predecessor'][phytomer.internode.exposed_element] = phytomer.hiddenzone
-                                mapping_topology['successor'][phytomer.hiddenzone] = phytomer.internode.exposed_element
-
-                    if phytomer.sheath:
-                        if phytomer.sheath.exposed_element:
-                            if phytomer.sheath.enclosed_element:
-                                mapping_topology['predecessor'][phytomer.sheath.exposed_element] = phytomer.sheath.enclosed_element
-                                mapping_topology['successor'][phytomer.sheath.enclosed_element] = phytomer.sheath.exposed_element
-                            elif phytomer.hiddenzone:
-                                mapping_topology['predecessor'][phytomer.sheath.exposed_element] = phytomer.hiddenzone
-                                mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.exposed_element
-                            else:
-                                mapping_topology['predecessor'][phytomer.sheath.exposed_element] = last_elongated_internode
-                                mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.exposed_element)
-                        if phytomer.sheath.enclosed_element:
-                            if phytomer.internode:
-                                if phytomer.internode.exposed_element:
-                                    mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.exposed_element
-                                    mapping_topology['successor'][phytomer.internode.exposed_element] = phytomer.sheath.enclosed_element
-                                else:
-                                    mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.enclosed_element
-                                    mapping_topology['successor'][phytomer.internode.enclosed_element].append(phytomer.sheath.enclosed_element)
-
-                            elif phytomer.hiddenzone:
-                                mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.hiddenzone
-                                mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.enclosed_element
-                            else:
-                                mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = last_elongated_internode
-                                mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.enclosed_element)
+                    # # Topoly of elements
+                    # if phytomer.lamina and phytomer.lamina.exposed_element:
+                    #     if phytomer.sheath:
+                    #         if phytomer.sheath.exposed_element:
+                    #             mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.sheath.exposed_element
+                    #             mapping_topology['successor'][phytomer.sheath.exposed_element] = phytomer.lamina.exposed_element
+                    #         elif phytomer.sheath.enclosed_element:
+                    #             mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.sheath.enclosed_element
+                    #             mapping_topology['successor'][phytomer.sheath.enclosed_element] = phytomer.lamina.exposed_element
+                    #     else:
+                    #         mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.hiddenzone
+                    #         mapping_topology['successor'][phytomer.hiddenzone] = phytomer.lamina.exposed_element
+                    #
+                    # if phytomer.internode:
+                    #     if phytomer.internode.enclosed_element:
+                    #         mapping_topology['predecessor'][phytomer.internode.enclosed_element] = last_elongated_internode
+                    #         mapping_topology['successor'][last_elongated_internode].append(phytomer.internode.enclosed_element)
+                    #         last_elongated_internode = phytomer.internode.enclosed_element
+                    #         mapping_topology['successor'][phytomer.internode.enclosed_element] = []
+                    #
+                    #     if phytomer.internode.exposed_element:
+                    #         if phytomer.internode.enclosed_element:
+                    #             mapping_topology['predecessor'][phytomer.internode.exposed_element] = phytomer.internode.enclosed_element
+                    #             mapping_topology['successor'][phytomer.internode.enclosed_element] = phytomer.internode.exposed_element
+                    #         else:
+                    #             mapping_topology['predecessor'][phytomer.internode.exposed_element] = phytomer.hiddenzone
+                    #             mapping_topology['successor'][phytomer.hiddenzone] = phytomer.internode.exposed_element
+                    #
+                    # if phytomer.sheath:
+                    #     if phytomer.sheath.exposed_element:
+                    #         if phytomer.sheath.enclosed_element:
+                    #             mapping_topology['predecessor'][phytomer.sheath.exposed_element] = phytomer.sheath.enclosed_element
+                    #             mapping_topology['successor'][phytomer.sheath.enclosed_element] = phytomer.sheath.exposed_element
+                    #         elif phytomer.hiddenzone:
+                    #             mapping_topology['predecessor'][phytomer.sheath.exposed_element] = phytomer.hiddenzone
+                    #             mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.exposed_element
+                    #         else:
+                    #             mapping_topology['predecessor'][phytomer.sheath.exposed_element] = last_elongated_internode
+                    #             mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.exposed_element)
+                    #     if phytomer.sheath.enclosed_element:
+                    #         if phytomer.internode:
+                    #             if phytomer.internode.exposed_element:
+                    #                 mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.exposed_element
+                    #                 mapping_topology['successor'][phytomer.internode.exposed_element] = phytomer.sheath.enclosed_element
+                    #             else:
+                    #                 mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.enclosed_element
+                    #                 mapping_topology['successor'][phytomer.internode.enclosed_element].append(phytomer.sheath.enclosed_element)
+                    #
+                    #         elif phytomer.hiddenzone:
+                    #             mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.hiddenzone
+                    #             mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.enclosed_element
+                    #         else:
+                    #             mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = last_elongated_internode
+                    #             mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.enclosed_element)
 
                 plant.axes.append(axis)
 
@@ -301,7 +301,7 @@ def to_dataframes(population=None, soils=None):
         all_plants_df.sort_values(by=PLANTS_VARIABLES, inplace=True)
         all_axes_df.sort_values(by=AXES_VARIABLES, inplace=True)
         all_phytomers_df.sort_values(by=PHYTOMERS_VARIABLES, inplace=True)
-        all_organs_df.sort_values(by=ORGANS_VARIABLES, inplace=True)
+        # all_organs_df.sort_values(by=ORGANS_VARIABLES, inplace=True)
         all_hiddenzones_df.sort_values(by=HIDDENZONE_VARIABLES, inplace=True)
         all_elements_df.sort_values(by=ELEMENTS_VARIABLES, inplace=True)
 
