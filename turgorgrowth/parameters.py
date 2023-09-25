@@ -228,7 +228,7 @@ class HiddenZoneInitCompartments(object):
                  ((self.proteins * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS)) / self.osmotic_water_potential  #: g
 
         # fluxes with ylem
-        self.water_flux = 0
+        self.water_influx = 0
         self.water_outflow = 0
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneInitCompartments` for current process
