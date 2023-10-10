@@ -12,6 +12,7 @@
 from __future__ import division  # use "//" to do integer division
 import numpy as np
 from math import exp
+from math import ceil
 
 from turgorgrowth import parameters
 
@@ -147,16 +148,19 @@ class Axis(object):
         # integrative variables
         self.Total_Transpiration = None  #: the total transpiration (mmol s-1)
         self.Growth = None #: the hiddenzone growth (g H2O)
+        self.total_water_influx = None #: water influx between xylem and photosynthetic organ element
 
     def calculate_aggregated_variables(self):
         """Calculate the integrative variables of the axis recursively.
         """
         self.Total_Transpiration = 0
         self.Growth = 0
+        self.total_water_influx = 0
 
         for phytomer in self.phytomers:
             phytomer.calculate_aggregated_variables()
             self.Total_Transpiration += phytomer.Total_Transpiration
+            self.total_water_influx += phytomer.total_water_influx + phytomer.Total_Transpiration
             if phytomer.hiddenzone is not None:
                 self.Growth += phytomer.hiddenzone.water_influx * phytomer.hiddenzone.nb_replications
 
@@ -198,18 +202,22 @@ class Phytomer(object):
         self.Total_Transpiration = None #:mmol H20 s-1
         self.water_influx = None
         self.Growth = None
+        self.total_water_influx = None
 
     def calculate_aggregated_variables(self):
         """Calculate the integrative variables of the phytomer recursively.
         """
         self.Total_Transpiration = 0
+        self.water_influx = 0
+        self.total_water_influx = 0
         for organ_ in (self.lamina, self.internode, self.sheath, self.hiddenzone):
             if organ_ is not None:
                 organ_.calculate_aggregated_variables()
                 if hasattr(organ_, 'Total_Transpiration'):
                     self.Total_Transpiration += organ_.Total_Transpiration
+                    self.total_water_influx += organ_.total_water_influx
                 if organ_ == 'hiddenzone':
-                    self.water_influx = organ_.water_influx
+                    self.water_influx += organ_.water_influx
 
     @property
     def nb_replications(self):
@@ -278,25 +286,6 @@ class Roots(Organ):
 
     @staticmethod
     # FLUXES
-
-    def calculate_resistance_radial(roots_dimensions, R_xylem):
-        """ Resistance of water flow between the roots and the xylem or the soil.
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-        """
-        resistance_radial = 0.5 * Xylem.PARAMETERS.R_xylem * (roots_dimensions['length'] / (roots_dimensions['width'] * roots_dimensions['thickness']))
-        return resistance_radial
-
-    def calculate_resistance_axial(self, R_xylem):
-        """ Resistance of water flow between the roots and the xylem or the soil.
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-        """
-        resistance_axial = 0.5 * Xylem.PARAMETERS.R_xylem
-        return resistance_axial
-
 
     def calculate_water_influx(self, total_water_potential, soil_water_potential, resistance_radial, delta_t):
         """Rate of water flow from soil to roots (g` water unloaded g-1 mstruct h-1).
@@ -403,20 +392,24 @@ class Xylem(Organ):
         return resistance
 
     @staticmethod
-    def calculate_xylem_water_potential(soil_water_potential, Total_Transpiration, Growth, delta_t):
+    def calculate_xylem_water_potential(soil_water_potential, total_water_influx, Growth, delta_t):
         """Total water potential of the xylem
 
         :param float soil_water_potential: MPa
         :param float Total_Transpiration: mmol H20 s-1
+        :param float total_water_influx: g H2O
         :param float Growth: g H2O
 
         :return: Total water potential (MPa)
         :rtype: float
         """
 
-        #Resistance between soil and xylem is a fixed parameter : R_soil
+        #Axial resistance between soil and xylem is a fixed parameter : R_soil
         #Total_Transpiration en g H2O h-1
-        xylem_water_potential = soil_water_potential - ((Total_Transpiration * 1E-3 * 18) + Growth) * Xylem.PARAMETERS.R_soil * delta_t
+
+        # xylem_water_potential = soil_water_potential - ((Total_Transpiration * 1E-3 * 18) + Growth) * Xylem.PARAMETERS.R_soil * delta_t
+        xylem_water_potential = soil_water_potential - (Growth + total_water_influx) * Xylem.PARAMETERS.R_soil * delta_t
+
         return xylem_water_potential
 
 class HiddenZone(Organ):
@@ -468,7 +461,7 @@ class HiddenZone(Organ):
 
         # other fluxes
         self.initial_volume = None #: m3
-        self.volume = None #: m3
+        ##self.volume = None #: m3
         self.osmotic_water_potential = osmotic_water_potential  #: MPa
         self.total_water_potential = total_water_potential    #: MPa
         self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
@@ -539,6 +532,7 @@ class HiddenZone(Organ):
         proteins = ((proteins_actual * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
 
         osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / (volume * HiddenZone.PARAMETERS.VSTORAGE)) * 1E-6
+
         return osmotic_water_potential
 
     @staticmethod
@@ -575,7 +569,8 @@ class HiddenZone(Organ):
         :return: resistance (MPa s g-1)
         :rtype: float
         """
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem * (hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']))
+        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_hz * (hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']))
+
         return resistance
 
     @staticmethod
@@ -646,7 +641,7 @@ class HiddenZone(Organ):
         :rtype: dict
         """
 
-        # proteins = proteins * 1E-6 * 2
+
 
         if age <= HiddenZone.PARAMETERS.tend:
             beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
@@ -655,13 +650,23 @@ class HiddenZone(Organ):
         else:
             beta_function_norm = 0
 
+        # Extensibility linear function with proteins
+        proteins_actual = proteins * min(1., (age * 5E-6 + 0.1))  # TODO: temp hack to account for the fact that N is mainly Nstruct in young hz
+        proteins = ((proteins_actual * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        intercept_N = 0.019
+        slope_N = -0.00043
+        proteins_function = (slope_N * proteins) + intercept_N
+        # proteins_actual_function = (-400 * proteins) + intercept_N
+
         phi = {}
 
         for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
-            # phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t * proteins * 1E5
-            phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
+
+            phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t * proteins_function
+            # phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t * proteins_actual_function
 
         return phi
+
 
     @staticmethod
     def calculate_delta_turgor_water_potential(phi, turgor_water_potential, volume, delta_water_content, water_content):
@@ -737,10 +742,12 @@ class PhotosyntheticOrgan(Organ):
 
     def calculate_aggregated_variables(self):
         self.Total_Transpiration = 0
+        self.total_water_influx = 0
         for element in (self.exposed_element, self.enclosed_element):
             if element is not None:
                 element.calculate_aggregated_variables()
                 self.Total_Transpiration += element.Total_Transpiration
+                self.total_water_influx += element.total_water_influx
 
 
 class Lamina(PhotosyntheticOrgan):
@@ -810,7 +817,8 @@ class PhotosyntheticOrganElement(object):
     def __init__(self, label=None, temperature = INIT_COMPARTMENTS.temperature, age = INIT_COMPARTMENTS.age, green_area = INIT_COMPARTMENTS.green_area, mstruct = INIT_COMPARTMENTS.mstruct, Ts = INIT_COMPARTMENTS.Ts,
                  Tr = INIT_COMPARTMENTS.Tr, length=INIT_COMPARTMENTS.length, sucrose = INIT_COMPARTMENTS.sucrose, amino_acids = INIT_COMPARTMENTS.amino_acids, proteins = INIT_COMPARTMENTS.proteins,
                  osmotic_water_potential = INIT_COMPARTMENTS.osmotic_water_potential, total_water_potential = INIT_COMPARTMENTS.total_water_potential,
-                 turgor_water_potential = INIT_COMPARTMENTS.turgor_water_potential, water_content = INIT_COMPARTMENTS.water_content, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, cohorts=None, cohorts_replications=None):
+                 turgor_water_potential = INIT_COMPARTMENTS.turgor_water_potential, water_content = INIT_COMPARTMENTS.water_content,
+                 water_influx = INIT_COMPARTMENTS.water_influx, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, cohorts=None, cohorts_replications=None):
 
         self.label = label                                      #: the label of the element
         if cohorts is None:  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
@@ -835,22 +843,21 @@ class PhotosyntheticOrganElement(object):
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.osmotic_water_potential = osmotic_water_potential  #: MPa
         self.total_water_potential = total_water_potential #: MPa
-        # self.total_water_potential = None      #: MPa
         self.length = length  #: m
 
         # state variables
         self.water_content = water_content                     #: g
 
         # fluxes to xylem
-        self.water_influx = None  #: current flow of water from xylem to organ integrated over delta t (g` water)
+        self.water_influx = water_influx  #: current flow of water from xylem to organ integrated over delta t (g` water)
 
         # other fluxes
-        self.volume = None  #: m3
-        # self.total_water_potential = None      #: MPa
+        ##self.volume = None  #: m3
         self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
 
         # Integrated variables
         self.Total_Transpiration = None  #:
+        self.delta_t = 3600
 
     @property
     def nb_replications(self):
@@ -859,12 +866,14 @@ class PhotosyntheticOrganElement(object):
     def calculate_aggregated_variables(self):
         """Calculate the integrative variables of the element.
         """
-        self.Total_Transpiration = self.calculate_Total_Transpiration(self.Tr, self.green_area)
+
+        self.Total_Transpiration = self.calculate_Total_Transpiration(self.Tr, self.green_area, self.delta_t)
+        self.total_water_influx = self.calculate_delta_water_content(self.water_influx, self.Total_Transpiration, self.delta_t)
 
     # VARIABLES
 
     @staticmethod
-    def calculate_Total_Transpiration(Tr, green_area):
+    def calculate_Total_Transpiration(Tr, green_area, delta_t):
         """Surfacic transpiration rate of an element
 
         :param float Tr: Transpiration rate (mmol H2O m-2 s-1)
@@ -873,7 +882,11 @@ class PhotosyntheticOrganElement(object):
         :return: Total transpiration (mmol H2O s-1)
         :rtype: float
         """
-        return Tr * green_area
+
+        conversion_ratio = 1E-3 * parameters.WATER_MOLAR_MASS * delta_t # en g H2O
+
+        # return Tr * green_area
+        return Tr * green_area * conversion_ratio
 
     # FLUXES
     #: Water flow equations common to all photosynthetic organ elements
@@ -932,7 +945,6 @@ class PhotosyntheticOrganElement(object):
         proteins = ((non_chloroplastic_proteins * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
 
         osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / (volume * PhotosyntheticOrganElement.PARAMETERS.vstorage)) * 1E-6
-
         return osmotic_water_potential
 
     @staticmethod
@@ -946,7 +958,7 @@ class PhotosyntheticOrganElement(object):
         :return: resistance (MPa s g-1)
         :rtype: float
         """
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
+        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_blade * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
 
         return resistance
 
@@ -988,7 +1000,8 @@ class PhotosyntheticOrganElement(object):
         :return: Delta of water flow into the organ (g)
         :rtype: float
         """
-        return water_influx - ((Total_Transpiration * 1E-3 * 18) * parameters.WATER_MOLAR_MASS * 1E-3 * delta_t) # transpiration en g
+        # return water_influx - (Total_Transpiration * parameters.WATER_MOLAR_MASS * 1E-3 * delta_t) # transpiration en g
+        return water_influx - Total_Transpiration # transpiration en g H2O
 
     @staticmethod
     def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content):
@@ -1005,7 +1018,6 @@ class PhotosyntheticOrganElement(object):
         elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
         plastic_component = 0
         organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
-        ##delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential

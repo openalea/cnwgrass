@@ -282,9 +282,11 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = { 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)', 'phi_length': u'Extensibility parameter  for length (Mpa-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1)', 'length_leaf_emerged': u'length of emerged part of the growing leaf (m)', 'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
+        graph_variables_hiddenzones = { 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)', 'phi_length': u'Extensibility parameter  for length (Mpa-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1)',
+                                        'length_leaf_emerged': u'length of emerged part of the growing leaf (m)',
+                                        'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',
-                                       'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow Xylem (g)', 'water_outflow': u'Water flow HZ to emerged lamina (g)',
+                                       'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow Xylem (g)', 'water_outflow': u'Water flow HZ (g)',
                                        'resistance': u'Resistance (MPa s g$^{-1}$)', 'thickness': u'Thickness (m)', 'volume': u'Volume m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids'}
     
         for variable_name, variable_label in graph_variables_hiddenzones.items():
@@ -301,7 +303,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 3) Roots and xylem
     if organs_df is not None:
-        graph_variables_organs = {'total_water_potential': u'Total water potential (MPa)', 'resistance': u'Resistance (MPa s g$^{-1}$)',
+        graph_variables_organs = {'total_water_potential': u'Total water potential (MPa)',
                                   'soil_water_potential': u'Soil water potential (Mpa)', 'SRWC': u'SRWC (%)'}
 
         for org in (['roots'], ['xylem']):
@@ -318,7 +320,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                         explicit_label=False)
 
     # 4) Axes
-    graph_variables_axes = {'Total_Transpiration': u'Total transpiration (mmol s-1)', 'Growth':u'Growth (g H2O)'}
+    graph_variables_axes = {'Total_Transpiration': u'Total transpiration (g H2O)', 'Growth':u'Growth (g H2O)', 'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)'}
 
     for variable_name, variable_label in graph_variables_axes.items():
         graph_name = variable_name + '_axis' + '.PNG'
@@ -346,6 +348,3 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                             filters={'plant': 1, 'axis': 'MS'},
                                                             plot_filepath=os.path.join(graphs_dirpath, graph_name),
                                                             explicit_label=False)
-
-    # 6) All together
-    # Water potential of xylem, hz and element

@@ -160,26 +160,21 @@ class HiddenZoneParameters(OrganParameters):
         super(HiddenZoneParameters, self).__init__()
 
         #INITAL
-        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: 0.9 Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        #V1
+        # self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: 0.9 Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.epsilon = {'x': 3, 'y': 2, 'z': 3}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
         #INITIAL
         # self.phi_initial = {'x': 1E-09, 'y': 1E-09, 'z': 0.4E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        #V1
-        # self.phi_initial = {'x': 0.4E-05, 'y': 0.01E-05, 'z': 0.45E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        #V2
-        # self.phi_initial = {'x': 0.4E-04, 'y': 0.01E-04, 'z': 0.45E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        #V3
-        # self.phi_initial = {'x': 0.4E-06, 'y': 0.1E-06, 'z': 0.1E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        #V4
-        # self.phi_initial = {'x': 0.4E-06, 'y': 0.1E-06, 'z': 0.2E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
-        self.phi_initial = {'x': 1E-09, 'y': 1E-09, 'z': 1E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # Changes after Tom's discussion 10/2023
+        # osmotic water potential calculated
+        self.phi_initial = {'x': 2E-07, 'y': 1E-08, 'z': 5E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # osmotic water potential fixed
+        # self.phi_initial = {'x': 2E-08, 'y': 1E-09, 'z': 5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         self.tend = 2500000  # 300 * 3600 * 24 / 12   #: Lamina age when extensibility reaches 0 (s at 12°C). Calculated from elongwheat parameter for phase 2
         self.tmax = 2000000  # 190 * 3600 * 24 / 12   #: Lamina age when organ extensibility is reduced by half of the initial value (s at 12°C). Calculated from elongwheat parameter for phase 2
-        self.tbase = -25 * 3600 * 24 / 12  #: beginning of leaf elongation in automate growth (s at 12°C); fitted from adapted data from Fournier 2005
+        self.tbase = -25 * 3600 * 24 / 12 #: - 180 000 #: beginning of leaf elongation in automate growth (s at 12°C); fitted from adapted data from Fournier 2005
         L0 = abs((1 + (self.tend / (self.tend - self.tmax))) * (min(1.0, float(-self.tbase) / float(self.tend - self.tbase)) ** ((self.tend - self.tbase) / (self.tend - self.tmax))))  #: Leaf length at t=0 in automate growth (beta function) (m)
         FITTED_L0 = 0.01557936  #: Fitted value of leaf length at t=0 after rescaling the beta function with L0 (m); Fournier 2005 sur courbe corrigee
         self.OFFSET_LEAF = FITTED_L0 - L0  #: Offset used for the final fitting of the beta function (m)
@@ -288,11 +283,12 @@ class XylemParameters(object):
         super(XylemParameters, self).__init__()
 
         self.VSTORAGE = 0.2  #: Storage portion of the xylem volume
-        ##self.R_xylem = 0.00001  #: Elemental xylem flow resistance (Mpa h g-1 m)
-        # self.R_xylem = 0.5    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
-        # self.R_soil = 0.01    #: Flow resistance between soil and xylem (Mpa s g-1 m)
-        self.R_xylem = 2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+
+        self.R_xylem_blade = 0.2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023
+        # self.R_xylem_hz = 200    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023 # osmotic potential fixed
+        self.R_xylem_hz = 2000    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023 # osmotic potential calculated
         self.R_soil = 0.001    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+
 
 #: The instance of class :class:`cnwheat.parameters.XylemParameters` for current process
 XYLEM_PARAMETERS = XylemParameters()
@@ -371,6 +367,9 @@ class PhotosyntheticOrganElementInitCompartments(object):
                  ((self.amino_acids * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) +
                  ((self.proteins * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS)) / self.osmotic_water_potential  #: g
 
+        # fluxes with ylem
+        self.water_influx = 0
+        self.water_outflow = 0
 
 
 #: The instance of class :class:`turgorgrowth.parameters.LaminaInitCompartments` for current process

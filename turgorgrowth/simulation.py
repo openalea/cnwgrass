@@ -136,7 +136,7 @@ class Simulation(object):
     #: the fluxes exchanged between the compartments at axis scale
     AXES_FLUXES = []
     #: the variables computed by integrating values of axis components parameters/variables recursively
-    AXES_INTEGRATIVE_VARIABLES = ['Total_Transpiration', 'Growth']
+    AXES_INTEGRATIVE_VARIABLES = ['Total_Transpiration', 'Growth', 'total_water_influx']
     #: all the variables computed during a run step of the simulation at axis scale
     AXES_RUN_VARIABLES = AXES_STATE + AXES_INTERMEDIATE_VARIABLES + AXES_FLUXES + AXES_INTEGRATIVE_VARIABLES
 
@@ -174,7 +174,9 @@ class Simulation(object):
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ORGANS_STATE = ORGANS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Organ, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ORGANS_INTERMEDIATE_VARIABLES = ['soil_water_potential', 'total_water_potential', 'resistance']
+    ##ORGANS_INTERMEDIATE_VARIABLES = ['soil_water_potential', 'total_water_potential', 'resistance']
+    ORGANS_INTERMEDIATE_VARIABLES = ['soil_water_potential', 'total_water_potential']
+
     #: the fluxes exchanged between the compartments at organ scale
     ORGANS_FLUXES = []
     #: the variables computed by integrating values of xylem components parameters/variables recursively
@@ -816,7 +818,7 @@ class Simulation(object):
                 #: Soil water potential
                 axis.xylem.soil_water_potential = axis.xylem.calculate_soil_water_potential(axis.xylem.SRWC)
                 #: Total water potential
-                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(axis.xylem.soil_water_potential, axis.Total_Transpiration, axis.Growth, self.delta_t)
+                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(axis.xylem.soil_water_potential, axis.total_water_influx, axis.Growth, self.delta_t)
 
                 for phytomer in axis.phytomers:
                     # Hidden zone
@@ -836,8 +838,8 @@ class Simulation(object):
                             continue
 
                         #: Osmotic water potential
-                        # hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume, hiddenzone.temperature, hiddenzone.age)
-                        hiddenzone.osmotic_water_potential = -0.8
+                        hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume, hiddenzone.temperature, hiddenzone.age)
+                        # hiddenzone.osmotic_water_potential = -0.8
                         #: Total water potential
                         hiddenzone.total_water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
                         #: Length
@@ -875,13 +877,13 @@ class Simulation(object):
                                 #: Volume
                                 element.volume = element.calculate_volume(element.water_content)
                                 #: Osmotic water potential
-                                # element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.proteins, element.volume, element.temperature)
-                                element.osmotic_water_potential = -0.8
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.proteins, element.volume, element.temperature)
+                                # element.osmotic_water_potential = -0.8
                                 #: Total water potential
                                 element.total_water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
 
                             #: Resistance to water flow
-                            element.resistance = element.calculate_resistance(element.organ_dimensions, axis.xylem.PARAMETERS.R_xylem)
+                            element.resistance = element.calculate_resistance(element.organ_dimensions, axis.xylem.PARAMETERS.R_xylem_blade)
 
                             #flows with xylem
                             element.water_influx = element.calculate_water_flux(element.total_water_potential, axis.xylem.total_water_potential, element.resistance, self.delta_t)
@@ -889,28 +891,29 @@ class Simulation(object):
                             if hiddenzone is not None:
                                 #End of elongation
                                 if hiddenzone.leaf_L >= hiddenzone.leaf_Lmax:
-                                    element.water_influx = element.calculate_water_flux(element.total_water_potential, axis.xylem.total_water_potential, element.resistance, self.delta_t)
+                                    continue
                                 else:
                                     #Growing leaf with emerged blade
                                     if hiddenzone.leaf_L > hiddenzone.leaf_pseudostem_length:
                                         if organ.label == "blade":
                                             if element.length >= hiddenzone.lamina_Lmax:
                                                 # End of blade elongation
-                                                element.water_influx = element.calculate_water_flux(element.total_water_potential, axis.xylem.total_water_potential, element.resistance, self.delta_t)
+                                                continue
                                             else:
                                                 # Growing blade
-                                                element.water_influx = element.calculate_water_flux(element.total_water_potential, hiddenzone.total_water_potential, element.resistance, self.delta_t)
-                                                element.water_flux_from_hz = element.water_influx
-                                                hiddenzone.water_outflow = element.water_influx
+                                                # element.water_influx = element.calculate_water_flux(element.total_water_potential, hiddenzone.total_water_potential, element.resistance, self.delta_t)
+                                                # element.water_flux_from_hz = element.water_influx
+                                                # hiddenzone.water_outflow = element.water_influx
+                                                continue
                                         if organ.label == "sheath":
                                             if element.length >= hiddenzone.sheath_Lmax:
                                                 # End of sheath elongation
-                                                element.water_influx = element.calculate_water_flux(element.total_water_potential, axis.xylem.total_water_potential, element.resistance, self.delta_t)
+                                                continue
                                             else:
                                                 # Growing sheath
-                                                element.water_influx = element.calculate_water_flux(element.total_water_potential, hiddenzone.total_water_potential, element.resistance, self.delta_t)
-                                                element.water_flux_from_hz = element.water_influx
-                                                hiddenzone.water_outflow = element.water_influx
+                                                # element.water_influx = element.calculate_water_flux(element.total_water_potential, hiddenzone.total_water_potential, element.resistance, self.delta_t)
+                                                # element.water_flux_from_hz = element.water_influx
+                                                continue
 
         #: compute the derivative of each compartment of element
         for plant in self.population.plants:
@@ -976,6 +979,7 @@ class Simulation(object):
                             # flows with xylem
                             #: Delta water content
                             delta_water_content_ele = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
+                            # delta_water_content_ele = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration)
                             #: Delta turgor pressure
                             delta_turgor_water_potential = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_ele)
                             #: Dimensions
