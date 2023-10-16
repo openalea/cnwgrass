@@ -262,7 +262,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 1) Photosynthetic organs
     if elements_df is not None:
-        graph_variables_ph_elements = {'length': u'Length (m)', 'water_flux_from_hz' : u'Water flux from hz to element (g H2O)',
+        graph_variables_ph_elements = {'organ_volume':'Volume of organ based on dimensions (m3)', 'epsilon_volume':'Volumetric extensibility (Mpa)', 'Total_Transpiration': u'Total transpiration (g H2O)', 'length': u'Length (m)', 'water_flux_from_hz' : u'Water flux from hz to element (g H2O)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'thickness': u'Thickness (m)', 'total_water_potential': u'Total water potential (MPa)',
                                        'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow from Xylem (g)',  'width': u'Width (m)',
                                        'resistance': u'Resistance (MPa s g$^{-1}$)', 'volume': u'Volume m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids'}
@@ -282,7 +282,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = { 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)', 'phi_length': u'Extensibility parameter  for length (Mpa-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1)',
+        graph_variables_hiddenzones = { 'organ_volume':'Volume of hz based on dimensions (m3)','phi_volume':'Volumetric extensibility (MPa-1) ', 'epsilon_volume':'Volumetric extensibility (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)', 'phi_length': u'Extensibility parameter  for length (Mpa-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1)',
                                         'length_leaf_emerged': u'length of emerged part of the growing leaf (m)',
                                         'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',
@@ -334,17 +334,17 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                     plot_filepath=os.path.join(graphs_dirpath, graph_name),
                                                     explicit_label=False)
 
-    # 5) Soil
-    if soil_df is not None:
-        graph_variables_soil = {'soil_water_potential': u'Total water potential of soil (MPa)'}
-        for variable_name, variable_label in graph_variables_soil.items():
-            graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
-            turgorgrowth_tools.plot_turgorgrowth_ouputs(soil_df,
-                                                            x_name=x_name,
-                                                            y_name=variable_name,
-                                                            x_label=x_label,
-                                                            y_label=variable_label,
-                                                            colors=['blue'],
-                                                            filters={'plant': 1, 'axis': 'MS'},
-                                                            plot_filepath=os.path.join(graphs_dirpath, graph_name),
-                                                            explicit_label=False)
+    # # 5) Soil
+    # if soil_df is not None:
+    #     graph_variables_soil = {'soil_water_potential': u'Total water potential of soil (MPa)'}
+    #     for variable_name, variable_label in graph_variables_soil.items():
+    #         graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
+    #         turgorgrowth_tools.plot_turgorgrowth_ouputs(soil_df,
+    #                                                         x_name=x_name,
+    #                                                         y_name=variable_name,
+    #                                                         x_label=x_label,
+    #                                                         y_label=variable_label,
+    #                                                         colors=['blue'],
+    #                                                         filters={'plant': 1, 'axis': 'MS'},
+    #                                                         plot_filepath=os.path.join(graphs_dirpath, graph_name),
+    #                                                         explicit_label=False)
