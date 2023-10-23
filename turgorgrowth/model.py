@@ -256,8 +256,7 @@ class Roots(Organ):
     PARAMETERS = parameters.ROOTS_PARAMETERS  #: the internal parameters of the roots
     INIT_COMPARTMENTS = parameters.ROOTS_INIT_COMPARTMENTS  #: the initial values of compartments and state parameters
 
-    def __init__(self, label='roots', total_water_potential=INIT_COMPARTMENTS.total_water_potential, soil_water_potential=INIT_COMPARTMENTS.soil_water_potential, xylem_water_potential=INIT_COMPARTMENTS.xylem_water_potential,
-                 water_content=INIT_COMPARTMENTS.water_content, length=INIT_COMPARTMENTS.length, width=INIT_COMPARTMENTS.width, thickness=INIT_COMPARTMENTS.thickness):
+    def __init__(self, label='roots'):
         """
         :param str label: root label
         :param float total_water_potential: Water potential of roots (MPa)
@@ -266,74 +265,16 @@ class Roots(Organ):
         super(Roots, self).__init__(label)
 
         # state parameters
-        self.total_water_potential = total_water_potential  #: MPa
-        self.soil_water_potential = soil_water_potential  #: MPa
-        self.xylem_water_potential = xylem_water_potential  #: MPa
-        self.length = length #: m
-        self.width = width #: m
-        self.thickness = thickness #: m
 
         # state variables
-        self.water_content = water_content  #: g
 
         # fluxes from xylem
-        self.water_influx = None  #: current flow of water from roots to xylem
 
         # other fluxes
-        self.resistance_axial = None #: resistance of water flux between soil and roots; roots and xylem (MPa s g-1)
-        self.resistance_radial = None #: resistance of water flux between soil and roots; roots and xylem (MPa s g-1)
 
-    @staticmethod
     # FLUXES
 
-    def calculate_water_influx(self, total_water_potential, soil_water_potential, resistance_radial, delta_t):
-        """Rate of water flow from soil to roots (g` water unloaded g-1 mstruct h-1).
-
-        :param float organ_water_potential: water potential of the organs (MPa)
-        :param float soil_water_potential: water potential of the soil (MPa)
-        :param float resistance: transport resistance between roots and soil (MPa s g-1)
-        :param float delta_t: time step of the simulation (s)
-
-        :return: Water influx into the roots integrated over delta_t (g)
-        :rtype: float
-        """
-        return ((soil_water_potential - total_water_potential) / resistance_radial) * delta_t
-
-    def calculate_water_flux(self, total_water_potential, xylem_water_potential, resistance_axial, delta_t):
-        """ Water flow into the organ according to water potential gradient with the xylem.
-
-        :param float organ_water_potential: water potential of the current organ (MPa)
-        :param float xylem_water_potential: water potential of the xylem (MPa)
-        :param float resistance: transport resistance between organ and xylem (MPa s g-1)
-        :param float delta_t: time step of the simulation (s)
-
-        :return: Water influx into the xylem integrated over delta_t (g)
-        :rtype: float
-        """
-        return ((total_water_potential - xylem_water_potential) / resistance_axial) * delta_t
-
-    def calculate_delta_water_content(self, water_influx, water_flux):
-        """ delta of water flow for the roots.
-
-        :param float water_flux: Water influx integrated over delta_t (g)
-        :param float water_influx: Water uptake from the soil (g)
-
-        :return: Delta of water flow into the roots (g)
-        :rtype: float
-        """
-        return water_influx - water_flux
-
     # COMPARTMENTS
-
-    def calculate_water_derivative(self, water_flux):
-        """delta water of xylem.
-
-        :param float water_flux: Water flow from roots to xylem (g` water)
-
-        :return: delta water (g` water)
-        :rtype: float
-        """
-        return water_flux
 
 
 class Xylem(Organ):
@@ -355,7 +296,7 @@ class Xylem(Organ):
 
         # fluxes from xylem
         self.total_water_influx = None
-        # self.Total_Transpiration = None
+        self.Total_Transpiration = None
         self.Growth = None
 
         # other fluxes
@@ -422,8 +363,9 @@ class HiddenZone(Organ):
 
     def __init__(self, label='hiddenzone', leaf_pseudo_age=INIT_COMPARTMENTS.age, age=INIT_COMPARTMENTS.age, amino_acids=INIT_COMPARTMENTS.amino_acids, proteins=INIT_COMPARTMENTS.proteins, sucrose=INIT_COMPARTMENTS.sucrose,
                  temperature=INIT_COMPARTMENTS.temperature, mstruct=INIT_COMPARTMENTS.mstruct, osmotic_water_potential=INIT_COMPARTMENTS.osmotic_water_potential,
-                 total_water_potential=INIT_COMPARTMENTS.total_water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length, leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness,
-                 width=INIT_COMPARTMENTS.width, turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_content=INIT_COMPARTMENTS.water_content,
+                 total_water_potential=INIT_COMPARTMENTS.total_water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length,
+                 leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width,
+                 turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_content=INIT_COMPARTMENTS.water_content,
                  Tr=INIT_COMPARTMENTS.Tr, green_area=INIT_COMPARTMENTS.green_area, water_influx=INIT_COMPARTMENTS.water_influx, water_outflow=INIT_COMPARTMENTS.water_outflow, cohorts=None, cohorts_replications=None,
                  leaf_Lmax=INIT_COMPARTMENTS.leaf_Lmax, leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, lamina_Lmax=INIT_COMPARTMENTS.lamina_Lmax):
 
@@ -447,9 +389,9 @@ class HiddenZone(Organ):
         self.lamina_Lmax = lamina_Lmax          #: m
         self.leaf_is_growing = leaf_is_growing   #:
         self.mstruct = mstruct                   #: g
-        self.age = age   #: °Cd
-        self.Tr = Tr
-        self.green_area = green_area
+        self.age = age                          #: °Cd
+        self.Tr = Tr                            #
+        self.green_area = green_area            #: m²
 
 
         # state variables
@@ -527,10 +469,11 @@ class HiddenZone(Organ):
 
         sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE) * parameters.VANT_HOFF_SUCROSE
         amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        proteins_actual = proteins * min(1., (age * 5E-6 + 0.1))  # TODO: temp hack to account for the fact that N is mainly Nstruct in young hz
-        proteins = ((proteins_actual * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        # proteins_actual = proteins * min(1., (age * 5E-6 + 0.1))  # TODO: temp hack to account for the fact that N is mainly Nstruct in young hz
+        # proteins = ((proteins_actual * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        proteins = 0
 
-        osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / (volume * HiddenZone.PARAMETERS.VSTORAGE)) * 1E-6
+        osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / volume ) * 1E-6
 
         return osmotic_water_potential
 
@@ -930,7 +873,9 @@ class PhotosyntheticOrganElement(object):
         amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
         proteins = ((proteins * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
 
-        initial_water_content = (- parameters.R * temperature_K * (sucrose + amino_acids + proteins)) / (hiddenzone_osmotic_water_potential * HiddenZone.PARAMETERS.VSTORAGE)
+        initial_water_content = (- parameters.R * temperature_K * (sucrose + amino_acids + proteins)) / hiddenzone_osmotic_water_potential
+        # WC = - 8.31 * (12 + 273.15) * ((sucrose * 1E-06 /12 * 1) + (amino_acids * 1E-06 / 1.17 * 1.25) + (proteins * 1E-06 / 1.17 * 1.25) ) / (-0.8 * 0.8)
+
         return initial_water_content
 
     @staticmethod
@@ -950,10 +895,11 @@ class PhotosyntheticOrganElement(object):
 
         sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE) * parameters.VANT_HOFF_SUCROSE
         amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        non_chloroplastic_proteins = proteins / 1
-        proteins = ((non_chloroplastic_proteins * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        # non_chloroplastic_proteins = proteins / 1
+        # proteins = ((non_chloroplastic_proteins * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        proteins = 0
 
-        osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / (volume * PhotosyntheticOrganElement.PARAMETERS.vstorage)) * 1E-6
+        osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / volume) * 1E-6
         return osmotic_water_potential
 
     @staticmethod

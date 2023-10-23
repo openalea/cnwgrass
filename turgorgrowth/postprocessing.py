@@ -282,7 +282,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = { 'organ_volume':'Volume of hz based on dimensions (m3)','phi_volume':'Volumetric extensibility (MPa-1) ', 'epsilon_volume':'Volumetric extensibility (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)', 'phi_length': u'Extensibility parameter  for length (Mpa-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1)',
+        graph_variables_hiddenzones = { 'organ_volume':'Volume of hz based on dimensions (m3)','phi_volume':'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume':'Volumetric extensibility (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)', 'phi_length': u'Extensibility parameter  for length (Mpa-1 h-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1 h-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1 h-1)',
                                         'length_leaf_emerged': u'length of emerged part of the growing leaf (m)',
                                         'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',

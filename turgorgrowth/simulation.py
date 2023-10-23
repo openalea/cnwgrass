@@ -825,42 +825,31 @@ class Simulation(object):
                         hiddenzone.leaf_L = y[self.initial_conditions_mapping[hiddenzone]['leaf_L']]
                         hiddenzone.thickness = y[self.initial_conditions_mapping[hiddenzone]['thickness']]
                         hiddenzone.width = y[self.initial_conditions_mapping[hiddenzone]['width']]
-                        hiddenzone.turgor_water_potential = y[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']]
-                        hiddenzone.water_content = y[self.initial_conditions_mapping[hiddenzone]['water_content']]
                         hiddenzone.length_leaf_emerged = 0
 
                         if hiddenzone.leaf_pseudo_age == 0:  #: First time after previous leaf emergence
                             #: Volume
                             hiddenzone.volume, hiddenzone.water_content = hiddenzone.calculate_initial_volume(hiddenzone.mstruct)
-
-                            #: TO DO from elong-wheat sub-model: incrementation of leaf_pseudo_age
-                            hiddenzone.leaf_pseudo_age = hiddenzone.leaf_pseudo_age + 4E5
-
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume,
-                                                                                                              hiddenzone.temperature, hiddenzone.age)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume, hiddenzone.temperature, hiddenzone.age)
                             #: Total water potential
                             hiddenzone.total_water_potential = axis.xylem.total_water_potential
                             #: Turgor water potential
                             hiddenzone.turgor_water_potential = hiddenzone.total_water_potential - hiddenzone.osmotic_water_potential
 
                         elif hiddenzone.leaf_pseudo_age > 0:
+                            #: Turgor water potential
+                            hiddenzone.turgor_water_potential = y[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']]
                             #: Volume
+                            hiddenzone.water_content = y[self.initial_conditions_mapping[hiddenzone]['water_content']]
                             hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume,
-                                                                                                              hiddenzone.temperature, hiddenzone.age)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume, hiddenzone.temperature, hiddenzone.age)
                             #: Total water potential
                             hiddenzone.total_water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
 
                         else:
                             continue
-
-                        # #: Osmotic water potential
-                        # hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume, hiddenzone.temperature, hiddenzone.age)
-                        # # hiddenzone.osmotic_water_potential = -0.8
-                        # #: Total water potential
-                        # hiddenzone.total_water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
 
                         #: Length
                         hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
@@ -882,23 +871,40 @@ class Simulation(object):
                             element.length = y[self.initial_conditions_mapping[element]['length']]
                             element.width = y[self.initial_conditions_mapping[element]['width']]
                             element.thickness = y[self.initial_conditions_mapping[element]['thickness']]
-                            element.water_content = y[self.initial_conditions_mapping[element]['water_content']]
-                            element.turgor_water_potential = y[self.initial_conditions_mapping[element]['turgor_water_potential']]
                             element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
 
                             #: First time after element emergence
                             if element.age == 0:
-                                element.osmotic_water_potential = -0.8
+                                #: Osmotic water potential
+                                # element.osmotic_water_potential = -0.8
+                                # #: Total water potential
+                                # element.total_water_potential = axis.xylem.total_water_potential
+                                # #: Turgor water potential
+                                # element.turgor_water_potential = element.total_water_potential - element.osmotic_water_potential
+                                # #: Volume
+                                # element.water_content = element.calculate_initial_water_content(hiddenzone.osmotic_water_potential, element.sucrose, element.amino_acids, element.proteins, element.temperature)
+                                # element.volume = element.calculate_volume(element.water_content)
+
+                                #: Volume
+                                element.volume = element.length * element.thickness * element.width
+                                #: Water content
+                                element.water_content = element.volume * 1E06
+                                #: Osmotic water potential
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.proteins, element.volume, element.temperature)
+                                #: Total water potential
                                 element.total_water_potential = axis.xylem.total_water_potential
+                                # : Turgor water potential
                                 element.turgor_water_potential = element.total_water_potential - element.osmotic_water_potential
-                                element.water_content = element.calculate_initial_water_content(hiddenzone.osmotic_water_potential, element.sucrose, element.amino_acids, element.proteins, element.temperature)
 
                             else:
+                                #: Water content
+                                element.water_content = y[self.initial_conditions_mapping[element]['water_content']]
+                                # : Turgor water potential
+                                element.turgor_water_potential = y[self.initial_conditions_mapping[element]['turgor_water_potential']]
                                 #: Volume
                                 element.volume = element.calculate_volume(element.water_content)
                                 #: Osmotic water potential
                                 element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.proteins, element.volume, element.temperature)
-                                # element.osmotic_water_potential = -0.8
                                 #: Total water potential
                                 element.total_water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
 
