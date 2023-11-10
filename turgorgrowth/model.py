@@ -148,7 +148,8 @@ class Axis(object):
         # integrative variables
         self.Total_Transpiration = None  #: the total transpiration (mmol s-1)
         self.Growth = None #: the hiddenzone growth (g H2O)
-        self.total_water_influx = None #: water influx between xylem and photosynthetic organ element
+        self.total_water_influx = None #: water influx between xylem and photosynthetic organ element (g H2O)
+        self.xylem_water_potential = None #: xylem water potential (Mpa)
 
     def calculate_aggregated_variables(self):
         """Calculate the integrative variables of the axis recursively.
@@ -156,6 +157,7 @@ class Axis(object):
         self.Total_Transpiration = 0
         self.Growth = 0
         self.total_water_influx = 0
+        self.xylem_water_potential = 0
 
         for phytomer in self.phytomers:
             phytomer.calculate_aggregated_variables()
@@ -163,6 +165,8 @@ class Axis(object):
             self.total_water_influx += phytomer.total_water_influx
             if phytomer.hiddenzone is not None:
                 self.Growth += phytomer.hiddenzone.water_influx * phytomer.hiddenzone.nb_replications
+
+        self.xylem_water_potential = self.xylem.total_water_potential
 
 
 class Phytomer(object):
@@ -264,18 +268,6 @@ class Roots(Organ):
 
         super(Roots, self).__init__(label)
 
-        # state parameters
-
-        # state variables
-
-        # fluxes from xylem
-
-        # other fluxes
-
-    # FLUXES
-
-    # COMPARTMENTS
-
 
 class Xylem(Organ):
     """
@@ -302,6 +294,15 @@ class Xylem(Organ):
         # other fluxes
         self.total_water_potential = total_water_potential    #: MPa
 
+        # integrative variables
+        self.delta_t = 3600
+
+
+    def calculate_aggregated_variables(self):
+        """Calculate the integrative variables of the phytomer recursively.
+        """
+        # self.xylem_water_potential = self.total_water_potential
+        self.xylem_water_potential = self.calculate_xylem_water_potential(self.soil_water_potential, self.total_water_influx, self.Growth, self.Total_Transpiration, self.delta_t)
 
     #:  Model equations for water flux
 
@@ -344,14 +345,13 @@ class Xylem(Organ):
         :return: Total water potential (MPa)
         :rtype: float
         """
-
-        #Axial resistance between soil and xylem is a fixed parameter : R_soil
-        #Total_Transpiration en g H2O h-1
+        #: Axial resistance between soil and xylem is a fixed parameter : R_soil
+        #: Total_Transpiration en g H2O h-1
 
         # xylem_water_potential = soil_water_potential - ((Total_Transpiration * 1E-3 * 18) + Growth) * Xylem.PARAMETERS.R_soil * delta_t
-        xylem_water_potential = soil_water_potential - (Growth + total_water_influx) * Xylem.PARAMETERS.R_soil * delta_t
+        total_water_potential = soil_water_potential - (Growth + total_water_influx) * Xylem.PARAMETERS.R_soil * delta_t
+        return total_water_potential
 
-        return xylem_water_potential
 
 class HiddenZone(Organ):
     """
@@ -392,7 +392,6 @@ class HiddenZone(Organ):
         self.age = age                          #: °Cd
         self.Tr = Tr                            #
         self.green_area = green_area            #: m²
-
 
         # state variables
         self.water_content = water_content                      #: g
@@ -469,9 +468,10 @@ class HiddenZone(Organ):
 
         sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE) * parameters.VANT_HOFF_SUCROSE
         amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        # proteins_actual = proteins * min(1., (age * 5E-6 + 0.1))  # TODO: temp hack to account for the fact that N is mainly Nstruct in young hz
-        # proteins = ((proteins_actual * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        proteins = 0
+        # amino_acids = 0
+        proteins_actual = proteins * min(1., (age * 5E-6 + 0.1))  # TODO: temp hack to account for the fact that N is mainly Nstruct in young hz
+        proteins = ((proteins_actual * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        # proteins = 0
 
         osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / volume ) * 1E-6
 
@@ -527,7 +527,10 @@ class HiddenZone(Organ):
         :return: Water influx into the current organ integrated over delta_t (g)
         :rtype: float
         """
-        return ((xylem_water_potential - organ_water_potential) / resistance) * delta_t
+
+        water_influx = ((xylem_water_potential - organ_water_potential) / resistance) * delta_t
+
+        return water_influx
 
     @staticmethod
     def calculate_delta_water_content(water_influx, water_outflow):
@@ -564,6 +567,53 @@ class HiddenZone(Organ):
 
         for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
             phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
+        return phi
+
+    @staticmethod
+    def calculate_extensibility_dimensions(age, delta_t):
+
+        # With nitrogen control
+
+        """ Hidden zone extensibility in each dimension in relation to non-reversible dimensional changes.
+
+        :param float age: hidden zone age (°Cd)
+        :param float delta_t: time step of the simulation (s)
+        :param float nitrogen: nitrogen content of the organ (µmol N)
+        :param float proteins: proteins content of the organ (µmol N)
+        :param float amino_acids: amino_acids content of the organ (µmol N)
+
+        :return: Extensibility z and x (MPa-1): {'z': float, 'x': float}
+        :rtype: dict
+        """
+
+        phi = {}
+
+        for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
+
+            if phi_init_dimensions == 'x': #: width
+                if age <= HiddenZone.PARAMETERS.tend:
+                    # beta_function_norm = 1 / (1 + exp (2*(age/1E06)))
+                    beta_function_norm = 1 / (1 + exp (3*(age/1E06)))
+                else:
+                    beta_function_norm = 0
+                phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
+            if phi_init_dimensions == 'y': #: thickness
+                if age <= HiddenZone.PARAMETERS.tend:
+                    # beta_function_norm = 1 / (1 + exp (2*(age/1E06)))
+                    beta_function_norm = 1 / (1 + exp (3*(age/1E06)))
+                else:
+                    beta_function_norm = 0
+                phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
+            if phi_init_dimensions =='z': #: length
+                if age <= HiddenZone.PARAMETERS.tend:
+                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
+                                          * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
+                                          ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))) + HiddenZone.PARAMETERS.OFFSET_LEAF
+                    # beta_function_norm = 1 / (1 + exp ((age/1E06)))
+                else:
+                    beta_function_norm = 0
+                phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
+
         return phi
 
     @staticmethod
@@ -797,7 +847,6 @@ class PhotosyntheticOrganElement(object):
         self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
 
         # Integrated variables
-        # self.Total_Transpiration = None  #:
         self.delta_t = 3600
 
     @property
@@ -895,9 +944,10 @@ class PhotosyntheticOrganElement(object):
 
         sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE) * parameters.VANT_HOFF_SUCROSE
         amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        # non_chloroplastic_proteins = proteins / 1
-        # proteins = ((non_chloroplastic_proteins * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        proteins = 0
+        # amino_acids = 0
+        non_chloroplastic_proteins = proteins / 1
+        proteins = ((non_chloroplastic_proteins * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        # proteins = 0
 
         osmotic_water_potential = - parameters.R * temperature_K * ((sucrose + amino_acids + proteins) / volume) * 1E-6
         return osmotic_water_potential
