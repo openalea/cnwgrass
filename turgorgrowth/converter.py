@@ -63,7 +63,7 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs
     """
 
     convert_dataframes_to_population = elements_inputs is not None and hiddenzones_inputs is not None and organs_inputs is not None
-    ##convert_dataframe_to_soils_dict = soil_inputs is not None
+    # convert_dataframe_to_soils_dict = soil_inputs is not None
 
     if convert_dataframes_to_population:
         population = model.Population()
@@ -73,7 +73,10 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs
             # create a new plant
             plant = model.Plant(plant_index)
             population.plants.append(plant)
-            curr_axes_labels = elements_inputs[elements_inputs['plant'] == plant_index].axis.unique()
+
+            # curr_axes_labels = elements_inputs[elements_inputs['plant'] == plant_index].axis.unique()
+            curr_axes_labels = organs_inputs[organs_inputs['plant'] == plant_index].axis.unique()
+
             for axis_label in curr_axes_labels:
                 # create a new axis
                 axis = model.Axis(axis_label)
@@ -97,8 +100,8 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs
                         setattr(axis, axis_attribute_name, organs)
 
                 #Topology of organs
-                roots = model.Roots(label='roots')  # TODO: temporary. Here, roots have a constant water potential fixed at -0.1 MPa
-                last_elongated_internode = roots
+                roots = model.Roots(label='roots')
+                # last_elongated_internode = roots
                 mapping_topology['successor'][roots] = []
                 xylem = model.Xylem(label='xylem')
                 mapping_topology['successor'][xylem] = []
@@ -137,6 +140,10 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs
                                 element_dict = element_inputs.loc[element_inputs.first_valid_index()].dropna().to_dict()
                                 # create a new element
                                 element = phytomer_attribute_element_class(label=mtg_element_label, **element_dict)
+
+                                # Add parameters from organ scale
+                                element.PARAMETERS.__dict__.update(organs.PARAMETERS.__dict__)
+
                                 setattr(organs, turgorgrowth_element_name, element)
 
                     #: Hidden zones
@@ -301,7 +308,7 @@ def to_dataframes(population=None, soils=None):
         all_plants_df.sort_values(by=PLANTS_VARIABLES, inplace=True)
         all_axes_df.sort_values(by=AXES_VARIABLES, inplace=True)
         all_phytomers_df.sort_values(by=PHYTOMERS_VARIABLES, inplace=True)
-        # all_organs_df.sort_values(by=ORGANS_VARIABLES, inplace=True)
+        all_organs_df.sort_values(by=ORGANS_VARIABLES, inplace=True)
         all_hiddenzones_df.sort_values(by=HIDDENZONE_VARIABLES, inplace=True)
         all_elements_df.sort_values(by=ELEMENTS_VARIABLES, inplace=True)
 

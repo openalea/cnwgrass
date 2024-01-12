@@ -220,20 +220,20 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     if organs_df is not None and axes_df is not None:
         axes_df = axes_df[axes_df['axis'] == 'MS'].copy()  # TODO : Temporary !
         pp_organs_df = pd.concat([organs_df, pd.DataFrame(columns=ORGANS_POSTPROCESSING_VARIABLES)], sort=False)
-        # roots
-        ##roots_df = organs_df.loc[organs_df.organ == 'roots']
-        # xylem
-        xylem_df = organs_df.loc[organs_df.organ == 'xylem']
+        #: roots
+        # roots_df = organs_df.loc[organs_df.organ == 'roots']
+        #: xylem
+        # xylem_df = organs_df.loc[organs_df.organ == 'xylem']
         pp_organs_df = pp_organs_df.reindex(columns=ORGANS_RUN_POSTPROCESSING_VARIABLES, copy=False)
         pp_organs_df['plant'] = pp_organs_df['plant'].astype(int)
         returned_dataframes.append(pp_organs_df)
 
-    # soil
-    if soil_df is not None:
-        pp_soil_df = pd.concat([soil_df, pd.DataFrame(columns=SOIL_POSTPROCESSING_VARIABLES)])
-        pp_soil_df = pp_soil_df.reindex(columns=SOIL_RUN_POSTPROCESSING_VARIABLES, copy=False)
-        pp_soil_df[['plant']] = pp_soil_df[['plant']].astype(int)
-        returned_dataframes.append(pp_soil_df)
+    # # soil
+    # if soil_df is not None:
+    #     pp_soil_df = pd.concat([soil_df, pd.DataFrame(columns=SOIL_POSTPROCESSING_VARIABLES)])
+    #     pp_soil_df = pp_soil_df.reindex(columns=SOIL_RUN_POSTPROCESSING_VARIABLES, copy=False)
+    #     pp_soil_df[['plant']] = pp_soil_df[['plant']].astype(int)
+    #     returned_dataframes.append(pp_soil_df)
 
     return tuple(returned_dataframes)
 
@@ -320,7 +320,8 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                         explicit_label=False)
 
     # 4) Axes
-    graph_variables_axes = { 'xylem_water_potential':u'Xylem water potential (Mpa)', 'Total_Transpiration': u'Total transpiration (g H2O)', 'Growth':u'Growth (g H2O)', 'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)'}
+    graph_variables_axes = {'xylem_water_potential':u'Xylem water potential (Mpa)', 'Total_Transpiration': u'Total transpiration (g H2O)', 'Growth': u'Growth (g H2O)',
+                             'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)'}
 
     for variable_name, variable_label in graph_variables_axes.items():
         graph_name = variable_name + '_axis' + '.PNG'

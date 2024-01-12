@@ -90,8 +90,8 @@ class SoilInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        self.SRWC = 80  #: %
-        self.soil_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
+        self.SRWC = 80          #: %
+        self.soil_water_potential = - exp((-self.SRWC + 39.765) / 18.902)           #: MPa
 
 #: The instance of class :class:`turgorgrowth.parameters.SoilInitCompartments` for current process
 SOIL_INIT_COMPARTMENTS = SoilInitCompartments()
@@ -138,8 +138,8 @@ class PhytomerInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        self.Tr = 0
-        self.green_area = 0
+        self.Tr = 0         #: mmol H20 m-2 s-1
+        self.green_area = 0         #: m2
 
 #: The instance of class :class:`turgorgrowth.parameters.PhytomerInitCompartments` for current process
 PHYTOMER_INIT_COMPARTMENTS = PhytomerInitCompartments()
@@ -166,16 +166,49 @@ class HiddenZoneParameters(OrganParameters):
         #INITAL
         # self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: 0.9 Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 3, 'y': 2, 'z': 3}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.phi_initial = {'x': 1E-09, 'y': 1E-09, 'z': 0.4E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
-        # volume work package
-        # self.phi_initial = {'x': 1E-03, 'y': 1E-03, 'z': 4E-02}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # self.phi_initial = {'x': 1E-07, 'y': 1E-07, 'z': 1E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # self.epsilon = {'x': 1, 'y': 1, 'z': 1}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3.0}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # IN CASE OF - NO - WATER_CONTENT TRANSFER BETWEEN HIDDENZONE AND BLADE
+        # AVEC K = 3
+        # AVEC K = 1
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 0.05, 'y': 0.05, 'z': 0.05}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.phi_initial = {'x': 3.5E-04, 'y': 2.5E-04, 'z': 3E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
-        # phi work package
-        self.phi_initial = {'x': 3.5E-05, 'y': 2.5E-05, 'z': 2E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 3.5E-04, 'y': 2E-04, 'z': 2.5E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 5, 'y': 3, 'z': 4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        # COUPLING WITH ELONG-WHEAT
+        # self.phi_initial = {'x': 3E-04, 'y': 2E-04, 'z': 2.5E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 2.5E-04, 'y': 2E-04, 'z': 3.5E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 5, 'y': 3, 'z': 4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V1
+        # self.phi_initial = {'x': 3E-04, 'y': 2E-04, 'z': 3E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 0.5, 'y': 0.3, 'z': 0.4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V2
+        # self.phi_initial = {'x': 2.5E-04, 'y': 1E-04, 'z': 2E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 5, 'y': 3, 'z': 4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V3
+        # no elasticity in hiddenzone
+        # self.phi_initial = {'x': 2.5E-04, 'y': 1E-04, 'z': 3.5E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 100, 'y': 100, 'z': 100}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V4
+        # self.phi_initial = {'x': 3E-06, 'y': 1E-07, 'z': 3E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        self.epsilon = {'x': 5, 'y': 3, 'z': 4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        self.phi_initial = {'x': 3E-07, 'y': 1E-08, 'z': 3E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+
+        #: V5
+        # self.phi_initial = {'x': 3E-08, 'y': 1E-09, 'z': 3E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 5, 'y': 3, 'z': 4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V6
+        # self.phi_initial = {'x': 3E-06, 'y': 1E-07, 'z': 7E-04}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.epsilon = {'x': 5, 'y': 3, 'z': 4}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
         self.tend = 2500000  # 300 * 3600 * 24 / 12   #: Lamina age when extensibility reaches 0 (s at 12°C). Calculated from elongwheat parameter for phase 2
         self.tmax = 2000000  # 190 * 3600 * 24 / 12   #: Lamina age when organ extensibility is reduced by half of the initial value (s at 12°C). Calculated from elongwheat parameter for phase 2
@@ -186,7 +219,7 @@ class HiddenZoneParameters(OrganParameters):
         self.RATIO_MSTRUCT_DM = 0.8  #: Ratio mstruct/dry matter (dimensionless). From growthwheat model.
         self.SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
         self.OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
-        self.GAMMA = 0.3
+        self.GAMMA = 0.3    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa)
 
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneParameters` for current process
@@ -198,8 +231,8 @@ class HiddenZoneInitCompartments(object):
     Initial values for compartments of hidden zones.
     """
     def __init__(self):
-        self.Tr = 0
-        self.green_area = 0
+        self.Tr = 0     #: mmol H20 m-2 s-1
+        self.green_area = 0     #: m2
         self.temperature = 8  #: °C
         self.age = 0  #: °Cd
         self.amino_acids = 0.000075  #: :math:`\mu mol N
@@ -208,38 +241,32 @@ class HiddenZoneInitCompartments(object):
         # self.mstruct = 2.65E-08    #: g TODO: viens d'ou?
         self.mstruct = 2.65E-10    #: g TODO: viens d'ou?
 
+        self.SRWC = 80  #: %
         self. volume = self.mstruct / RATIO_MSTRUCT_DM * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME  #: m3
         self.water_content = ((self.mstruct / RATIO_MSTRUCT_DM) * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME) * RHO_WATER  #: g
-        # WC = ((mstruct / 0.8) * 3.23337E-06 + 1.82312E-13 ) * 1E06
-
         # self.osmotic_water_potential = - R * (self.temperature + CELSIUS_2_KELVIN) * (
         #          ((self.sucrose * 1E-6 / NB_C_SUCROSE) * VANT_HOFF_SUCROSE) +
         #          ((self.amino_acids * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) +
-        #          ((self.proteins * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) ) / (self.volume * RHO_WATER)
-
+        #          ((self.proteins * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) ) / (self.volume * RHO_WATER)     #: MPa
         self.osmotic_water_potential = -0.8
-
-        # self.osmotic_water_potential = - R * (self.temperature + CELSIUS_2_KELVIN) * (
-        #          ((self.sucrose * 1E-6 / NB_C_SUCROSE) * VANT_HOFF_SUCROSE) +
-        #          ((self.amino_acids * 1E-6 / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) ) / (self.volume * RHO_WATER)
-
-        self.SRWC = 80  #: %
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
         self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential   #: MPa
 
         self.leaf_pseudostem_length = 4E-6   #: m
         self.leaf_L = 4E-6                   #: m
-        self.leaf_Lmax = 0.1331                    #: m
-        self.lamina_Lmax = 0.0991                  #: m
-        self.leaf_is_growing = True                #:
-        self.width = 4E-6
+        # self.leaf_Lmax = 0.1331                    #: m
+        # self.lamina_Lmax = 0.0991                  #: m
+        self.leaf_Lmax = None                    #: m
+        self.lamina_Lmax = None                 #: m
+        self.sheath_Lmax = None                 #: m
+        self.leaf_is_growing = True                #: -
+        self.width = 4E-6                 #: m
 
-        # self.thickness = 4E-6
+        # self.thickness = 4E-6                     #: m
         self.thickness = self.volume / (self.width * self.leaf_L)                     #: m
-        # TO DO: vérifier que length = leaf_L car pas d'émergence
 
-        self.water_influx = 0
-        self.water_outflow = 0
+        self.water_influx = 0                 #: g H2O
+        self.water_outflow = 0                 #: g H2O
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneInitCompartments` for current process
 HIDDEN_ZONE_INIT_COMPARTMENTS = HiddenZoneInitCompartments()
@@ -272,13 +299,57 @@ class XylemParameters(object):
     def __init__(self):
         super(XylemParameters, self).__init__()
 
-        # self.R_xylem_blade = 2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023
+        # self.R_xylem_organ = 2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023
         # self.R_xylem_hz = 0.2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023
-        self.R_soil = 0.001    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+        # self.R_soil = 1E-03    #: Flow resistance between soil and xylem (Mpa s g-1 m)
 
-        # volume
-        self.R_xylem_blade = 0.5  #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
-        self.R_xylem_hz = 0.2  #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # NO TRANSFER OF WATER_CONTENT BETWEEN HZ AND BLADE
+        # self.R_soil = 1E-05    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+        # self.R_xylem_hz = 2E-05     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-05      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+
+        # self.R_xylem_hz = 2E-05     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-03      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-07    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+
+
+        #: V1
+        # self.R_xylem_hz = 0.02     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 0.05      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-04    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+
+        #: V2
+        # self.R_xylem_hz = 2E-03  #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_hz = 2E-04  #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+
+        # self.R_xylem_organ = 5E-01  #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+
+        # self.R_soil = 1E-03  #: Flow resistance between soil and xylem (Mpa s g-1 m)
+
+        self.R_xylem_hz = 2E-03     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        self.R_xylem_organ = 5E-01      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        self.R_soil = 1E-04    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+
+        #: V3
+        # self.R_xylem_hz = 2E-05     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-03      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-07    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+        #: V4
+        # self.R_xylem_hz = 2E-02     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-02      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-02    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+        #: V5
+        # self.R_xylem_hz = 2E-02     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-04      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-02    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+        #: V6
+        # self.R_xylem_hz = 2E-04     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-02      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-02    #: Flow resistance between soil and xylem (Mpa s g-1 m)
+        #: V7
+        # self.R_xylem_hz = 2E-02     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_xylem_organ = 5E-02      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
+        # self.R_soil = 1E-03    #: Flow resistance between soil and xylem (Mpa s g-1 m)
 
 #: The instance of class :class:`cnwheat.parameters.XylemParameters` for current process
 XYLEM_PARAMETERS = XylemParameters()
@@ -295,6 +366,9 @@ class XylemInitCompartments(object):
         self.SRWC = 80  #: %
         self.soil_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
+        self.total_water_influx = None  #: g H2O
+        self.Total_Transpiration = None  #: g H2O
+        self.Growth = None  #: g H2O
 
 #: The instance of class :class:`cnwheat.parameters.XylemInitCompartments` for current process
 XYLEM_INIT_COMPARTMENTS = XylemInitCompartments()
@@ -311,9 +385,25 @@ class PhotosyntheticOrganElementParameters(object):
         # self.epsilon = {'x': 4, 'y': 4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.4, 'y': 0.4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 15, 'y': 15, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3.0}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3.0}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.15, 'y': 0.15, 'z': 0.30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        # IN CASE OF - NO - WATER_CONTENT TRANSFER BETWEEN HIDDENZONE AND BLADE
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 10, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 0.5, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 0.1, 'y': 0.5, 'z': 1}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 10, 'y': 50, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V1
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V2
+        self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V3
+        # self.epsilon = {'x': 500, 'y': 500, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
         # https://acsess.onlinelibrary.wiley.com/doi/epdf/10.2134/agronj1979.00021962007100010008x
         # entre 10 et 30 MPa pour wheat et 18 wheatgrass
@@ -328,7 +418,6 @@ class PhotosyntheticOrganElementInitCompartments(object):
     def __init__(self):
         # state parameters
         self.age = None                       #: °Cd
-        #: TO DO : self.age = 0
         self.sucrose = 15                    #: :math:`\mu mol C
         self.amino_acids = 2                 #: :math:`\mu mol N
         self.proteins = 25                   #: :math:`\mu mol N
@@ -346,25 +435,21 @@ class PhotosyntheticOrganElementInitCompartments(object):
         # self.sucrose = 0.00974303  #: :math:`\mu mol C
         # self.amino_acids = 0.00009251  #: :math:`\mu mol N
         # self.proteins = 0.01017986  #: :math:`\mu mol N
-        self.volume = self.width * self.thickness * self.length
-        self.water_content = self.volume * RHO_WATER
+        self.volume = self.width * self.thickness * self.length  #: m3
+        self.water_content = self.volume * RHO_WATER  #: g H2O
 
         # self.osmotic_water_potential = - R * (self.Ts + CELSIUS_2_KELVIN) * (
         #         (((self.sucrose * 1E-6) / NB_C_SUCROSE) * VANT_HOFF_SUCROSE) +
         #         (((self.amino_acids * 1E-6) / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) +
         #         (((self.proteins * 1E-6) / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) ) / (self.volume * RHO_WATER)
-
-        # self.osmotic_water_potential = - R * (self.Ts + CELSIUS_2_KELVIN) * (
-        #         (((self.sucrose * 1E-6) / NB_C_SUCROSE) * VANT_HOFF_SUCROSE) +
-        #         (((self.amino_acids * 1E-6) / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) ) / (self.volume * RHO_WATER)
-        self.osmotic_water_potential = -0.8
+        self.osmotic_water_potential = -0.8   #: MPa
 
         self.SRWC = 80  #: %
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
         self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential   #: MPa
 
-        self.water_influx = 0
-        self.water_outflow = 0
+        self.water_influx = 0   #: g H2O
+        self.water_outflow = 0   #: g H2O
 
 
 #: The instance of class :class:`turgorgrowth.parameters.LaminaInitCompartments` for current process
@@ -382,9 +467,24 @@ class LaminaElementParameters(OrganParameters):
         # self.epsilon = {'x': 4, 'y': 4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.4, 'y': 0.4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 15, 'y': 15, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3.0}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.15, 'y': 0.15, 'z': 0.30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        # IN CASE OF - NO - WATER_CONTENT TRANSFER BETWEEN HIDDENZONE AND BLADE
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 10, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 0.5, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 0.1, 'y': 0.5, 'z': 1}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 10, 'y': 50, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V1
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V2
+        self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V3
+        # self.epsilon = {'x': 500, 'y': 500, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
 #: The instance of class :class:`turgorgrowth.parameters.LaminaParameters` for current process
 LAMINA_ELEMENT_PARAMETERS = LaminaElementParameters()
@@ -396,10 +496,8 @@ class LaminaElementInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        # self.width = 0.003       #: m
-        # self.thickness = 0.0005  #: m
-        self.width = 0.001                   #: m init
-        self.thickness = 0.0001              #: m init
+        self.width = 0.001                   #: m
+        self.thickness = 0.0001              #: m
 
 #: The instance of class :class:`turgorgrowth.parameters.LaminaElementInitCompartments` for current process
 LAMINA_ELEMENT_INIT_COMPARTMENTS = LaminaElementInitCompartments()
@@ -416,9 +514,24 @@ class InternodeElementParameters(OrganParameters):
         # self.epsilon = {'x': 4, 'y': 4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.4, 'y': 0.4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 15, 'y': 15, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3.0}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.15, 'y': 0.15, 'z': 0.30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        # IN CASE OF - NO - WATER_CONTENT TRANSFER BETWEEN HIDDENZONE AND BLADE
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 10, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 0.5, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 0.1, 'y': 0.5, 'z': 1}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 10, 'y': 50, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V1
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V2
+        self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V3
+        # self.epsilon = {'x': 500, 'y': 500, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
 #: The instance of class :class:`turgorgrowth.parameters.InternodeParameters` for current process
 INTERNODE_ELEMENT_PARAMETERS = InternodeElementParameters()
@@ -430,10 +543,8 @@ class InternodeElementInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        # self.width = 0.003       #: m
-        # self.thickness = 0.0005  #: m
-        self.width = 0.001                   #: m init
-        self.thickness = 0.0001              #: m init
+        self.width = 0.001                   #: m
+        self.thickness = 0.0001              #: m
 
 #: The instance of class :class:`turgorgrowth.parameters.InternodeElementInitCompartments` for current process
 INTERNODE_ELEMENT_INIT_COMPARTMENTS = InternodeElementInitCompartments()
@@ -450,9 +561,24 @@ class SheathElementParameters(OrganParameters):
         # self.epsilon = {'x': 4, 'y': 4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.4, 'y': 0.4, 'z': 0.7}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 15, 'y': 15, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 3.0}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 0.15, 'y': 0.15, 'z': 0.30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 1.5, 'y': 1.5, 'z': 30}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        # IN CASE OF - NO - WATER_CONTENT TRANSFER BETWEEN HIDDENZONE AND BLADE
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 10, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 1, 'y': 0.5, 'z': 1.5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 0.1, 'y': 0.5, 'z': 1}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 10, 'y': 50, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V1
+        # self.epsilon = {'x': 5, 'y': 5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V2
+        self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
+        #: V3
+        # self.epsilon = {'x': 500, 'y': 500, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
 #: The instance of class :class:`turgorgrowth.parameters.InternodeParameters` for current process
 SHEATH_ELEMENT_PARAMETERS = SheathElementParameters()
@@ -464,10 +590,8 @@ class SheathElementInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        # self.width = 0.003       #: m
-        # self.thickness = 0.0005  #: m
-        self.width = 0.001                   #: m init
-        self.thickness = 0.0001              #: m init
+        self.width = 0.001                   #: m
+        self.thickness = 0.0001              #: m
 
 #: The instance of class :class:`turgorgrowth.parameters.SheathElementInitCompartments` for current process
 SHEATH_ELEMENT_INIT_COMPARTMENTS = SheathElementInitCompartments()
