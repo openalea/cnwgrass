@@ -66,7 +66,7 @@ class Simulation(object):
                                 model.Roots: [],
                                 model.Phytomer: [],
                                 model.Organ: [],
-                                model.HiddenZone: ['leaf_L', 'thickness', 'turgor_water_potential', 'water_content', 'width'],
+                                model.HiddenZone: ['leaf_L', 'turgor_water_potential', 'water_content', 'width', 'thickness'],
                                 model.PhotosyntheticOrganElement: ['length', 'turgor_water_potential', 'water_content', 'width', 'thickness'],
                                 model.Soil: []}
 
@@ -84,7 +84,7 @@ class Simulation(object):
     #: concatenation of :attr:`T_INDEX` and :attr:`PLANTS_INDEXES`
     PLANTS_T_INDEXES = T_INDEX + PLANTS_INDEXES
     #: the parameters which define the state of the modeled system at plant scale
-    PLANTS_STATE_PARAMETERS = ['SRWC']
+    PLANTS_STATE_PARAMETERS = []
     #: the variables which define the state of the modeled system at plant scale,
     #: formed be the concatenation of :attr:`PLANTS_STATE_PARAMETERS` and the names
     #: of the compartments associated to each plant (see :attr:`MODEL_COMPARTMENTS_NAMES`)
@@ -883,12 +883,22 @@ class Simulation(object):
                                 continue
                             element.length = y[self.initial_conditions_mapping[element]['length']]
                             element.width = y[self.initial_conditions_mapping[element]['width']]
-                            element.thickness = y[self.initial_conditions_mapping[element]['thickness']]
-                            element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
+
+                            if organ.label == "blade":
+                                # element.width = y[self.initial_conditions_mapping[element]['width']]
+                                element.thickness = y[self.initial_conditions_mapping[element]['thickness']]
+                                element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
+                            elif organ.label == "sheath":
+                                # element.radius = y[self.initial_conditions_mapping[element]['radius']]
+                                element.organ_dimensions = {'length': element.length, 'width': element.width}
+                            elif organ.label == "internode":
+                                # element.radius = y[self.initial_conditions_mapping[element]['radius']]
+                                element.organ_dimensions = {'length': element.length, 'width': element.width}
 
                             if element.age == 0:    #: First time after element emergence
                                 #: Volume
-                                element.volume = element.length * element.thickness * element.width
+                                element.volume = element.calculate_organ_volume(element.organ_dimensions)
+
                                 #: Water content
                                 element.water_content = element.volume * 1E06   #: RHO_WATER parameters
 
@@ -941,52 +951,7 @@ class Simulation(object):
                         if hiddenzone.leaf_pseudo_age > 0:  #: After previous leaf emergence
                             #: Derivatives
                             #: Delta turgor pressure
-                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz, hiddenzone.water_content)
-                            #: Dimensions
-                            hiddenzone_dimensions = {'length': hiddenzone.length, 'width': hiddenzone.width, 'thickness': hiddenzone.thickness}
-                            delta_hiddenzone_dimensions = hiddenzone.calculate_delta_organ_dimensions(delta_turgor_water_potential, hiddenzone.turgor_water_potential, phi, hiddenzone_dimensions)
-
-                        #     if hiddenzone.leaf_L >= hiddenzone.leaf_pseudostem_length:  # Emerged blade
-                        #         if hiddenzone.leaf_L >= hiddenzone.leaf_Lmax:   # End of leaf elongation
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = 0
-                        #             # y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] += delta_water_content_hz
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = 0
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = 0
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = 0
-                        #             # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness'] * hiddenzone.length / hiddenzone.leaf_L
-                        #             # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width'] * hiddenzone.length / hiddenzone.leaf_L
-                        #             hiddenzone.length_leaf_emerged = hiddenzone.leaf_L - hiddenzone.leaf_pseudostem_length
-                        #
-                        #         else:   # Growing leaf with emerged blade
-                        #             # End of hiddenzone elongation in length dimensions, but width and thickness may be still growing
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = 0
-                        #             # y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] += delta_water_content_hz    #: No water flow between hiddenzone and element
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = 0
-                        #             # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness'] * hiddenzone.length / hiddenzone.leaf_L
-                        #             # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width'] * hiddenzone.length / hiddenzone.leaf_L
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = 0
-                        #             y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = 0
-                        #             hiddenzone.length_leaf_emerged = hiddenzone.leaf_L - hiddenzone.leaf_pseudostem_length
-                        #
-                        #     else:    # Enclosed blade
-                        #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] += delta_water_content_hz
-                        #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
-                        #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] += delta_hiddenzone_dimensions['length']
-                        #         # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness'] * hiddenzone.length / hiddenzone.leaf_L
-                        #         # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width'] * hiddenzone.length / hiddenzone.leaf_L
-                        #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness']
-                        #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width']
-                        #     hiddenzone.end_elongation = hiddenzone.calculate_end_elongation(hiddenzone.leaf_Lmax, hiddenzone.leaf_L)
-                        #
-                        # else:   #: Before previous leaf emergence
-                        #     continue
-
-                        if hiddenzone.leaf_pseudo_age > 0:  #: After previous leaf emergence
-                            #: Derivatives
-                            #: Delta turgor pressure
-                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz, hiddenzone.water_content)
+                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone_dimensions, hiddenzone.volume, delta_water_content_hz, hiddenzone.water_content)
                             #: Dimensions
                             hiddenzone_dimensions = {'length': hiddenzone.length, 'width': hiddenzone.width, 'thickness': hiddenzone.thickness}
                             delta_hiddenzone_dimensions = hiddenzone.calculate_delta_organ_dimensions(delta_turgor_water_potential, hiddenzone.turgor_water_potential, phi, hiddenzone_dimensions)
@@ -1024,19 +989,54 @@ class Simulation(object):
                         for element in (organ.exposed_element, organ.enclosed_element):
                             if element is None:
                                 continue
-                            epsilon_x, epsilon_y, epsilon_z = element.PARAMETERS.epsilon['x'], element.PARAMETERS.epsilon['y'], element.PARAMETERS.epsilon['z']
-                            element.epsilon_volume = (epsilon_x * epsilon_y * epsilon_z) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
-                            element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
 
-                            #: Delta water content
-                            delta_water_content_ele = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
-                            #: Delta turgor pressure
-                            delta_turgor_water_potential = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_ele)
-                            #: Dimensions
-                            delta_element_dimensions = element.calculate_delta_organ_dimensions(delta_turgor_water_potential, element.organ_dimensions)
+                            if organ.label == "blade":  #: Case of blade
+                                epsilon_x, epsilon_y, epsilon_z = element.PARAMETERS.epsilon['x'], element.PARAMETERS.epsilon['y'], element.PARAMETERS.epsilon['z']
+                                element.epsilon_volume = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
+                                element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
+                                #: Delta water content
+                                delta_water_content_blade = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
+                                #: Delta turgor pressure
+                                delta_turgor_water_potential_blade = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_blade)
+                                #: Dimensions
+                                delta_element_dimensions = element.calculate_delta_organ_dimensions(delta_turgor_water_potential_blade, element.organ_dimensions)
+
+                            elif organ.label == "sheath":   #: Case of sheath
+                                epsilon_x, epsilon_z = element.PARAMETERS.epsilon['x'], element.PARAMETERS.epsilon['z']
+                                element.epsilon_volume = (epsilon_x * epsilon_z) / (2 * epsilon_z + epsilon_x)  #: Elastic reversible growth (MPa)
+                                element.organ_dimensions = {'length': element.length, 'width': element.width}
+                                #: Delta water content
+                                delta_water_content_sheath = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
+                                #: Delta turgor pressure
+                                delta_turgor_water_potential_sheath = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_sheath)
+                                #: Dimensions
+                                delta_element_dimensions = element.calculate_delta_organ_dimensions(delta_turgor_water_potential_sheath, element.organ_dimensions)
+
+                            elif organ.label == "internode":    #: Case of internode
+                                epsilon_x, epsilon_z = element.PARAMETERS.epsilon['x'], element.PARAMETERS.epsilon['z']
+                                element.epsilon_volume = (epsilon_x * epsilon_z) / (2 * epsilon_z + epsilon_x)  #: Elastic reversible growth (MPa)
+                                element.organ_dimensions = {'length': element.length, 'width': element.width}
+                                #: Delta water content
+                                delta_water_content_int = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
+                                #: Delta turgor pressure
+                                delta_turgor_water_potential_int = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_int)
+                                #: Dimensions
+                                delta_element_dimensions = element.calculate_delta_organ_dimensions(delta_turgor_water_potential_int, element.organ_dimensions)
+
+                            # #: Delta water content
+                            # delta_water_content_ele = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
+                            # #: Delta turgor pressure
+                            # delta_turgor_water_potential = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_ele)
+                            # #: Dimensions
+                            # delta_element_dimensions = element.calculate_delta_organ_dimensions(delta_turgor_water_potential, element.organ_dimensions)
 
                             #: Derivatives
-                            y_derivatives[self.initial_conditions_mapping[element]['turgor_water_potential']] = delta_turgor_water_potential
+                            if organ.label == "blade":  #: Case of blade
+                                y_derivatives[self.initial_conditions_mapping[element]['turgor_water_potential']] = delta_turgor_water_potential_blade
+                            elif organ.label == "sheath":  #: Case of blade
+                                y_derivatives[self.initial_conditions_mapping[element]['turgor_water_potential']] = delta_turgor_water_potential_sheath
+                            elif organ.label == "internode":  #: Case of blade
+                                y_derivatives[self.initial_conditions_mapping[element]['turgor_water_potential']] = delta_turgor_water_potential_int
 
                             if hiddenzone is not None:
                                 if hiddenzone.leaf_L >= hiddenzone.leaf_pseudostem_length:
@@ -1050,49 +1050,83 @@ class Simulation(object):
                                             y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
                                             y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
                                             y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                            y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz   # Transfer of water content from hiddenzone
-
+                                            y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_blade + delta_water_content_hz   # Transfer of water content from hiddenzone
                                         else:
                                             # End of blade elongation
                                             y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_element_dimensions['length']
                                             y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
                                             y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
                                             y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
-                                            y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
+                                            y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_blade + delta_water_content_hz  # Transfer of water content from hiddenzone
 
                                     else:   # Case of sheath and internode
                                         if organ.label == "sheath":     # Case of sheath
+                                            sheath_length = element.length
                                             if lamina_length >= hiddenzone.lamina_Lmax:  #: Blade must have finished to elongate
                                                 if element.length < hiddenzone.sheath_Lmax: # Growing sheath
                                                     #: Derivatives
                                                     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
                                                     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
                                                     y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
-                                                    y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                                    y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz # Transfer of water content from hiddenzone
+                                                    # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
+                                                    # y_derivatives[self.initial_conditions_mapping[element]['radius']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['radius'])) / hiddenzone.leaf_L)
+                                                    y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_sheath + delta_water_content_hz # Transfer of water content from hiddenzone
                                                 else:
                                                     # End of sheath elongation
                                                     #: Derivatives
                                                     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_element_dimensions['length']
                                                     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
-                                                    y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
+                                                    # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
                                                     y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
-                                                    y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
-
+                                                    # y_derivatives[self.initial_conditions_mapping[element]['radius']] = delta_element_dimensions['radius']
+                                                    y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_sheath + delta_water_content_hz  # Transfer of water content from hiddenzone
                                             else:  # Lamina is still growing
                                                 continue
 
+                                            # if element.length < hiddenzone.sheath_Lmax: # Growing sheath
+                                            #     #: Derivatives
+                                            #     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz # Transfer of water content from hiddenzone
+                                            # else:
+                                            #     # End of sheath elongation
+                                            #     #: Derivatives
+                                            #     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_element_dimensions['length']
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
+                                            #     y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
+
                                         elif organ.label == "internode":    # Case of internode
-                                            continue    # Internode elongation in elong-wheat
+                                            continue  # Internode elongation in elong-wheat
+
+                                            # if lamina_length >= hiddenzone.lamina_Lmax & sheath_length >= hiddenzone.sheath_Lmax:
+                                            #     if element.length < hiddenzone.internode_Lmax: # Growing sheath
+                                            #         #: Derivatives
+
+                                            #     else:
+                                            #         # End of internode elongation
+                                            #         #: Derivatives
+
+                                            # else:  # Lamina is still growing
+                                            #     continue
 
                                 else:   # Enclosed element
                                     continue
 
                             else:
+                                if organ.label == 'blade':
+                                    delta_water_content_ele = delta_water_content_blade
+                                    y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
+                                elif organ.label == 'sheath':
+                                    delta_water_content_ele = delta_water_content_sheath
+                                elif organ.label == 'internode':
+                                    delta_water_content_ele = delta_water_content_int
                                 # End of leaf elongation
                                 #: Derivatives
                                 y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
-                                y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
                                 y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
                                 y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele  # Transfer of water content from hiddenzone
 
