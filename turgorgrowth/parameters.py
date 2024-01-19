@@ -558,6 +558,7 @@ class InternodeElementInitCompartments(object):
         self.length = 0.0001                   #: m
         # self.radius = 0.001                 #: m
         self.width = 0.001                 #: m
+        self.thickness = 0.0001              #: m
         self.volume = self.length * PI * self.width ** 2  #: m3
         self.water_content = self.volume * RHO_WATER  #: g H2O
 
@@ -611,7 +612,9 @@ class SheathElementInitCompartments(object):
         self.length = 0.0001                   #: m
         # self.radius = 0.001                   #: m
         self.width = 0.001                   #: m
-        self.volume = self.length * PI * self.width ** 2  #: m3
+        self.thickness = 0.0001              #: m
+        # self.volume = self.length * PI * self.width ** 2  #: m3
+        self.volume = self.length * self.width * self.thickness
         self.water_content = self.volume * RHO_WATER  #: g H2O
 
 #: The instance of class :class:`turgorgrowth.parameters.SheathElementInitCompartments` for current process

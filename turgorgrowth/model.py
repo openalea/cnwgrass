@@ -553,21 +553,18 @@ class HiddenZone(Organ):
 
             if phi_init_dimensions == 'x': #: width
                 if age <= HiddenZone.PARAMETERS.tend:
-                # if age <= 2E06:
-                    beta_function_norm = 1 / (1 + exp(1/1E06 * age))
+                    beta_function_norm = 2 / (1 + exp(3/1E06 * age))
                 else:
                     beta_function_norm = 0
                 phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
             if phi_init_dimensions == 'y': #: thickness
                 if age <= HiddenZone.PARAMETERS.tend:
-                # if age <= 2E06:
-                    beta_function_norm = 1 / (1 + exp(1/1E06 * age))
+                    beta_function_norm = 2 / (1 + exp(3/1E06 * age))
                 else:
                     beta_function_norm = 0
                 phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
             if phi_init_dimensions == 'z': #: length
                 if age <= HiddenZone.PARAMETERS.tend:
-                # if age <= 2E06:
                     beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
                                           * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
                                           ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
@@ -986,7 +983,7 @@ class LaminaElement(PhotosyntheticOrganElement):
         self.water_content = water_content          #: g H2O
 
     @staticmethod
-    def calculate_organ_volume(organ_dimensions):
+    def calculate_organ_volume(organ_dimensions, lamina_Lmax):
         """ Photosynthetic element volume, assumed to be equal to a box dimensions.
 
         :param float length: (m)
@@ -1000,7 +997,7 @@ class LaminaElement(PhotosyntheticOrganElement):
         return organ_volume
 
     @staticmethod
-    def calculate_resistance(organ_dimensions, R_xylem):
+    def calculate_resistance(organ_dimensions, lamina_Lmax):
         """
         Resistance of water flow between the lamina and xylem
         Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
@@ -1010,7 +1007,7 @@ class LaminaElement(PhotosyntheticOrganElement):
         :return: resistance (MPa s g-1)
         :rtype: float
         """
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ *  organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
+        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
 
         return resistance
 
@@ -1028,8 +1025,8 @@ class LaminaElement(PhotosyntheticOrganElement):
         epsilon_z, epsilon_x, epsilon_y = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x'], PhotosyntheticOrganElement.PARAMETERS.epsilon['y']
         elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
         plastic_component = 0   #: Plastic irreversible growth (MPa)
-        # organ_volume = volume
-        organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
+        organ_volume = volume
+        # organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
@@ -1061,17 +1058,20 @@ class InternodeElement(PhotosyntheticOrganElement):
     PARAMETERS = parameters.INTERNODE_ELEMENT_PARAMETERS                           #: the internal parameters of the internode
     INIT_COMPARTMENTS = parameters.INTERNODE_ELEMENT_INIT_COMPARTMENTS             #: the initial values of compartments and state parameters
 
-    def __init__(self, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content=INIT_COMPARTMENTS.water_content, **kwargs):
+    def __init__(self, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content=INIT_COMPARTMENTS.water_content, thickness=INIT_COMPARTMENTS.thickness, **kwargs):
         super(InternodeElement, self).__init__(**kwargs)
 
         # self.thickness = thickness  #: m
-        self.width = width          #: m
-        # self.radius = radius        #: m
-        self.length = length        #: m
-        self.water_content = water_content      #: g H2O
+        # self.width = width          #: m
+
+        # self.radius = radius  #: m
+        self.length = length  #: m
+        self.water_content = water_content  #: m
+        self.width = width  #: m
+        self.thickness = thickness  #: m
 
     @staticmethod
-    def calculate_organ_volume(organ_dimensions):
+    def calculate_organ_volume(organ_dimensions, internode_Lmax):
         """ Photosynthetic element volume, assumed to be equal to a perfect cylinder.
 
         :param float length: (m)
@@ -1081,11 +1081,15 @@ class InternodeElement(PhotosyntheticOrganElement):
         :return: volume (m3)
         :rtype: float
         """
-        organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
+            organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+        else:  #: Rectangle shape when elongating
+            organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
+
         return organ_volume
 
     @staticmethod
-    def calculate_resistance(organ_dimensions, R_xylem):
+    def calculate_resistance(organ_dimensions, internode_Lmax):
         """
         Resistance of water flow between the lamina and xylem
         Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
@@ -1095,12 +1099,18 @@ class InternodeElement(PhotosyntheticOrganElement):
         :return: resistance (MPa s g-1)
         :rtype: float
         """
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+
+        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
+            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+        else:  #: Rectangle shape when elongating
+            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
+
+        # resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
 
         return resistance
 
     @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content):
+    def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content, internode_Lmax):
         """ Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
         Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
 
@@ -1110,30 +1120,48 @@ class InternodeElement(PhotosyntheticOrganElement):
         :return: Delta of turgor water potential (MPa)
         :rtype: float
         """
-        epsilon_z, epsilon_x = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x']
-        elastic_component = (epsilon_z * epsilon_x) / (2 * epsilon_z + epsilon_x) #: Elastic reversible growth (MPa)
-        plastic_component = 0   #: Plastic irreversible growth (MPa)
-        # organ_volume = volume
-        organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2  #: (m3)
+        organ_volume = volume
+
+        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
+            epsilon_z, epsilon_x = SheathElement.PARAMETERS.epsilon['z'], SheathElement.PARAMETERS.epsilon['x']
+            elastic_component = (epsilon_z * epsilon_x) / (2 * epsilon_z + epsilon_x)  #: Elastic reversible growth (MPa)
+            # organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2  #: (m3)
+
+        else:  #: Rectangle shape when elongating
+            epsilon_z, epsilon_x, epsilon_y = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x'], PhotosyntheticOrganElement.PARAMETERS.epsilon['y']
+            elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
+            # organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
+
+        plastic_component = 0  #: Plastic irreversible growth (MPa)
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
     @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions):
-        """Delta of internode dimensions according to turgor water potential, dimensions, and elasticity
+    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions, internode_Lmax):
+        """Delta of sheath dimensions according to turgor water potential, dimensions, and elasticity
 
         :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
         :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
         :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
         :rtype: dict
         """
-        delta_organ_dimensions = {}
-        epsilon_dict = InternodeElement.PARAMETERS.epsilon.items()
-        mapping_dimensions = {'x': 'width', 'z': 'length'}
 
-        for epsilon_dimension, epsilon_value in epsilon_dict:
-            delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
+        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
+            delta_organ_dimensions = {}
+            epsilon_dict = SheathElement.PARAMETERS.epsilon.items()
+            mapping_dimensions = {'x': 'width', 'z': 'length'}
+
+            for epsilon_dimension, epsilon_value in epsilon_dict:
+                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
+
+        else:  #: Rectangle shape when elongating
+            delta_organ_dimensions = {}
+            epsilon_dict = PhotosyntheticOrganElement.PARAMETERS.epsilon.items()
+            mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
+
+            for epsilon_dimension, epsilon_value in epsilon_dict:
+                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
 
         return delta_organ_dimensions
 
@@ -1146,17 +1174,20 @@ class SheathElement(PhotosyntheticOrganElement):
     PARAMETERS = parameters.SHEATH_ELEMENT_PARAMETERS                   #: the internal parameters of the sheath
     INIT_COMPARTMENTS = parameters.SHEATH_ELEMENT_INIT_COMPARTMENTS     #: the initial values of compartments and state parameters
 
-    def __init__(self, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content=INIT_COMPARTMENTS.water_content, **kwargs):
+    def __init__(self, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content=INIT_COMPARTMENTS.water_content, thickness=INIT_COMPARTMENTS.thickness, **kwargs):
         super(SheathElement, self).__init__(**kwargs)
 
         # self.thickness = thickness  #: m
-        self.width = width  #: m
+        # self.width = width  #: m
+
         # self.radius = radius  #: m
         self.length = length  #: m
         self.water_content = water_content  #: m
+        self.width = width  #: m
+        self.thickness = thickness  #: m
 
     @staticmethod
-    def calculate_organ_volume(organ_dimensions):
+    def calculate_organ_volume(organ_dimensions, sheath_Lmax):
         """ Photosynthetic element volume, assumed to be equal to a perfect cylinder.
 
         :param float length: (m)
@@ -1166,11 +1197,15 @@ class SheathElement(PhotosyntheticOrganElement):
         :return: volume (m3)
         :rtype: float
         """
-        organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
+            organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+        else:   #: Rectangle shape when elongating
+            organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
+
         return organ_volume
 
     @staticmethod
-    def calculate_resistance(organ_dimensions, R_xylem):
+    def calculate_resistance(organ_dimensions, sheath_Lmax):
         """
         Resistance of water flow between the lamina and xylem
         Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
@@ -1180,12 +1215,18 @@ class SheathElement(PhotosyntheticOrganElement):
         :return: resistance (MPa s g-1)
         :rtype: float
         """
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+
+        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
+            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
+        else:   #: Rectangle shape when elongating
+            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
+
+        # resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
 
         return resistance
 
     @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content):
+    def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content, sheath_Lmax):
         """ Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
         Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
 
@@ -1195,17 +1236,25 @@ class SheathElement(PhotosyntheticOrganElement):
         :return: Delta of turgor water potential (MPa)
         :rtype: float
         """
-        epsilon_z, epsilon_x = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x']
-        elastic_component = (epsilon_z * epsilon_x) / (2 * epsilon_z + epsilon_x) #: Elastic reversible growth (MPa)
+        organ_volume = volume
+
+        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
+            epsilon_z, epsilon_x = SheathElement.PARAMETERS.epsilon['z'], SheathElement.PARAMETERS.epsilon['x']
+            elastic_component = (epsilon_z * epsilon_x) / (2 * epsilon_z + epsilon_x) #: Elastic reversible growth (MPa)
+            # organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2  #: (m3)
+
+        else:   #: Rectangle shape when elongating
+            epsilon_z, epsilon_x, epsilon_y = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x'], PhotosyntheticOrganElement.PARAMETERS.epsilon['y']
+            elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
+            # organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
+
         plastic_component = 0   #: Plastic irreversible growth (MPa)
-        # organ_volume = volume
-        organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2  #: (m3)
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
     @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions):
+    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions, sheath_Lmax):
         """Delta of sheath dimensions according to turgor water potential, dimensions, and elasticity
 
         :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
@@ -1213,11 +1262,21 @@ class SheathElement(PhotosyntheticOrganElement):
         :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
         :rtype: dict
         """
-        delta_organ_dimensions = {}
-        epsilon_dict = SheathElement.PARAMETERS.epsilon.items()
-        mapping_dimensions = {'x': 'width', 'z': 'length'}
 
-        for epsilon_dimension, epsilon_value in epsilon_dict:
-            delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
+        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
+            delta_organ_dimensions = {}
+            epsilon_dict = SheathElement.PARAMETERS.epsilon.items()
+            mapping_dimensions = {'x': 'width', 'z': 'length'}
+
+            for epsilon_dimension, epsilon_value in epsilon_dict:
+                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
+
+        else:   #: Rectangle shape when elongating
+            delta_organ_dimensions = {}
+            epsilon_dict = PhotosyntheticOrganElement.PARAMETERS.epsilon.items()
+            mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
+
+            for epsilon_dimension, epsilon_value in epsilon_dict:
+                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
 
         return delta_organ_dimensions
