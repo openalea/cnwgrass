@@ -38,7 +38,8 @@ SOIL_T_INDEXES = turgorgrowth_simulation.Simulation.SOIL_T_INDEXES
 #: soil post-processing variables
 SOIL_POSTPROCESSING_VARIABLES = []
 #: concatenation of :attr:`SOIL_T_INDEXES`, :attr:`SOIL_RUN_VARIABLES <turgorgrowth.simulation.Simulation.SOIL_RUN_VARIABLES>` and :attr:`SOIL_POSTPROCESSING_VARIABLES`
-SOIL_RUN_POSTPROCESSING_VARIABLES = SOIL_T_INDEXES + turgorgrowth_simulation.Simulation.SOIL_RUN_VARIABLES + SOIL_POSTPROCESSING_VARIABLES
+# SOIL_RUN_POSTPROCESSING_VARIABLES = SOIL_T_INDEXES + turgorgrowth_simulation.Simulation.SOIL_RUN_VARIABLES + SOIL_POSTPROCESSING_VARIABLES
+SOIL_RUN_POSTPROCESSING_VARIABLES = set(SOIL_T_INDEXES + turgorgrowth_simulation.Simulation.SOIL_RUN_VARIABLES + SOIL_POSTPROCESSING_VARIABLES)
 
 #: the indexes to locate the axes in the modeled system
 AXES_INDEXES = turgorgrowth_simulation.Simulation.AXES_INDEXES
@@ -322,7 +323,8 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 4) Axes
     graph_variables_axes = {'xylem_water_potential':u'Xylem water potential (Mpa)', 'Total_Transpiration': u'Total transpiration (g H2O)', 'Growth': u'Growth (g H2O)',
-                             'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)'}
+                             'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)',
+                            'plant_WC_DM': u'Plant water content per dry matter (g H2O g mstruct -1)', 'mstruct_turgor':u'mstruct turgorgrowth (g)'}
 
     for variable_name, variable_label in graph_variables_axes.items():
         graph_name = variable_name + '_axis' + '.PNG'

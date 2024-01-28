@@ -108,7 +108,10 @@ class Axis(object):
         self.Growth = None  #: the hiddenzone growth (g H2O)
         self.total_water_influx = None  #: water influx between xylem and photosynthetic organ element (g H2O)
         self.xylem_water_potential = None  #: xylem water potential (Mpa)
-        self.plant_water_content = None
+        self.plant_water_content = None #: plant water content (g H2O)
+        self.plant_delta_water_content = None   #: plant delta water content (g H2O)
+        self.mstruct_turgor = None  #: structural mass of the axis (g)
+        self.plant_WC_DM = None #: absolute plant water content per structural mass of the shoot axis (g H2O g -1)
 
     def calculate_aggregated_variables(self):
         """Calculate the integrative variables of the axis recursively.
@@ -118,18 +121,21 @@ class Axis(object):
         self.total_water_influx = 0
         self.xylem_water_potential = 0
         self.plant_water_content = 0
+        self.mstruct_turgor = 0
+        self.plant_WC_DM = 0
 
         for phytomer in self.phytomers:
             phytomer.calculate_aggregated_variables()
             self.Total_Transpiration += phytomer.Total_Transpiration
+            self.mstruct_turgor += phytomer.mstruct * phytomer.nb_replications
             if phytomer != phytomer.hiddenzone:
                 self.total_water_influx += phytomer.total_water_influx
             if phytomer.hiddenzone is not None:
                 self.Growth += phytomer.hiddenzone.water_influx * phytomer.hiddenzone.nb_replications
 
         self.xylem_water_potential = self.xylem.total_water_potential
-        self.plant_water_content = self.total_water_influx + self.Growth - self.Total_Transpiration     # TEST
-
+        self.plant_water_content += (self.total_water_influx + self.Growth) - self.Total_Transpiration
+        self.plant_WC_DM = self.plant_water_content / self.mstruct_turgor
 
 class Phytomer(object):
     """
@@ -152,11 +158,11 @@ class Phytomer(object):
         :param Sheath sheath: Sheath object
         :param HiddenZone hiddenzone: HiddenZone object
         """
-        self.index = index
-        self.lamina = lamina
-        self.internode = internode
-        self.sheath = sheath
-        self.hiddenzone = hiddenzone
+        self.index = index  #: the index of the phytomer
+        self.lamina = lamina  #: the lamina
+        self.internode = internode  #: the internode
+        self.sheath = sheath  #: the sheath
+        self.hiddenzone = hiddenzone  #: the hidden zone
         if cohorts is None:
             cohorts = []
         self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
@@ -169,6 +175,7 @@ class Phytomer(object):
         self.water_influx = None    #: g H20
         self.Growth = None  #: g H20
         self.total_water_influx = None  #: g H20
+        self.mstruct = None  #: the structural mass of the phytomer (g)
 
     def calculate_aggregated_variables(self):
         """Calculate the integrative variables of the phytomer recursively.
@@ -176,9 +183,11 @@ class Phytomer(object):
         self.Total_Transpiration = 0
         self.water_influx = 0
         self.total_water_influx = 0
+        self.mstruct = 0
         for organ_ in (self.lamina, self.internode, self.sheath, self.hiddenzone):
             if organ_ is not None:
                 organ_.calculate_aggregated_variables()
+                self.mstruct += organ_.mstruct
                 if hasattr(organ_, 'Total_Transpiration'):
                     self.Total_Transpiration += organ_.Total_Transpiration
                     self.total_water_influx += organ_.total_water_influx
@@ -411,10 +420,6 @@ class HiddenZone(Organ):
         """
         temperature_K = temperature + parameters.CELSIUS_2_KELVIN
 
-        # sucrose = 2
-        # amino_acids = 0.25
-        # proteins = 5
-
         sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE) * parameters.VANT_HOFF_SUCROSE
         amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
         proteins_actual = proteins * min(1., (age * 5E-6 + 0.1))  # TODO: temp hack to account for the fact that N is mainly Nstruct in young hz
@@ -529,70 +534,30 @@ class HiddenZone(Organ):
         """
 
         #: TO DO parameters into parameters.py
+        # a = 2, b = 3, c = 1E06
 
         phi = {}
 
         for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
-
-            # FUNCTION 1
-
-            # if phi_init_dimensions == 'x': #: width
-            #     if age <= HiddenZone.PARAMETERS.tend:
-            #         beta_function_norm = 1 / (1 + exp(3*(age/1E06)))
-            #     else:
-            #         beta_function_norm = 0
-            #     phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
-            # if phi_init_dimensions == 'y': #: thickness
-            #     if age <= HiddenZone.PARAMETERS.tend:
-            #         beta_function_norm = 1 / (1 + exp(3*(age/1E06)))
-            #     else:
-            #         beta_function_norm = 0
-            #     phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
-
-            # FUNCTION 2
-
             if phi_init_dimensions == 'x': #: width
                 if age <= HiddenZone.PARAMETERS.tend:
                     beta_function_norm = 2 / (1 + exp(3/1E06 * age))
                 else:
                     beta_function_norm = 0
-                phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
             if phi_init_dimensions == 'y': #: thickness
                 if age <= HiddenZone.PARAMETERS.tend:
                     beta_function_norm = 2 / (1 + exp(3/1E06 * age))
                 else:
                     beta_function_norm = 0
-                phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
             if phi_init_dimensions == 'z': #: length
                 if age <= HiddenZone.PARAMETERS.tend:
                     beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
                                           * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
                                           ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-                                          # + HiddenZone.PARAMETERS.OFFSET_LEAF     #: No offset
                 else:
                     beta_function_norm = 0
-                phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
 
-            # # FUNCTION 3
-            #
-            # if phi_init_dimensions == 'x':  #: width
-            #     if age <= 1E09:
-            #         beta_function_norm = 1 / (1 + exp(3 / 1E09 * age))
-            #     else:
-            #         beta_function_norm = 0
-            #     phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
-            # if phi_init_dimensions == 'y':  #: thickness
-            #     if age <= 1E09:
-            #         beta_function_norm = 1 / (1 + exp(3 / 1E09 * age))
-            #     else:
-            #         beta_function_norm = 0
-            #     phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
-            # if phi_init_dimensions == 'z':  #: length
-            #     if age <= 1E09:
-            #         beta_function_norm = 1 / (1 + exp(1 / 1E09 * age))
-            #     else:
-            #         beta_function_norm = 0
-            #     phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
+            phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
 
         return phi
 
@@ -638,11 +603,14 @@ class HiddenZone(Organ):
         :return: Delta of turgor water potential (MPa)
         :rtype: float
         """
+
+        # TO DO : which volume to consider (water or dimensions) ?
+
         epsilon_x, epsilon_y, epsilon_z = HiddenZone.PARAMETERS.epsilon['x'], HiddenZone.PARAMETERS.epsilon['y'], HiddenZone.PARAMETERS.epsilon['z']
         elastic_component = (epsilon_x * epsilon_y * epsilon_z) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)   #: Elastic reversible growth (MPa)
         plastic_component = (phi['x'] + phi['y'] + phi['z'])   #: Plastic irreversible growth
-        # organ_volume = volume
-        organ_volume = hiddenzone_dimensions['length'] * hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']
+        organ_volume = volume
+        # organ_volume = hiddenzone_dimensions['length'] * hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
@@ -666,14 +634,6 @@ class HiddenZone(Organ):
         mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
 
         for epsilon_dimension, epsilon_value in epsilon_dict.items():
-            # if epsilon_dimension != 'z':
-            #     delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = 0
-            #
-            # else:
-            #     delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential +
-            #                                                                  phi[epsilon_dimension] * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) *\
-            #                                                                 organ_dimensions[mapping_dimensions[epsilon_dimension]]
-
             delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential +
                                                                              phi[epsilon_dimension] * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) *\
                                                                             organ_dimensions[mapping_dimensions[epsilon_dimension]]
@@ -704,15 +664,18 @@ class PhotosyntheticOrgan(Organ):
         self.enclosed_element = enclosed_element
         self.Tr = None  #: mmol H20 m-2 s-1
         self.green_area = None  #: m2
+        self.mstruct = None  #: the structural dry mass
 
     def calculate_aggregated_variables(self):
         self.Total_Transpiration = 0
         self.total_water_influx = 0
+        self.mstruct = 0
         for element in (self.exposed_element, self.enclosed_element):
             if element is not None:
                 element.calculate_aggregated_variables()
                 self.Total_Transpiration += element.Total_Transpiration
                 self.total_water_influx += element.total_water_influx
+                self.mstruct += element.mstruct
 
 
 class Lamina(PhotosyntheticOrgan):
@@ -779,7 +742,7 @@ class PhotosyntheticOrganElement(object):
                  osmotic_water_potential = INIT_COMPARTMENTS.osmotic_water_potential, total_water_potential = INIT_COMPARTMENTS.total_water_potential,
                  turgor_water_potential = INIT_COMPARTMENTS.turgor_water_potential,
                  water_influx = INIT_COMPARTMENTS.water_influx,
-                 # length=INIT_COMPARTMENTS.length, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, water_content = INIT_COMPARTMENTS.water_content,
+                 length=INIT_COMPARTMENTS.length, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, water_content = INIT_COMPARTMENTS.water_content,
                  cohorts=None, cohorts_replications=None):
 
         self.label = label                                      #: the label of the element
@@ -798,17 +761,17 @@ class PhotosyntheticOrganElement(object):
         self.Ts = Ts                                            #: °C
         self.temperature = temperature                          #: °C
         self.Tr = Tr                                            #: mmol H20 m-2 s-1
-        # self.thickness = thickness  #: m
-        # self.width = width          #: m
+        self.thickness = thickness  #: m
+        self.width = width          #: m
 
         # intermediate variables
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.osmotic_water_potential = osmotic_water_potential  #: MPa
         self.total_water_potential = total_water_potential #: MPa
-        # self.length = length  #: m
+        self.length = length  #: m
 
         # state variables
-        # self.water_content = water_content                     #: g H2O
+        self.water_content = water_content                     #: g H2O
 
         # fluxes to xylem
         self.water_influx = water_influx  #: current flow of water from xylem to organ integrated over delta t (g H2O)
@@ -831,6 +794,31 @@ class PhotosyntheticOrganElement(object):
         self.total_water_influx = self.calculate_total_water_influx(self.water_influx)
 
     # VARIABLES
+    @staticmethod
+    def calculate_organ_volume(organ_dimensions):
+        """ Photosynthetic element volume, assumed to be equal to a box dimensions.
+        :param float length: (m)
+        :param float width: (m)
+        :param float thickness: (m)
+        :return: volume (m3)
+        :rtype: float
+        """
+        organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
+        return organ_volume
+
+    @staticmethod
+    def calculate_resistance(organ_dimensions):
+        """
+        Resistance of water flow between the lamina and xylem
+        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
+        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
+        :return: resistance (MPa s g-1)
+        :rtype: float
+        """
+        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
+
+        return resistance
+
     @staticmethod
     def calculate_total_water_influx(water_influx):
         """
@@ -966,51 +954,6 @@ class PhotosyntheticOrganElement(object):
         return water_influx - Total_Transpiration # transpiration en g H2O
 
 
-class LaminaElement(PhotosyntheticOrganElement):
-    """
-    The class :class:`LaminaElement`.
-    """
-
-    PARAMETERS = parameters.LAMINA_ELEMENT_PARAMETERS                   #: the internal parameters of the lamina
-    INIT_COMPARTMENTS = parameters.LAMINA_ELEMENT_INIT_COMPARTMENTS     #: the initial values of compartments and state parameters
-
-    def __init__(self, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content = INIT_COMPARTMENTS.water_content, **kwargs):
-        super(LaminaElement, self).__init__(**kwargs)
-
-        self.thickness = thickness  #: m
-        self.width = width          #: m
-        self.length = length          #: m
-        self.water_content = water_content          #: g H2O
-
-    @staticmethod
-    def calculate_organ_volume(organ_dimensions, lamina_Lmax):
-        """ Photosynthetic element volume, assumed to be equal to a box dimensions.
-
-        :param float length: (m)
-        :param float width: (m)
-        :param float thickness: (m)
-
-        :return: volume (m3)
-        :rtype: float
-        """
-        organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
-        return organ_volume
-
-    @staticmethod
-    def calculate_resistance(organ_dimensions, lamina_Lmax):
-        """
-        Resistance of water flow between the lamina and xylem
-        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
-
-        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-        """
-        resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
-
-        return resistance
-
     @staticmethod
     def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content):
         """ Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
@@ -1050,6 +993,21 @@ class LaminaElement(PhotosyntheticOrganElement):
         return delta_organ_dimensions
 
 
+class LaminaElement(PhotosyntheticOrganElement):
+    """
+    The class :class:`LaminaElement`.
+    """
+
+    PARAMETERS = parameters.LAMINA_ELEMENT_PARAMETERS                   #: the internal parameters of the lamina
+    INIT_COMPARTMENTS = parameters.LAMINA_ELEMENT_INIT_COMPARTMENTS     #: the initial values of compartments and state parameters
+
+    def __init__(self, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, **kwargs):
+        super(LaminaElement, self).__init__(**kwargs)
+
+        # self.thickness = thickness  #: m
+        # self.width = width          #: m
+
+
 class InternodeElement(PhotosyntheticOrganElement):
     """
     The class :class:`InternodeElement`.
@@ -1058,112 +1016,11 @@ class InternodeElement(PhotosyntheticOrganElement):
     PARAMETERS = parameters.INTERNODE_ELEMENT_PARAMETERS                           #: the internal parameters of the internode
     INIT_COMPARTMENTS = parameters.INTERNODE_ELEMENT_INIT_COMPARTMENTS             #: the initial values of compartments and state parameters
 
-    def __init__(self, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content=INIT_COMPARTMENTS.water_content, thickness=INIT_COMPARTMENTS.thickness, **kwargs):
+    def __init__(self, width=INIT_COMPARTMENTS.width, thickness=INIT_COMPARTMENTS.thickness, **kwargs):
         super(InternodeElement, self).__init__(**kwargs)
 
         # self.thickness = thickness  #: m
         # self.width = width          #: m
-
-        # self.radius = radius  #: m
-        self.length = length  #: m
-        self.water_content = water_content  #: m
-        self.width = width  #: m
-        self.thickness = thickness  #: m
-
-    @staticmethod
-    def calculate_organ_volume(organ_dimensions, internode_Lmax):
-        """ Photosynthetic element volume, assumed to be equal to a perfect cylinder.
-
-        :param float length: (m)
-        :param float width: (m)
-        :param float thickness: (m)
-
-        :return: volume (m3)
-        :rtype: float
-        """
-        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
-            organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
-        else:  #: Rectangle shape when elongating
-            organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
-
-        return organ_volume
-
-    @staticmethod
-    def calculate_resistance(organ_dimensions, internode_Lmax):
-        """
-        Resistance of water flow between the lamina and xylem
-        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
-
-        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-        """
-
-        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
-            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
-        else:  #: Rectangle shape when elongating
-            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
-
-        # resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
-
-        return resistance
-
-    @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content, internode_Lmax):
-        """ Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
-        Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
-
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
-        :param float delta_water_content: delta water content integrated over delta t (g)
-
-        :return: Delta of turgor water potential (MPa)
-        :rtype: float
-        """
-        organ_volume = volume
-
-        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
-            epsilon_z, epsilon_x = SheathElement.PARAMETERS.epsilon['z'], SheathElement.PARAMETERS.epsilon['x']
-            elastic_component = (epsilon_z * epsilon_x) / (2 * epsilon_z + epsilon_x)  #: Elastic reversible growth (MPa)
-            # organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2  #: (m3)
-
-        else:  #: Rectangle shape when elongating
-            epsilon_z, epsilon_x, epsilon_y = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x'], PhotosyntheticOrganElement.PARAMETERS.epsilon['y']
-            elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
-            # organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
-
-        plastic_component = 0  #: Plastic irreversible growth (MPa)
-        delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
-
-        return delta_turgor_water_potential
-
-    @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions, internode_Lmax):
-        """Delta of sheath dimensions according to turgor water potential, dimensions, and elasticity
-
-        :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
-        :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
-        :rtype: dict
-        """
-
-        if organ_dimensions['length'] >= internode_Lmax:  #: Cylinder shape after end of elongation
-            delta_organ_dimensions = {}
-            epsilon_dict = SheathElement.PARAMETERS.epsilon.items()
-            mapping_dimensions = {'x': 'width', 'z': 'length'}
-
-            for epsilon_dimension, epsilon_value in epsilon_dict:
-                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-
-        else:  #: Rectangle shape when elongating
-            delta_organ_dimensions = {}
-            epsilon_dict = PhotosyntheticOrganElement.PARAMETERS.epsilon.items()
-            mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
-
-            for epsilon_dimension, epsilon_value in epsilon_dict:
-                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-
-        return delta_organ_dimensions
 
 
 class SheathElement(PhotosyntheticOrganElement):
@@ -1174,109 +1031,8 @@ class SheathElement(PhotosyntheticOrganElement):
     PARAMETERS = parameters.SHEATH_ELEMENT_PARAMETERS                   #: the internal parameters of the sheath
     INIT_COMPARTMENTS = parameters.SHEATH_ELEMENT_INIT_COMPARTMENTS     #: the initial values of compartments and state parameters
 
-    def __init__(self, width=INIT_COMPARTMENTS.width, length=INIT_COMPARTMENTS.length, water_content=INIT_COMPARTMENTS.water_content, thickness=INIT_COMPARTMENTS.thickness, **kwargs):
+    def __init__(self, width=INIT_COMPARTMENTS.width, thickness=INIT_COMPARTMENTS.thickness, **kwargs):
         super(SheathElement, self).__init__(**kwargs)
 
         # self.thickness = thickness  #: m
         # self.width = width  #: m
-
-        # self.radius = radius  #: m
-        self.length = length  #: m
-        self.water_content = water_content  #: m
-        self.width = width  #: m
-        self.thickness = thickness  #: m
-
-    @staticmethod
-    def calculate_organ_volume(organ_dimensions, sheath_Lmax):
-        """ Photosynthetic element volume, assumed to be equal to a perfect cylinder.
-
-        :param float length: (m)
-        :param float width: (m)
-        :param float thickness: (m)
-
-        :return: volume (m3)
-        :rtype: float
-        """
-        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
-            organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
-        else:   #: Rectangle shape when elongating
-            organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
-
-        return organ_volume
-
-    @staticmethod
-    def calculate_resistance(organ_dimensions, sheath_Lmax):
-        """
-        Resistance of water flow between the lamina and xylem
-        Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
-
-        :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
-
-        :return: resistance (MPa s g-1)
-        :rtype: float
-        """
-
-        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
-            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
-        else:   #: Rectangle shape when elongating
-            resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']
-
-        # resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2
-
-        return resistance
-
-    @staticmethod
-    def calculate_delta_turgor_water_potential(organ_dimensions, volume, delta_water_content, sheath_Lmax):
-        """ Delta of turgor water potential according to organ water content, turgor water potential, dimensions and elasticity.
-        Extensibility (psi) is supposed to be 0 as this tissue is mature (growth completed).
-
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
-        :param float delta_water_content: delta water content integrated over delta t (g)
-
-        :return: Delta of turgor water potential (MPa)
-        :rtype: float
-        """
-        organ_volume = volume
-
-        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
-            epsilon_z, epsilon_x = SheathElement.PARAMETERS.epsilon['z'], SheathElement.PARAMETERS.epsilon['x']
-            elastic_component = (epsilon_z * epsilon_x) / (2 * epsilon_z + epsilon_x) #: Elastic reversible growth (MPa)
-            # organ_volume = organ_dimensions['length'] * parameters.PI * organ_dimensions['width'] ** 2  #: (m3)
-
-        else:   #: Rectangle shape when elongating
-            epsilon_z, epsilon_x, epsilon_y = PhotosyntheticOrganElement.PARAMETERS.epsilon['z'], PhotosyntheticOrganElement.PARAMETERS.epsilon['x'], PhotosyntheticOrganElement.PARAMETERS.epsilon['y']
-            elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
-            # organ_volume = organ_dimensions['length'] * organ_dimensions['width'] * organ_dimensions['thickness']  #: (m3)
-
-        plastic_component = 0   #: Plastic irreversible growth (MPa)
-        delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
-
-        return delta_turgor_water_potential
-
-    @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, organ_dimensions, sheath_Lmax):
-        """Delta of sheath dimensions according to turgor water potential, dimensions, and elasticity
-
-        :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = ['length', 'thickness', 'width'] (m)
-        :return: Delta of organ specific-dimensions (m). Keys = ['length', 'width', 'thickness']
-        :rtype: dict
-        """
-
-        if organ_dimensions['length'] >= sheath_Lmax:   #: Cylinder shape after end of elongation
-            delta_organ_dimensions = {}
-            epsilon_dict = SheathElement.PARAMETERS.epsilon.items()
-            mapping_dimensions = {'x': 'width', 'z': 'length'}
-
-            for epsilon_dimension, epsilon_value in epsilon_dict:
-                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-
-        else:   #: Rectangle shape when elongating
-            delta_organ_dimensions = {}
-            epsilon_dict = PhotosyntheticOrganElement.PARAMETERS.epsilon.items()
-            mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
-
-            for epsilon_dimension, epsilon_value in epsilon_dict:
-                delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential) * organ_dimensions[mapping_dimensions[epsilon_dimension]]
-
-        return delta_organ_dimensions
