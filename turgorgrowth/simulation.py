@@ -38,7 +38,7 @@ class SimulationConstructionError(SimulationError):
 class SimulationInitializationError(SimulationError):
     """
     Exception raised when a problem occurs at initialization time, in particular
-    when checking the consistency of inputs `population` and `soil` (see :meth:`initialize`).
+    when checking the consistency of inputs `population` (see :meth:`initialize`).
     """
     pass
 
@@ -67,14 +67,14 @@ class Simulation(object):
                                 model.Phytomer: [],
                                 model.Organ: [],
                                 model.HiddenZone: ['leaf_L', 'turgor_water_potential', 'water_content', 'width', 'thickness'],
-                                model.PhotosyntheticOrganElement: ['length', 'turgor_water_potential', 'water_content', 'width', 'thickness'],
-                                model.Soil: []}
+                                model.PhotosyntheticOrganElement: ['length', 'turgor_water_potential', 'water_content', 'width', 'thickness']
+                                }
 
     #: the time index
     T_INDEX = ['t']
 
     # --------------------------------------------------------------------------
-    #           DEFINITION OF THE PARAMETERS AND COMPUTED VARIABLES            -
+    #           DEFINITION OF THE PARAMETERS AND COMPUTED VARIABLES
     # --------------------------------------------------------------------------
 
     # ---------- PLANT scale ----------
@@ -98,27 +98,6 @@ class Simulation(object):
     #: all the variables computed during a run step of the simulation at plant scale
     PLANTS_RUN_VARIABLES = PLANTS_STATE + PLANTS_INTERMEDIATE_VARIABLES + PLANTS_FLUXES + PLANTS_INTEGRATIVE_VARIABLES
 
-    # ---------- SOIL scale ----------
-
-    #: the indexes to locate the soil in the modeled system
-    SOIL_INDEXES = ['plant', 'axis']
-    #: concatenation of :attr:`T_INDEX` and :attr:`SOIL_INDEXES`
-    SOIL_T_INDEXES = T_INDEX + SOIL_INDEXES
-    #: the parameters which define the state of the modeled system at soil scale
-    SOIL_STATE_PARAMETERS = ['SRWC']
-    #: the variables which define the state of the modeled system at soil scale,
-    #: formed be the concatenation of :attr:`SOIL_STATE_PARAMETERS` and the names
-    #: of the compartments associated to each soil (see :attr:`MODEL_COMPARTMENTS_NAMES`)
-    SOIL_STATE = SOIL_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Soil, [])
-    #: the variables that we need to compute in order to compute fluxes and/or compartments values at soil scale
-    SOIL_INTERMEDIATE_VARIABLES = ['soil_water_potential']
-    #: the fluxes exchanged between the compartments at soil scale
-    SOIL_FLUXES = []
-    #: the variables computed by integrating values of soil components parameters/variables recursively
-    SOIL_INTEGRATIVE_VARIABLES = []
-    #: all the variables computed during a run step of the simulation at soil scale
-    SOIL_RUN_VARIABLES = SOIL_STATE + SOIL_INTERMEDIATE_VARIABLES + SOIL_FLUXES + SOIL_INTEGRATIVE_VARIABLES
-
     # ---------- AXIS scale ----------
 
     #: the indexes to locate the axes in the modeled system
@@ -126,8 +105,7 @@ class Simulation(object):
     #: concatenation of :attr:`T_INDEX` and :attr:`AXES_INDEXES`
     AXES_T_INDEXES = T_INDEX + AXES_INDEXES
     #: the parameters which define the state of the modeled system at axis scale
-    AXES_STATE_PARAMETERS = ['Tr', 'green_area']
-    # AXES_STATE_PARAMETERS = []
+    AXES_STATE_PARAMETERS = ['Tr', 'green_area', 'mstruct']
     #: the variables which define the state of the modeled system at axis scale,
     #: formed be the concatenation of :attr:`AXES_STATE_PARAMETERS` and the names
     #: of the compartments associated to each axis (see :attr:`MODEL_COMPARTMENTS_NAMES`)
@@ -137,7 +115,7 @@ class Simulation(object):
     #: the fluxes exchanged between the compartments at axis scale
     AXES_FLUXES = []
     #: the variables computed by integrating values of axis components parameters/variables recursively
-    AXES_INTEGRATIVE_VARIABLES = ['Total_Transpiration', 'Growth', 'total_water_influx', 'xylem_water_potential', 'plant_water_content', 'plant_WC_DM', 'mstruct_turgor']
+    AXES_INTEGRATIVE_VARIABLES = ['Total_Transpiration_turgor', 'Growth', 'total_water_influx', 'xylem_water_potential', 'delta_plant_water_content', 'plant_water_content', 'plant_WC_DM', 'LAI_turgor']
     #: all the variables computed during a run step of the simulation at axis scale
     AXES_RUN_VARIABLES = AXES_STATE + AXES_INTERMEDIATE_VARIABLES + AXES_FLUXES + AXES_INTEGRATIVE_VARIABLES
 
@@ -175,7 +153,7 @@ class Simulation(object):
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ORGANS_STATE = ORGANS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Organ, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ORGANS_INTERMEDIATE_VARIABLES = ['soil_water_potential', 'total_water_potential']
+    ORGANS_INTERMEDIATE_VARIABLES = ['soil_water_potential', 'total_water_potential', 'Ksoil']
     #: the fluxes exchanged between the compartments at organ scale
     ORGANS_FLUXES = []
     #: the variables computed by integrating values of xylem components parameters/variables recursively
@@ -190,19 +168,21 @@ class Simulation(object):
     #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
     HIDDENZONE_T_INDEXES = T_INDEX + HIDDENZONE_INDEXES
     #: the parameters which define the state of the modeled system at hidden zone scale
-    HIDDENZONE_STATE_PARAMETERS = ['leaf_pseudo_age','leaf_pseudostem_length', 'amino_acids', 'proteins', 'sucrose', 'temperature', 'mstruct', 'leaf_Lmax', 'lamina_Lmax', 'sheath_Lmax']
+    # HIDDENZONE_STATE_PARAMETERS = ['leaf_Wmax', 'delta_teq', 'res', 'leaf_pseudo_age', 'leaf_pseudostem_length', 'amino_acids', 'proteins', 'sucrose', 'temperature', 'mstruct', 'leaf_Lmax', 'lamina_Lmax', 'sheath_Lmax', 'hiddenzone_age', 'leaf_enclosed_mstruct']
+    HIDDENZONE_STATE_PARAMETERS = ['delta_teq', 'res', 'leaf_pseudo_age', 'leaf_pseudostem_length', 'fructan', 'amino_acids', 'proteins', 'sucrose', 'temperature', 'mstruct', 'hiddenzone_age', 'leaf_enclosed_mstruct']
     #: the variables which define the state of the modeled system at hidden zone scale,
     #: formed be the concatenation of :attr:`HIDDENZONE_STATE_PARAMETERS` and the names
     #: of the compartments associated to each hidden zone (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     HIDDENZONE_STATE = HIDDENZONE_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.HiddenZone, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at hidden zone scale
-    HIDDENZONE_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'total_water_potential', 'volume', 'length', 'length_leaf_emerged', 'end_elongation', 'phi_width', 'phi_thickness', 'phi_length', 'phi_volume', 'epsilon_volume', 'organ_volume']
+    HIDDENZONE_INTERMEDIATE_VARIABLES = ['vstorage', 'osmotic_water_potential', 'resistance', 'total_water_potential', 'volume', 'length', 'phi_width', 'phi_thickness', 'phi_length', 'phi_volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct', 'contribution', 'DP']
     #: the fluxes exchanged between the compartments at hidden zone scale
     HIDDENZONE_FLUXES = ['water_influx', 'water_outflow', 'Growth']
     #: the variables computed by integrating values of hidden zone components parameters/variables recursively
     HIDDENZONE_INTEGRATIVE_VARIABLES = []
     #: all the variables computed during a run step of the simulation at plant scale
     HIDDENZONE_RUN_VARIABLES = HIDDENZONE_STATE + HIDDENZONE_INTERMEDIATE_VARIABLES + HIDDENZONE_FLUXES + HIDDENZONE_INTEGRATIVE_VARIABLES
+
 
     # ---------- ELEMENT scale ----------
 
@@ -211,23 +191,23 @@ class Simulation(object):
     #: concatenation of :attr:`T_INDEX` and :attr:`ELEMENTS_INDEXES`
     ELEMENTS_T_INDEXES = T_INDEX + ELEMENTS_INDEXES
     #: the parameters which define the state of the modeled system at organ scale
-    ELEMENTS_STATE_PARAMETERS = ['amino_acids', 'green_area', 'mstruct', 'proteins', 'sucrose', 'Ts', 'Tr', 'age']
+    # ELEMENTS_STATE_PARAMETERS = ['Wmax', 'amino_acids', 'green_area', 'mstruct', 'proteins', 'sucrose', 'Ts', 'Tr', 'age']
+    ELEMENTS_STATE_PARAMETERS = ['amino_acids', 'green_area', 'mstruct', 'proteins', 'sucrose', 'fructan', 'Ts', 'Tr', 'age', 'is_growing', 'vstorage']
     #: the variables which define the state of the modeled system at organ scale,
     #: formed be the concatenation of :attr:`ELEMENTS_STATE_PARAMETERS` and the names
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ELEMENTS_STATE = ELEMENTS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.PhotosyntheticOrganElement, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ELEMENTS_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'total_water_potential', 'volume', 'epsilon_volume', 'organ_volume']
+    ELEMENTS_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'total_water_potential', 'volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct']
     #: the fluxes exchanged between the compartments at organ scale
-    ELEMENTS_FLUXES = ['water_influx', 'water_flux_from_hz']
+    ELEMENTS_FLUXES = ['water_influx']
     #: the variables computed by integrating values of organ components parameters/variables recursively
-    ELEMENTS_INTEGRATIVE_VARIABLES = ['Total_Transpiration', 'total_water_influx']
+    ELEMENTS_INTEGRATIVE_VARIABLES = ['Total_Transpiration_turgor', 'total_water_influx']
     #: all the variables computed during a run step of the simulation at organ scale
     ELEMENTS_RUN_VARIABLES = ELEMENTS_STATE + ELEMENTS_INTERMEDIATE_VARIABLES + ELEMENTS_FLUXES + ELEMENTS_INTEGRATIVE_VARIABLES
 
     #: a dictionary of all the variables which define the state of the modeled system, for each scale
     ALL_STATE_PARAMETERS = {model.Plant: PLANTS_STATE_PARAMETERS,
-                            model.Soil: SOIL_STATE_PARAMETERS,
                             model.Axis: AXES_STATE_PARAMETERS,
                             model.Organ: ORGANS_STATE_PARAMETERS,
                             model.Phytomer: PHYTOMERS_STATE_PARAMETERS,
@@ -237,39 +217,25 @@ class Simulation(object):
 
     #: the names of the elements forcings
     ELEMENTS_FORCINGS = ('green_area', 'Tr')
-    #: the names of the soil forcings
-    SOIL_FORCINGS = ('SRWC')
 
     #: the name of the loggers for compartments and derivatives
     LOGGERS_NAMES = {'compartments': {model.Plant: 'turgorgrowth.compartments.plants',
-                                      model.Soil: 'turgorgrowth.compartments.soil',
                                       model.Axis: 'turgorgrowth.compartments.axes',
                                       model.Phytomer: 'turgorgrowth.compartments.phytomers',
                                       model.Organ: 'turgorgrowth.compartments.organs',
                                       model.HiddenZone: 'turgorgrowth.compartments.hiddenzones',
                                       model.PhotosyntheticOrganElement: 'turgorgrowth.compartments.elements'},
-                                      # model.Xylem: 'turgorgrowth.compartments.xylem',
-                                      # model.Roots: 'turgorgrowth.compartments.roots'},
                      'derivatives': {model.Plant: 'turgorgrowth.derivatives.plants',
-                                     model.Soil: 'turgorgrowth.derivatives.soil',
                                      model.Axis: 'turgorgrowth.derivatives.axes',
                                      model.Phytomer: 'turgorgrowth.derivatives.phytomers',
                                      model.Organ: 'turgorgrowth.derivatives.organs',
                                      model.HiddenZone: 'turgorgrowth.derivatives.hiddenzones',
                                      model.PhotosyntheticOrganElement: 'turgorgrowth.derivatives.elements'}}
-                                     # model.Xylem: 'turgorgrowth.derivatives.xylem',
-                                     # model.Roots: 'turgorgrowth.derivatives.roots'}}
 
-    def __init__(self, delta_t=1, interpolate_forcings=False, elements_forcings_delta_t=None, hiddenzone_forcings_delta_t=None, soil_forcings_delta_t=None):
+    def __init__(self, delta_t=1, interpolate_forcings=False, elements_forcings_delta_t=None, hiddenzone_forcings_delta_t=None):
 
         self.population = model.Population()  #: the population to simulate on
         self.mapping_topology = {}  #: a dict describing plant topology at element scale
-
-        #: The inputs of the soil.
-        #:
-        #: `soil` is a dictionary of objects of type :class:`model.Soil`:
-        #:     {(plant_index, axis_label): soil_object, ...}
-        ##self.soils = {}
 
         self.initial_conditions = []  #: the initial conditions of the compartments in the population and soil
         self.initial_conditions_mapping = {}  #: dictionary to map the compartments to their indexes in :attr:`initial_conditions`
@@ -290,8 +256,6 @@ class Simulation(object):
             if compartments_logger.isEnabledFor(logging.DEBUG):
                 plants_compartments_logger = logging.getLogger('turgorgrowth.compartments.plants')
                 plants_compartments_logger.debug(sep.join(Simulation.PLANTS_T_INDEXES + Simulation.PLANTS_STATE))
-                soil_compartments_logger = logging.getLogger('turgorgrowth.compartments.soil')
-                soil_compartments_logger.debug(sep.join(Simulation.SOIL_T_INDEXES + Simulation.SOIL_STATE))
                 axes_compartments_logger = logging.getLogger('turgorgrowth.compartments.axes')
                 axes_compartments_logger.debug(sep.join(Simulation.AXES_T_INDEXES + Simulation.AXES_STATE))
                 phytomers_compartments_logger = logging.getLogger('turgorgrowth.compartments.phytomers')
@@ -299,16 +263,16 @@ class Simulation(object):
                 organs_compartments_logger = logging.getLogger('turgorgrowth.compartments.organs')
                 organs_compartments_logger.debug(sep.join(Simulation.ORGANS_T_INDEXES + Simulation.ORGANS_STATE))
                 hiddenzones_compartments_logger = logging.getLogger('turgorgrowth.compartments.hiddenzones')
-                hiddenzones_compartments_logger.debug(sep.join(Simulation.HIDDENZONE_T_INDEXES + Simulation.HIDDENZONE_STATE))
+                hiddenzones_compartments_logger.debug(sep.join(Simulation.HIDDENZONE_T_INDEXES + Simulation.HIDDENZONE_STATE + Simulation.HIDDENZONE_INTERMEDIATE_VARIABLES))
+                # hiddenzones_compartments_logger.debug(sep.join(Simulation.HIDDENZONE_T_INDEXES + Simulation.HIDDENZONE_RUN_VARIABLES))
                 elements_compartments_logger = logging.getLogger('turgorgrowth.compartments.elements')
-                elements_compartments_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.ELEMENTS_STATE))
+                elements_compartments_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.ELEMENTS_STATE + Simulation.ELEMENTS_INTERMEDIATE_VARIABLES))
+                # elements_compartments_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.ELEMENTS_RUN_VARIABLES))
                 organs_compartments_logger = logging.getLogger('turgorgrowth.compartments.organs')
                 organs_compartments_logger.debug(sep.join(Simulation.ORGANS_T_INDEXES + Simulation.ORGANS_STATE))
             if derivatives_logger.isEnabledFor(logging.DEBUG):
                 plants_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.plants')
                 plants_derivatives_logger.debug(sep.join(Simulation.PLANTS_T_INDEXES + Simulation.PLANTS_STATE))
-                soil_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.soil')
-                soil_derivatives_logger.debug(sep.join(Simulation.SOIL_T_INDEXES + Simulation.SOIL_STATE))
                 axes_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.axes')
                 axes_derivatives_logger.debug(sep.join(Simulation.AXES_T_INDEXES + Simulation.AXES_STATE))
                 phytomers_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.phytomers')
@@ -316,9 +280,11 @@ class Simulation(object):
                 organs_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.organs')
                 organs_derivatives_logger.debug(sep.join(Simulation.ORGANS_T_INDEXES + Simulation.ORGANS_STATE))
                 hiddenzones_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.hiddenzones')
-                hiddenzones_derivatives_logger.debug(sep.join(Simulation.HIDDENZONE_T_INDEXES + Simulation.HIDDENZONE_STATE))
+                hiddenzones_derivatives_logger.debug(sep.join(Simulation.HIDDENZONE_T_INDEXES + Simulation.HIDDENZONE_STATE + Simulation.HIDDENZONE_INTERMEDIATE_VARIABLES))
+                # hiddenzones_derivatives_logger.debug(sep.join(Simulation.HIDDENZONE_T_INDEXES + Simulation.HIDDENZONE_RUN_VARIABLES))
                 elements_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.elements')
-                elements_derivatives_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.ELEMENTS_STATE))
+                elements_derivatives_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.ELEMENTS_STATE + Simulation.ELEMENTS_INTERMEDIATE_VARIABLES))
+                # elements_derivatives_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.HIDDENZONE_RUN_VARIABLES))
                 organs_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.organs')
                 organs_derivatives_logger.debug(sep.join(Simulation.ORGANS_T_INDEXES + Simulation.ORGANS_STATE))
 
@@ -327,9 +293,8 @@ class Simulation(object):
             self.t_offset = 0.0  #: the absolute time offset elapsed from the beginning of the simulation
 
         if interpolate_forcings:
-            if elements_forcings_delta_t is not None and hiddenzone_forcings_delta_t is not None and soil_forcings_delta_t is not None:
+            if (elements_forcings_delta_t is not None and hiddenzone_forcings_delta_t is not None):
                 self.elements_forcings_delta_t_ratio = elements_forcings_delta_t / delta_t  #: the ratio between the delta t of the elements forcings and the delta t of the simulation
-                self.soil_forcings_delta_t_ratio = soil_forcings_delta_t / delta_t  #: the ratio between the delta t of the soil forcings and the delta t of the simulation
                 self.hiddenzone_forcings_delta_t_ratio = hiddenzone_forcings_delta_t / delta_t  #: the ratio between the delta t of the hiddenzone forcings and the delta t of the simulation
             elif elements_forcings_delta_t is None:
                 message = """The value of `interpolate_forcings` passed to the Simulation constructor is `True`, but `elements_forcings_delta_t` is `None`. 
@@ -341,21 +306,12 @@ class Simulation(object):
                 Please set `hiddenzone_forcings_delta_t` (through the Simulation constructor) to a not `None` value."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
-            elif soil_forcings_delta_t is None:
-                message = """The value of `interpolate_forcings` passed to the Simulation constructor is `True`, but `soil_forcings_delta_t` is `None`. 
-                Please set `soil_forcings_delta_t` (through the Simulation constructor) to a not `None` value."""
-                logger.exception(message)
-                raise SimulationConstructionError(message)
             elif elements_forcings_delta_t < delta_t:
                 message = """The value of `elements_forcings_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `elements_forcings_delta_t` that is at least equal to `delta_t`."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
             elif hiddenzone_forcings_delta_t < delta_t:
                 message = """The value of `hiddenzone_forcings_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `hiddenzone_forcings_delta_t` that is at least equal to `delta_t`."""
-                logger.exception(message)
-                raise SimulationConstructionError(message)
-            elif soil_forcings_delta_t < delta_t:
-                message = """The value of `soil_forcings_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `soil_forcings_delta_t` that is at least equal to `delta_t`."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
 
@@ -369,14 +325,12 @@ class Simulation(object):
         """
         Initialize:
             * :attr:`population`,
-            * :attr:`soil`,
             * :attr:`initial_conditions_mapping`,
             * and :attr:`initial_conditions`
 
-        from `population` and 'soil'.
+        from `population`
 
         :param model.Population population: a population of plants.
-        :param dict soil: the soil associated to each axis. `soil` must be a dictionary with the same structure as :attr:`soil`
         :param dict mapping_topology: a dictionary with the topological mapping of the predecessor and successor of each organ
         """
 
@@ -386,18 +340,16 @@ class Simulation(object):
 
         # clean the attributes of the simulation
         del self.population.plants[:]
-        # self.soils.clear()
 
         del self.initial_conditions[:]
         self.initial_conditions_mapping.clear()
 
         self.mapping_topology = mapping_topology
 
-        # create new population and soil
+        # create new population
         self.population.plants.extend(population.plants)
-        # self.soils.update(soils)
 
-        # check the consistency of population and soil
+        # check the consistency of population
         if len(self.population.plants) != 0:  # population must contain at least 1 plant
             for plant in self.population.plants:
                 if len(plant.axes) != 0:  # each plant must contain at least 1 axis
@@ -412,7 +364,8 @@ class Simulation(object):
                             raise SimulationInitializationError(message)
                         if len(axis.phytomers) != 0:  # each axis must contain at least 1 phytomer
                             for phytomer in axis.phytomers:
-                                phytomer_organs = (phytomer.lamina, phytomer.internode, phytomer.sheath)
+                                # phytomer_organs = (phytomer.lamina, phytomer.internode, phytomer.sheath)
+                                phytomer_organs = (phytomer.lamina, phytomer.sheath)
                                 # each phytomer must contain at least 1 photosynthetic organ or an hidden zone
                                 if phytomer_organs.count(None) != len(phytomer_organs) or phytomer.hiddenzone is not None:
                                     for organ in phytomer_organs:
@@ -449,10 +402,6 @@ class Simulation(object):
                                                                                        axis.label)
                             logger.exception(message)
                             raise SimulationInitializationError(message)
-                        # if (plant.index, axis.label) not in self.soils:  # each axis must be associated to a soil
-                        #     message = 'No soil found in (plant={},axis={})'.format(plant.index, axis.label)
-                        #     logger.exception(message)
-                        #     raise SimulationInitializationError(message)
                 else:
                     message = 'No axis found in (plant={})'.format(plant.index)
                     logger.exception(message)
@@ -470,7 +419,7 @@ class Simulation(object):
                     for organ in (axis.xylem, axis.roots):
                         xylem_id = (plant.index, axis.label, organ.label)
                         self.new_forcings_values[xylem_id] = {}
-                        forcing_labels = Simulation.SOIL_FORCINGS
+                        forcing_labels = {}
                         self.new_forcings_values[xylem_id][forcing_labels] = getattr(axis.xylem, forcing_labels)
                         if axis.xylem in self.previous_forcings_values:
                             setattr(axis.xylem, forcing_labels, self.previous_forcings_values[xylem_id][forcing_labels])
@@ -490,19 +439,6 @@ class Simulation(object):
         # Update SRWC using weather data
         for plant in self.population.plants:
             plant.SRWC = SRWC
-
-        # Update SRWC using weather data
-        # for soil_id, soil_inputs in self.soils.items():
-        #     self.soils[soil_id].SRWC = SRWC
-
-        # Save the new value of each forcing and set the state parameters to the previous forcing values of soil
-        # for soil_id, soil_inputs in self.soils.items():
-        #     if soils is not None:
-        #         self.new_forcings_values[soil_id] = {}
-        #         for forcing_label in Simulation.SOIL_FORCINGS:
-        #             self.new_forcings_values[soil_id][forcing_label] = getattr(soils, forcing_label)
-        #             if soil_id in self.previous_forcings_values:
-        #                 setattr(soils, forcing_label, self.previous_forcings_values[soil_id][forcing_label])
 
         # # Update SRWC using weather data
         # for plant in self.population.plants:
@@ -531,9 +467,6 @@ class Simulation(object):
 
         i = 0
 
-        # for soil in soils.values():
-        #     i = _init_initial_conditions(soil, i)
-
         for plant in self.population.plants:
             i = _init_initial_conditions(plant, i)
             for axis in plant.axes:
@@ -546,7 +479,8 @@ class Simulation(object):
                     i = _init_initial_conditions(phytomer, i)
                     if phytomer.hiddenzone:
                         i = _init_initial_conditions(phytomer.hiddenzone, i)
-                    for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
+                    # for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
+                    for organ in (phytomer.lamina, phytomer.sheath):
                         if organ:
                             for element in (organ.exposed_element, organ.enclosed_element):
                                 if element:
@@ -613,21 +547,6 @@ class Simulation(object):
         next_forcings_values = {}
         for plant in self.population.plants:
             for axis in plant.axes:
-                if axis.xylem is not None:
-                    for organ in (axis.xylem, axis.roots):
-                        xylem_id = (plant.index, axis.label, organ.label)
-                        self.interpolation_functions[xylem_id] = {}
-                        forcing_label = Simulation.SOIL_FORCINGS
-                        forcings_delta_t_ratio = self.soil_forcings_delta_t_ratio
-                        if xylem_id in self.previous_forcings_values and self.previous_forcings_values[xylem_id][forcing_label] != self.new_forcings_values[xylem_id][forcing_label]:
-                            prev_forcing_value = self.previous_forcings_values[xylem_id][forcing_label]
-                            next_forcing_value = prev_forcing_value + (self.new_forcings_values[xylem_id][forcing_label] - prev_forcing_value) / forcings_delta_t_ratio
-                        else:
-                            next_forcing_value = self.new_forcings_values[xylem_id][forcing_label]
-                            prev_forcing_value = next_forcing_value
-                        self.interpolation_functions[xylem_id][forcing_label] = interpolate.interp1d(self.time_grid, [prev_forcing_value, next_forcing_value], assume_sorted=True)
-                        next_forcings_values[xylem_id] = {}
-                        next_forcings_values[xylem_id][forcing_label] = next_forcing_value
                 for phytomer in axis.phytomers:
                     for organ in (phytomer.lamina, phytomer.sheath):
                         if organ is None:
@@ -650,23 +569,6 @@ class Simulation(object):
                                     self.interpolation_functions[element_id][forcing_label] = interpolate.interp1d(self.time_grid, [prev_forcing_value, next_forcing_value], assume_sorted=True)
                                     next_forcings_values[element_id][forcing_label] = next_forcing_value
 
-        for soil_id in self.soils.items():
-            if soils is not None:
-                self.interpolation_functions[soil_id] = {}
-                next_forcings_values[soil_id] = {}
-                forcing_labels = Simulation.SOIL_FORCINGS
-                forcings_delta_t_ratio = self.elements_forcings_delta_t_ratio
-                for forcing_label in forcing_labels:
-                    if soil_id in self.previous_forcings_values and \
-                            self.previous_forcings_values[soil_id][forcing_label] != self.new_forcings_values[soil_id][forcing_label]:
-                        prev_forcing_value = self.previous_forcings_values[soil_id][forcing_label]
-                        next_forcing_value = prev_forcing_value + (self.new_forcings_values[soil_id][forcing_label] - prev_forcing_value) / forcings_delta_t_ratio
-                    else:
-                        next_forcing_value = self.new_forcings_values[soil_id][forcing_label]
-                        prev_forcing_value = next_forcing_value
-                    self.interpolation_functions[soil_id][forcing_label] = interpolate.interp1d(self.time_grid, [prev_forcing_value, next_forcing_value], assume_sorted=True)
-                    next_forcings_values[soil_id][forcing_label] = next_forcing_value
-
         self.previous_forcings_values.clear()
         self.previous_forcings_values.update(next_forcings_values)
 
@@ -682,13 +584,17 @@ class Simulation(object):
             """
             row = []
             class_ = model_object.__class__
+            intermediate_variables = None
             if issubclass(class_, model.HiddenZone):
                 class_ = model.HiddenZone
+                intermediate_variables = Simulation.HIDDENZONE_INTERMEDIATE_VARIABLES
             elif issubclass(class_, model.PhotosyntheticOrganElement):
                 class_ = model.PhotosyntheticOrganElement
+                intermediate_variables = Simulation.ELEMENTS_INTERMEDIATE_VARIABLES
             elif issubclass(class_, model.Organ):
                 class_ = model.Organ
-            parameters_names = Simulation.ALL_STATE_PARAMETERS[class_]
+                intermediate_variables = Simulation.ORGANS_INTERMEDIATE_VARIABLES
+            parameters_names = Simulation.ALL_STATE_PARAMETERS[class_] + intermediate_variables
             for parameter_name in parameters_names:
                 if hasattr(model_object, parameter_name):
                     row.append(str(getattr(model_object, parameter_name)))
@@ -707,9 +613,6 @@ class Simulation(object):
         i = 0
         all_rows = dict([(class_, []) for class_ in loggers_names])
 
-        # for soil_id, soil in self.soils.items():
-        #     i = update_rows(soil, (t,) + soil_id, all_rows[model.Soil], i)
-
         for plant in self.population.plants:
             for axis in plant.axes:
                 for organ in (axis.roots, axis.xylem):
@@ -717,7 +620,8 @@ class Simulation(object):
                         continue
                     i = update_rows(organ, [t, plant.index, axis.label, organ.label], all_rows[model.Organ], i)
                 for phytomer in axis.phytomers:
-                    for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath, phytomer.hiddenzone):
+                    # for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath, phytomer.hiddenzone):
+                    for organ in (phytomer.lamina, phytomer.sheath, phytomer.hiddenzone):
                         if organ is None:
                             continue
                         if organ is phytomer.hiddenzone:
@@ -772,11 +676,6 @@ class Simulation(object):
             # Update state parameters using interpolation functions
             for plant in self.population.plants:
                 for axis in plant.axes:
-                    if axis.xylem is not None:
-                        for organ in (axis.xylem, axis.roots):
-                            xylem_id = (plant.index, axis.label, organ.label)
-                            forcing_label = Simulation.SOIL_FORCINGS
-                            setattr(axis.xylem, forcing_label, float(self.interpolation_functions[xylem_id][forcing_label](t)))
                     for phytomer in axis.phytomers:
                         for organ in (phytomer.lamina, phytomer.sheath):
                             if organ is None:
@@ -787,23 +686,12 @@ class Simulation(object):
                                     for forcing_label in Simulation.ELEMENTS_FORCINGS:
                                         setattr(element, forcing_label, float(self.interpolation_functions[element_id][forcing_label](t)))
 
-            """
-            for soil_id in self.soils.items():
-                if soil is not None:
-                    for forcing_label in Simulation.SOIL_FORCINGS:
-                        setattr(soil, forcing_label, float(self.interpolation_functions[soil_id][forcing_label](t)))
-            """
-
             # Compute integrative variables
             self.population.calculate_aggregated_variables()
 
         compartments_logger = logging.getLogger('turgorgrowth.compartments')
         if logger.isEnabledFor(logging.DEBUG) and compartments_logger.isEnabledFor(logging.DEBUG):
             self._log_compartments(t_abs, y, Simulation.LOGGERS_NAMES['compartments'])
-
-
-        # soil = self.soils[(1, 'MS')]
-        # soil_water_potential = soil.calculate_soil_water_potential(SRWC)
 
         # Check that the solver is not crashed
         y_isnan = np.isnan(y)
@@ -819,11 +707,12 @@ class Simulation(object):
             for axis in plant.axes:
                 # Xylem
                 #: Soil water potential
+                axis.xylem.Ksoil = axis.xylem.calculate_soil_conductivity(axis.LAI_turgor)
                 axis.xylem.soil_water_potential = axis.xylem.calculate_soil_water_potential(plant.SRWC)
                 #: SRWC
                 axis.xylem.SRWC = plant.SRWC
                 #: Total water potential
-                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(axis.xylem.soil_water_potential, axis.total_water_influx, axis.Growth, axis.Total_Transpiration, self.delta_t)
+                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(axis.xylem.soil_water_potential, axis.total_water_influx, axis.Growth, axis.xylem.Ksoil, self.delta_t)
 
                 for phytomer in axis.phytomers:
                     # Hidden zone
@@ -832,13 +721,34 @@ class Simulation(object):
                         hiddenzone.leaf_L = y[self.initial_conditions_mapping[hiddenzone]['leaf_L']]
                         hiddenzone.thickness = y[self.initial_conditions_mapping[hiddenzone]['thickness']]
                         hiddenzone.width = y[self.initial_conditions_mapping[hiddenzone]['width']]
-                        hiddenzone.length_leaf_emerged = 0
+                        hiddenzone.vstorage = hiddenzone.calculate_vstorage(hiddenzone.leaf_pseudo_age, hiddenzone.vstorage)
+                        # hiddenzone.vstorage = 0.8
 
                         if hiddenzone.leaf_pseudo_age == 0:  #: First time after previous leaf emergence
                             #: Volume & water content
-                            hiddenzone.volume, hiddenzone.water_content = hiddenzone.calculate_initial_volume(hiddenzone.mstruct)
+
+                            # As function of mstruct
+                            # hiddenzone.volume, hiddenzone.water_content = hiddenzone.calculate_initial_volume(hiddenzone.mstruct, hiddenzone.leaf_L, hiddenzone.width, hiddenzone.thickness)
+
+                            # As function of osmotic water potential
+                            # hiddenzone.water_content = -8.31 * (hiddenzone.temperature + 273.15) * (hiddenzone.sucrose * 1E-06 / 12 + hiddenzone.amino_acids * 1E-06 * 1.25 / 1.17 + (hiddenzone.proteins * min(1., (hiddenzone.leaf_pseudo_age * 5E-6 + 0.1)) * 1E-06 * 1.25 / 1.17)) / -0.8
+                            # hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
+
+                            # As function of dimensional volume
+                            hiddenzone.volume = hiddenzone.length * hiddenzone.width * hiddenzone.thickness
+                            hiddenzone.water_content = hiddenzone.volume * 1E06
+
+                            # manual - inter
+                            # hiddenzone.water_content = 0.0006  #: min
+                            # hiddenzone.water_content = 0.00015  #: inter
+                            # hiddenzone.water_content = 0.00003  #: max
+                            # hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
+
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = -0.8
+                            hiddenzone.contribution = hiddenzone.calculate_contribution(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length, hiddenzone.leaf_pseudo_age, phytomer.index)
+                            hiddenzone.DP = hiddenzone.calculate_DP(hiddenzone.leaf_pseudo_age, hiddenzone.fructan, hiddenzone.sucrose, phytomer.index, hiddenzone.mstruct, hiddenzone.volume, hiddenzone.amino_acids)
+                            # hiddenzone.osmotic_water_potential = -0.8
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, hiddenzone.temperature, hiddenzone.vstorage, hiddenzone.contribution, hiddenzone.DP)
                             #: Total water potential
                             hiddenzone.total_water_potential = axis.xylem.total_water_potential
                             #: Turgor water potential
@@ -849,11 +759,14 @@ class Simulation(object):
                         elif hiddenzone.leaf_pseudo_age > 0:    #: After previous leaf emergence
                             #: Turgor water potential
                             hiddenzone.turgor_water_potential = y[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']]
+
                             #: Volume
                             hiddenzone.water_content = y[self.initial_conditions_mapping[hiddenzone]['water_content']]
                             hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.proteins, hiddenzone.volume,hiddenzone.temperature, hiddenzone.age)
+                            hiddenzone.contribution = hiddenzone.calculate_contribution(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length, hiddenzone.leaf_pseudo_age, phytomer.index)
+                            hiddenzone.DP = hiddenzone.calculate_DP(hiddenzone.leaf_pseudo_age, hiddenzone.fructan, hiddenzone.sucrose, phytomer.index, hiddenzone.mstruct, hiddenzone.volume, hiddenzone.amino_acids)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, hiddenzone.temperature, hiddenzone.vstorage, hiddenzone.contribution, hiddenzone.DP)
                             # hiddenzone.osmotic_water_potential = -0.8
 
                             #: Total water potential
@@ -872,13 +785,10 @@ class Simulation(object):
                         hiddenzone.water_influx = hiddenzone.calculate_water_flux(hiddenzone.total_water_potential, axis.xylem.total_water_potential, hiddenzone.resistance, self.delta_t)
                         hiddenzone.water_outflow = 0    #: No water flow between hiddenzone and element
 
-                        # End of elongation redulated by extensibility
-                        # if hiddenzone.leaf_pseudo_age > 0 :
-                        #     if hiddenzone.leaf_L >= hiddenzone.leaf_Lmax:  # End of elongation : hypothesis of no water flux between xylem and hiddenzone
-                        #         hiddenzone.water_influx = 0
 
                     # Photosynthetic Organ Elements
-                    for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
+                    # for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
+                    for organ in (phytomer.lamina, phytomer.sheath):
                         if organ is None:
                             continue
                         for element in (organ.exposed_element, organ.enclosed_element):
@@ -890,37 +800,60 @@ class Simulation(object):
                             element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
 
                             if element.age == 0:    #: First time after element emergence
-                                #: Volume
-                                # element.length = 0.0001
-                                # element.width = 0.001
-                                # element.thickness = 0.0001
-                                # element.volume = element.length * element.width * element.thickness
-
-                                element.sucrose = 1  #: :math:`\mu mol C
-                                element.amino_acids = 0.1  #: :math:`\mu mol N
-                                element.proteins = 20  #: :math:`\mu mol N
-                                element.volume = -8.31 * (element.temperature + 273.15) * (element.sucrose * 1E-06 / 12 + element.amino_acids * 1E-06 * 1.25 / 1.17 + element.proteins * 1E-06 * 1.25 / 1.17) / -0.8 * 1E-06
-
-                                # init : element.volume = element.calculate_organ_volume(element.organ_dimensions)
-
+                                # From dimensions - with dimensions from hiddenzone growth
+                                if hiddenzone is not None :
+                                    element.vstorage = hiddenzone.vstorage
+                                    element.thickness = hiddenzone.thickness
+                                    #: TEST ADEL 07.05.2024
+                                    # element.Wmax = hiddenzone.width
+                                    # hiddenzone.leaf_Wmax = hiddenzone.width
+                                    if organ.label == 'sheath':     #: Only for sheath due to width calculation of blade in ADEL
+                                        element.width = hiddenzone.width
+                                element.volume = element.calculate_organ_volume(element.organ_dimensions)
                                 #: Water content
                                 element.water_content = element.volume * 1E06   #: RHO_WATER parameters
-                                #: Osmotic water potential
-                                element.osmotic_water_potential = -0.8
+
+                                #: Water content
+                                # From osmotic water potential which is initiated at -0.8 MPa
+                                # element.water_content = element.calculate_initial_water_content(element.osmotic_water_potential, element.sucrose, element.amino_acids, element.proteins, element.temperature, element.vstorage)
+
+                                # element.sucrose = hiddenzone.sucrose / hiddenzone.length * element.length
+                                # element.amino_acids = hiddenzone.amino_acids / hiddenzone.length * element.length
+                                # element.proteins = hiddenzone.proteins / hiddenzone.length * element.length
+                                # element.water_content = hiddenzone.water_content / hiddenzone.length * element.length
+
+                                #     element.sucrose = hiddenzone.sucrose / hiddenzone.length * element.length
+                                #     element.amino_acids = hiddenzone.amino_acids / hiddenzone.length * element.length
+                                #     element.proteins = hiddenzone.proteins / hiddenzone.length * element.length
+                                #     element.water_content = hiddenzone.water_content / hiddenzone.length * element.length
+                                #     # element.water_content = element.calculate_initial_water_content(-0.8, element.sucrose, element.amino_acids, element.proteins, element.temperature, element.vstorage)
+                                #     #: Thickness    # TO DO
+                                #     element.thickness = hiddenzone.thickness
+
+                                #: Volume
+                                # element.volume = element.water_content * 1E-06   #: RHO_WATER parameters
+
+                                # : Osmotic water potential
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.vstorage, element.fructan)
+                                # element.osmotic_water_potential = -0.8
                                 #: Total water potential
                                 element.total_water_potential = axis.xylem.total_water_potential
                                 # : Turgor water potential
                                 element.turgor_water_potential = element.total_water_potential - element.osmotic_water_potential
 
                             elif element.age > 0:   #: Emerged element
+                                if hiddenzone is not None:
+                                    element.vstorage = hiddenzone.vstorage
+                                else:
+                                    element.vstorage = element.vstorage
                                 #: Water content
                                 element.water_content = y[self.initial_conditions_mapping[element]['water_content']]
+                                # : Volume
+                                element.volume = element.calculate_volume(element.water_content)
                                 # : Turgor water potential
                                 element.turgor_water_potential = y[self.initial_conditions_mapping[element]['turgor_water_potential']]
-                                #: Volume
-                                element.volume = element.calculate_volume(element.water_content)
                                 #: Osmotic water potential
-                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.proteins, element.volume, element.temperature)
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.vstorage, element.fructan)
                                 # element.osmotic_water_potential = -0.8
                                 #: Total water potential
                                 element.total_water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
@@ -929,6 +862,7 @@ class Simulation(object):
                             element.resistance = element.calculate_resistance(element.organ_dimensions)
                             #: Water fluxes with xylem
                             element.water_influx = element.calculate_water_flux(element.total_water_potential, axis.xylem.total_water_potential, element.resistance, self.delta_t)
+
 
         #: compute the derivative of each compartment of element
         for plant in self.population.plants:
@@ -939,7 +873,9 @@ class Simulation(object):
                     if hiddenzone is not None:
                         delta_water_content_hz = hiddenzone.calculate_delta_water_content(hiddenzone.water_influx, hiddenzone.water_outflow)
                         # phi = hiddenzone.calculate_extensibility_init(hiddenzone.leaf_pseudo_age, self.delta_t)
-                        phi = hiddenzone.calculate_extensibility_dimensions(hiddenzone.leaf_pseudo_age, self.delta_t)
+                        # phi = hiddenzone.calculate_extensibility_dimensions(hiddenzone.leaf_pseudo_age, self.delta_t)
+                        phi = hiddenzone.calculate_extensibility_temperature(hiddenzone.leaf_pseudo_age, hiddenzone.delta_teq, self.delta_t)
+
                         hiddenzone.phi_length = phi['z']  # extensibility for length
                         hiddenzone.phi_width = phi['x']  # extensibility for length
                         hiddenzone.phi_thickness = phi['y']  # extensibility for length
@@ -950,42 +886,57 @@ class Simulation(object):
                         if hiddenzone.leaf_pseudo_age > 0:  #: After previous leaf emergence
                             #: Derivatives
                             #: Delta turgor pressure
-                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone_dimensions, hiddenzone.volume, delta_water_content_hz, hiddenzone.water_content)
+                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz, hiddenzone.vstorage)
                             #: Dimensions
                             hiddenzone_dimensions = {'length': hiddenzone.length, 'width': hiddenzone.width, 'thickness': hiddenzone.thickness}
-                            delta_hiddenzone_dimensions = hiddenzone.calculate_delta_organ_dimensions(delta_turgor_water_potential, hiddenzone.turgor_water_potential, phi, hiddenzone_dimensions)
+                            delta_hiddenzone_dimensions_plastic = hiddenzone.calculate_delta_organ_dimensions_plastic(hiddenzone.turgor_water_potential, phi, hiddenzone_dimensions)
+                            delta_hiddenzone_dimensions_elastic = hiddenzone.calculate_delta_organ_dimensions_elastic(delta_turgor_water_potential, hiddenzone_dimensions)
+
+                            #: TEST ADEL 07.05.24
+                            #: Update Wmax
+                            # hiddenzone.leaf_Wmax = hiddenzone.width
 
                             if hiddenzone.leaf_L >= hiddenzone.leaf_pseudostem_length:  # Emerged blade
                                 # Growing leaf with emerged blade
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = 0     # Transfer of water content to emerged element
-                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = delta_water_content_hz      # No transfer of water content to emerged element
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = delta_water_content_hz     # Transfer of water content to emerged element
+
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = 0
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = 0
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = 0
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = 0
                                 # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness'] * hiddenzone.length / hiddenzone.leaf_L
                                 # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width'] * hiddenzone.length / hiddenzone.leaf_L
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = 0
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = 0
 
-                                hiddenzone.length_leaf_emerged = hiddenzone.leaf_L - hiddenzone.leaf_pseudostem_length
+                                # Elastic vs Plastic Growth
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width']
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions_elastic['thickness']
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions_elastic['length']
 
                             else:  # Enclosed blade
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = delta_water_content_hz
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length']
                                 # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness'] * hiddenzone.length / hiddenzone.leaf_L
                                 # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width'] * hiddenzone.length / hiddenzone.leaf_L
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness']
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width']
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions['thickness']
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions['width']
+                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length']
 
-                            hiddenzone.end_elongation = hiddenzone.calculate_end_elongation(hiddenzone.leaf_Lmax, hiddenzone.leaf_L)
+                                # Elastic vs Plastic Growth
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions_elastic['thickness'] + delta_hiddenzone_dimensions_plastic['thickness']
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width'] + delta_hiddenzone_dimensions_plastic['width']
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions_elastic['length'] + delta_hiddenzone_dimensions_plastic['length']
+
                             hiddenzone.organ_volume = hiddenzone.calculate_organ_volume(hiddenzone_dimensions)
+                            hiddenzone.WC_mstruct = hiddenzone.water_content / (hiddenzone.water_content + hiddenzone.mstruct) * 100
 
                         else:  #: Before previous leaf emergence
                             continue
 
 
                     # Photosynthetic Organ Elements
-                    for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
+                    # for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
+                    for organ in (phytomer.lamina, phytomer.sheath):
                         if organ is None:
                             continue
                         for element in (organ.exposed_element, organ.enclosed_element):
@@ -995,111 +946,54 @@ class Simulation(object):
                             element.epsilon_volume = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
                             element.organ_dimensions = {'length': element.length, 'width': element.width, 'thickness': element.thickness}
                             #: Delta water content
-                            delta_water_content_ele = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration, self.delta_t)
+                            delta_water_content_ele = element.calculate_delta_water_content(element.water_influx, element.Total_Transpiration_turgor)
                             #: Delta turgor pressure
-                            delta_turgor_water_potential = element.calculate_delta_turgor_water_potential(element.organ_dimensions, element.volume, delta_water_content_ele)
+                            delta_turgor_water_potential = element.calculate_delta_turgor_water_potential(element.volume, delta_water_content_ele, element.vstorage)
                             #: Dimensions
                             delta_element_dimensions = element.calculate_delta_organ_dimensions(delta_turgor_water_potential, element.organ_dimensions)
-
                             #: Derivatives
                             y_derivatives[self.initial_conditions_mapping[element]['turgor_water_potential']] = delta_turgor_water_potential
 
+                            #: TEST ADEL 07.05.24
+                            #: Update Wmax
+                            # element.Wmax = element.width
+
                             if hiddenzone is not None:
-                                #: TO DO : croissance que si exposed ?
-                                # if hiddenzone.leaf_L >= hiddenzone.leaf_pseudostem_length:  # Exposed element
                                 if element is not None:
-                                    if organ.label == "blade":  # Case of blade
-                                        lamina_length = element.length  # Length of blade to initialize growth of sheath
-                                        # if element.length < hiddenzone.lamina_Lmax: # Growing leaf
-                                        #     #: Derivatives
-                                        #     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_hiddenzone_dimensions['width'] + delta_element_dimensions['width']
-                                        #     # y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_hiddenzone_dimensions['thickness'] + delta_element_dimensions['thickness']
-                                        #     # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz   # Transfer of water content from hiddenzone
-                                        # else:   # End of sheath elongation
-                                        #     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_element_dimensions['length']
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
-                                        #     y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
-
-                                        # No limitation of growth by lamina_Lmax
+                                    if element.is_growing == True:
+                                        y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
+                                        # Elastic vs Plastic Growth
+                                        y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions_plastic['length'] + delta_element_dimensions['length']
+                                        y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions_plastic['length'] + delta_element_dimensions['length']
+                                        y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_hiddenzone_dimensions_plastic['width'] + delta_element_dimensions['width']
+                                        y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_hiddenzone_dimensions_plastic['thickness'] + delta_element_dimensions['thickness']
+                                    else:
+                                        # End of leaf elongation
                                         #: Derivatives
-                                        y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                        y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                        y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_hiddenzone_dimensions['width'] + delta_element_dimensions['width']
-                                        # y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
-                                        y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_hiddenzone_dimensions['thickness'] + delta_element_dimensions['thickness']
-                                        # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                        y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz   # Transfer of water content from hiddenzone
+                                        y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
+                                        y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
+                                        y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
+                                        y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele
+                                        y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_element_dimensions['length']
 
-                                    if organ.label == "sheath":
-                                        if lamina_length >= hiddenzone.lamina_Lmax:  #: Blade must have finished to elongate
-                                            #: Derivatives
-                                            print('Growth of sheath in turgor-growth')
-                                            y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                            y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                            y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_hiddenzone_dimensions['width'] + delta_element_dimensions['width']
-                                            # y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
-                                            y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_hiddenzone_dimensions['thickness'] + delta_element_dimensions['thickness']
-                                            # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                            y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
-                                        else:  # Lamina is still growing
-                                            continue
-
-                                    # else:   # Case of sheath and internode
-                                    #     if organ.label == "sheath":     # Case of sheath
-                                    #         sheath_length = element.length
-                                            # if lamina_length >= hiddenzone.lamina_Lmax:  #: Blade must have finished to elongate
-                                            # #     if element.length < hiddenzone.sheath_Lmax: # Growing sheath
-                                            # #         #: Derivatives
-                                            # #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_hiddenzone_dimensions['width'] + delta_element_dimensions['width']
-                                            # #         # y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_hiddenzone_dimensions['thickness'] + delta_element_dimensions['thickness']
-                                            # #         # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz # Transfer of water content from hiddenzone
-                                            # #     else:   # End of sheath elongation
-                                            # #         #: Derivatives
-                                            # #         y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_element_dimensions['length']
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
-                                            # #         y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
-                                            #
-                                            #     # No limitation of growth by sheath_Lmax
-                                            #     #: Derivatives
-                                            #     y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                            #     y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_hiddenzone_dimensions['length'] + delta_element_dimensions['length']
-                                            #     y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_hiddenzone_dimensions['width'] + delta_element_dimensions['width']
-                                            #     # y_derivatives[self.initial_conditions_mapping[element]['width']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['width']) + (element.length * delta_element_dimensions['width'])) / hiddenzone.leaf_L)
-                                            #     y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_hiddenzone_dimensions['thickness'] + delta_element_dimensions['thickness']
-                                            #     # y_derivatives[self.initial_conditions_mapping[element]['thickness']] = (((delta_hiddenzone_dimensions['length'] * delta_hiddenzone_dimensions['thickness']) + (element.length * delta_element_dimensions['thickness'])) / hiddenzone.leaf_L)
-                                            #     y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele + delta_water_content_hz  # Transfer of water content from hiddenzone
-                                            #
-                                            # else:  # Lamina is still growing
-                                            #     continue
-
-                                    if organ.label == "internode": # Case of internode
-                                        continue  # Internode elongation in elong-wheat
+                                    # #: Update of lamina_Lmax   # TEST 06.2024
+                                    # if organ.label == 'blade':
+                                    #     if element.length >= hiddenzone.lamina_Lmax:
+                                    #         hiddenzone.lamina_Lmax = element.length
 
                                 else:   # Enclosed element
                                     continue
 
                             else:
                                 # End of leaf elongation
-                                #: Derivatives
                                 y_derivatives[self.initial_conditions_mapping[element]['length']] = delta_element_dimensions['length']
                                 y_derivatives[self.initial_conditions_mapping[element]['width']] = delta_element_dimensions['width']
                                 y_derivatives[self.initial_conditions_mapping[element]['thickness']] = delta_element_dimensions['thickness']
-                                y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele  # Transfer of water content from hiddenzone
+                                y_derivatives[self.initial_conditions_mapping[element]['water_content']] = delta_water_content_ele
 
                             #: Dimensions volume of element
                             element.organ_volume = element.calculate_organ_volume(element.organ_dimensions)
+                            element.WC_mstruct = element.water_content / (element.water_content + element.mstruct) * 100
 
         derivatives_logger = logging.getLogger('turgorgrowth.derivatives')
         if logger.isEnabledFor(logging.DEBUG) and derivatives_logger.isEnabledFor(logging.DEBUG):

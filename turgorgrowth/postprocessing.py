@@ -31,16 +31,6 @@ PLANTS_POSTPROCESSING_VARIABLES = []
 #: concatenation of :attr:`PLANTS_T_INDEXES`, :attr:`PLANTS_RUN_VARIABLES <turgorgrowth.simulation.Simulation.PLANTS_RUN_VARIABLES>` and :attr:`PLANTS_POSTPROCESSING_VARIABLES`
 PLANTS_RUN_POSTPROCESSING_VARIABLES = set(PLANTS_T_INDEXES + turgorgrowth_simulation.Simulation.PLANTS_RUN_VARIABLES + PLANTS_POSTPROCESSING_VARIABLES)
 
-#: the indexes to locate the soil in the modeled system
-SOIL_INDEXES = turgorgrowth_simulation.Simulation.SOIL_INDEXES
-#: concatenation of :attr:`T_INDEX` and :attr:`SOIL_INDEXES`
-SOIL_T_INDEXES = turgorgrowth_simulation.Simulation.SOIL_T_INDEXES
-#: soil post-processing variables
-SOIL_POSTPROCESSING_VARIABLES = []
-#: concatenation of :attr:`SOIL_T_INDEXES`, :attr:`SOIL_RUN_VARIABLES <turgorgrowth.simulation.Simulation.SOIL_RUN_VARIABLES>` and :attr:`SOIL_POSTPROCESSING_VARIABLES`
-# SOIL_RUN_POSTPROCESSING_VARIABLES = SOIL_T_INDEXES + turgorgrowth_simulation.Simulation.SOIL_RUN_VARIABLES + SOIL_POSTPROCESSING_VARIABLES
-SOIL_RUN_POSTPROCESSING_VARIABLES = set(SOIL_T_INDEXES + turgorgrowth_simulation.Simulation.SOIL_RUN_VARIABLES + SOIL_POSTPROCESSING_VARIABLES)
-
 #: the indexes to locate the axes in the modeled system
 AXES_INDEXES = turgorgrowth_simulation.Simulation.AXES_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`AXES_INDEXES`
@@ -75,7 +65,7 @@ HIDDENZONE_INDEXES = turgorgrowth_simulation.Simulation.HIDDENZONE_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
 HIDDENZONE_T_INDEXES = turgorgrowth_simulation.Simulation.HIDDENZONE_T_INDEXES
 #: hidden zones post-processing variables
-HIDDENZONE_POSTPROCESSING_VARIABLES = []
+HIDDENZONE_POSTPROCESSING_VARIABLES = ['conc_C_vol', 'conc_C_mass', 'conc_fructan_vol', 'conc_sucrose_vol']
 HIDDENZONE_RUN_VARIABLES_ADDITIONAL = []
 #: concatenation of :attr:`HIDDENZONE_T_INDEXES`, :attr:`HIDDENZONE_RUN_VARIABLES <turgorgrowth.simulation.Simulation.HIDDENZONE_RUN_VARIABLES>` and :attr:`HIDDENZONE_POSTPROCESSING_VARIABLES`
 HIDDENZONE_RUN_POSTPROCESSING_VARIABLES = HIDDENZONE_T_INDEXES + turgorgrowth_simulation.Simulation.HIDDENZONE_RUN_VARIABLES + HIDDENZONE_RUN_VARIABLES_ADDITIONAL + HIDDENZONE_POSTPROCESSING_VARIABLES
@@ -112,8 +102,68 @@ class HiddenZone:
     """
     Post-processing to apply on HiddenZone outputs.
     """
-    pass
+    def __init__(self):
+        pass
 
+    @staticmethod
+    def calculate_conc_sucrose_vol(sucrose, volume):
+        """Dry mass
+
+        :param float sucrose: Amount of sucrose (µmol` C)
+        :param float volume: Volume (m3)
+
+        :return: Sucrose volumic concentration (µmol m-3)
+        :rtype: float
+        """
+
+        conc_sucrose_vol = sucrose / volume
+
+        return conc_sucrose_vol
+
+    @staticmethod
+    def calculate_conc_fructan_vol(fructan, volume):
+        """Dry mass
+
+        :param float sucrose: Amount of sucrose (µmol` C)
+        :param float volume: Volume (m3)
+
+        :return: Sucrose volumic concentration (µmol m-3)
+        :rtype: float
+        """
+
+        conc_fructan_vol = fructan / volume
+
+        return conc_fructan_vol
+
+    @staticmethod
+    def calculate_conc_C_vol(sucrose, fructan, volume):
+        """Dry mass
+
+        :param float sucrose: Amount of sucrose (µmol` C)
+        :param float volume: Volume (m3)
+
+        :return: Sucrose volumic concentration (µmol m-3)
+        :rtype: float
+        """
+
+        conc_C_vol = (sucrose + fructan) / volume
+
+        return conc_C_vol
+
+    @staticmethod
+    def calculate_conc_C_mass(fructan, sucrose, mstruct):
+        """Dry mass
+
+        :param float sucrose: Amount of sucrose (µmol` C)
+        :param float volume: Volume (m3)
+
+        :return: Sucrose volumic concentration (µmol m-3)
+        :rtype: float
+        """
+
+        conc_C_mass = (fructan + sucrose) / mstruct
+
+        return conc_C_mass
 
 class Element:
     """
@@ -132,7 +182,7 @@ class Organ:
 #           PLEASE USE THIS FUNCTION TO APPLY POST-PROCESSING ON THE OUTPUT OF TURGOR-GROWTH     -
 # ------------------------------------------------------------------------------------------------
 
-def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, soil_df=None, delta_t=1):
+def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, delta_t=1):
     """
     Compute post-processing from Turgor-Growth outputs, and format the post-processing to :class:`dataframes <pandas.DataFrame>`.
 
@@ -147,15 +197,12 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     :param pandas.DataFrame hiddenzones_df: Turgor-Growth outputs at hidden zone scale (see :attr:`simulation.Simulation.HIDDENZONE_RUN_VARIABLES`)
     :param pandas.DataFrame elements_df: Turgor-Growth outputs at element scale (see :attr:`simulation.Simulation.ELEMENTS_RUN_VARIABLES`)
     :param pandas.DataFrame organ_df: Turgor-Growth outputs at xylem scale (see :attr:`simulation.Simulation. ORGAN_RUN_VARIABLES`)
-    :param pandas.DataFrame soil_df: Turgor-Growth outputs at soil scale (see :attr:`simulation.Simulation.SOIL_RUN_VARIABLES`)
     :param float delta_t: Delta t between 2 outputs (in seconds).
 
     :return: :class:`dataframes <pandas.DataFrame>` of post-processing for each scale:
             * hidden zone (see :attr:`HIDDENZONE_RUN_POSTPROCESSING_VARIABLES`)
             * element (see :attr:`ELEMENTS_RUN_POSTPROCESSING_VARIABLES`)
             * xylem (see :attr:`XYLEM_RUN_POSTPROCESSING_VARIABLES`)
-            * and soil (see :attr:`SOIL_RUN_POSTPROCESSING_VARIABLES`)
-
 
     :rtype tuple [pandas.DataFrame]
     """
@@ -192,7 +239,12 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
 
     # hidden zones
     if hiddenzones_df is not None:
-        pp_hiddenzones_df = pd.concat([hiddenzones_df, pd.DataFrame(columns=HIDDENZONE_POSTPROCESSING_VARIABLES)], sort=True)
+        hiddenzones_df.loc[:, 'conc_C_mass'] = HiddenZone.calculate_conc_C_mass(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['mstruct'])
+        hiddenzones_df.loc[:, 'conc_fructan_vol'] = HiddenZone.calculate_conc_fructan_vol(hiddenzones_df['fructan'], hiddenzones_df['volume'])
+        hiddenzones_df.loc[:, 'conc_sucrose_vol'] = HiddenZone.calculate_conc_sucrose_vol(hiddenzones_df['sucrose'], hiddenzones_df['volume'])
+        hiddenzones_df.loc[:, 'conc_C_vol'] = HiddenZone.calculate_conc_C_vol(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['volume'])
+
+        pp_hiddenzones_df = pd.concat([hiddenzones_df, pd.DataFrame(columns=HIDDENZONE_POSTPROCESSING_VARIABLES)], sort=False)
         pp_hiddenzones_df = pp_hiddenzones_df.reindex(columns=HIDDENZONE_RUN_POSTPROCESSING_VARIABLES, copy=False)
         pp_hiddenzones_df[['plant', 'metamer']] = pp_hiddenzones_df[['plant', 'metamer']].astype(int)
         returned_dataframes.append(pp_hiddenzones_df)
@@ -201,8 +253,8 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     if elements_df is not None:
         pp_elements_df = pd.concat([elements_df, pd.DataFrame(columns=ELEMENTS_POSTPROCESSING_VARIABLES)], sort=True)
         pp_elements_df = pp_elements_df.reindex(columns=ELEMENTS_RUN_POSTPROCESSING_VARIABLES, copy=False)
-        ##pp_elements_df[['plant', 'metamer']] = pp_elements_df[['plant', 'metamer']].astype(int)
-        ##returned_dataframes.append(pp_elements_df)
+        #pp_elements_df[['plant', 'metamer']] = pp_elements_df[['plant', 'metamer']].astype(int)
+        #returned_dataframes.append(pp_elements_df)
 
         grouped = elements_df.groupby('organ')
         for organ_type, parameters_class in (('blade', turgorgrowth_parameters.LAMINA_ELEMENT_PARAMETERS), ('internode', turgorgrowth_parameters.INTERNODE_ELEMENT_PARAMETERS), ('sheath', turgorgrowth_parameters.SHEATH_ELEMENT_PARAMETERS)):
@@ -229,13 +281,6 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         pp_organs_df['plant'] = pp_organs_df['plant'].astype(int)
         returned_dataframes.append(pp_organs_df)
 
-    # # soil
-    # if soil_df is not None:
-    #     pp_soil_df = pd.concat([soil_df, pd.DataFrame(columns=SOIL_POSTPROCESSING_VARIABLES)])
-    #     pp_soil_df = pp_soil_df.reindex(columns=SOIL_RUN_POSTPROCESSING_VARIABLES, copy=False)
-    #     pp_soil_df[['plant']] = pp_soil_df[['plant']].astype(int)
-    #     returned_dataframes.append(pp_soil_df)
-
     return tuple(returned_dataframes)
 
 
@@ -244,7 +289,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
 #           PLEASE USE THIS FUNCTION FOR THE GENERATION OF GRAPHS     -
 # ---------------------------------------------------------------------
 
-def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, soil_df=None, graphs_dirpath='.'):
+def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, graphs_dirpath='.'):
 
     """
     Generate graphs to validate the outputs of Turgor-Growth, and save them in directory `graphs_dirpath`.
@@ -252,7 +297,6 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
     :param pandas.DataFrame hiddenzones_df: Turgor-Growth outputs at hidden zone scale (see :attr:`HIDDENZONE_RUN_POSTPROCESSING_VARIABLES`)
     :param pandas.DataFrame elements_df: Turgor-Growth outputs at element scale (see :attr:`ELEMENTS_RUN_POSTPROCESSING_VARIABLES`)
     :param pandas.DataFrame organ_df: Turgor-Growth outputs at organ scale (see :attr:`ORGANS_RUN_POSTPROCESSING_VARIABLES`)
-    :param pandas.DataFrame soil_df: Turgor-Growth outputs at soil scale (see :attr:`SOIL_RUN_POSTPROCESSING_VARIABLES`)
     :param str graphs_dirpath: the path of the directory to save the generated graphs
     """
 
@@ -263,10 +307,10 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 1) Photosynthetic organs
     if elements_df is not None:
-        graph_variables_ph_elements = {'age':u'Age (°Cd)', 'organ_volume':'Volume of organ based on dimensions (m3)', 'epsilon_volume':'Volumetric extensibility (Mpa)', 'Total_Transpiration': u'Total transpiration (g H2O)', 'length': u'Length (m)', 'water_flux_from_hz' : u'Water flux from hz to element (g H2O)',
+        graph_variables_ph_elements = {'is_growing': u'is_growing', 'vstorage': u'vstorage', 'age': u'Age (°Cd)', 'organ_volume': 'Volume of organ based on dimensions (m3)', 'epsilon_volume': 'Volumetric elasticity (Mpa)', 'Total_Transpiration_turgor': u'Total transpiration of turgor model (g H2O)', 'length': u'Length (m)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'thickness': u'Thickness (m)', 'total_water_potential': u'Total water potential (MPa)',
-                                       'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow from Xylem (g)',  'width': u'Width (m)',
-                                       'resistance': u'Resistance (MPa s g$^{-1}$)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids'}
+                                       'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow from Xylem (g)',  'width': u'Width (m)', 'WC_mstruct': u'ratio WC_mstruct (%)',
+                                       'resistance': u'Resistance (MPa s g$^{-1}$)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids', 'fructan': u'Fructans', }
     
         for org_ph in (['blade'], ['sheath'], ['internode']):
             for variable_name, variable_label in graph_variables_ph_elements.items():
@@ -283,13 +327,15 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = { 'end_elongation':'Leaf length until end of elongation (m)', 'organ_volume':'Volume of hz based on dimensions (m3)','phi_volume':'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume':'Volumetric extensibility (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
+        graph_variables_hiddenzones = {'conc_C_vol': u'conc_C_vol', 'conc_C_mass': u'conc_C_mass', 'conc_fructan_vol': u'conc_fructan_vol', 'conc_sucrose_vol': u'conc_sucrose_vol',
+                                        'DP': u'Degree of fructans polymerization', 'fructan': u'Fructan',
+                                       # 'lamina_Lmax': u'Maximal length of blade (m)',
+                                       'contribution': u'contribution parameters', 'vstorage': u'vstorage', 'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
                                         'phi_length': u'Extensibility parameter  for length (Mpa-1 h-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1 h-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1 h-1)',
-                                        'length_leaf_emerged': u'length of emerged part of the growing leaf (m)',
-                                        'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)',
+                                        'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)', 'hiddenzone_age': u'Age (s)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',
                                        'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow Xylem (g)',
-                                       'resistance': u'Resistance (MPa s g$^{-1}$)', 'thickness': u'Thickness (m)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids'}
+                                       'resistance': u'Resistance (MPa s g$^{-1}$)', 'thickness': u'Thickness (m)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids', 'WC_mstruct': u'ratio WC_mstruct'}
     
         for variable_name, variable_label in graph_variables_hiddenzones.items():
             graph_name = variable_name + '_hz' + '.PNG'
@@ -306,6 +352,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
     # 3) Roots and xylem
     if organs_df is not None:
         graph_variables_organs = {'total_water_potential': u'Total water potential (MPa)',
+                                  # 'Ksoil': u'Soil axial conductivity (g s-1 Mpa-1)';
                                   'soil_water_potential': u'Soil water potential (Mpa)', 'SRWC': u'SRWC (%)'}
 
         for org in (['roots'], ['xylem']):
@@ -322,9 +369,10 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                         explicit_label=False)
 
     # 4) Axes
-    graph_variables_axes = {'xylem_water_potential':u'Xylem water potential (Mpa)', 'Total_Transpiration': u'Total transpiration (g H2O)', 'Growth': u'Growth (g H2O)',
-                             'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)',
-                            'plant_WC_DM': u'Plant water content per dry matter (g H2O g mstruct -1)', 'mstruct_turgor':u'mstruct turgorgrowth (g)'}
+    graph_variables_axes = {'xylem_water_potential':u'Xylem water potential (Mpa)', 'Total_Transpiration_turgor': u'Total transpiration from turgor model (g H2O)', 'Growth': u'Growth (g H2O)',
+                            # 'LAI_turgor': u'LAI calculated in turgor model',
+                            'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)',
+                            'delta_plant_water_content': u'Delta water content of the plant (g H2O)', 'plant_WC_DM': u'Ratio of plant water content per structural mass (%)'}
 
     for variable_name, variable_label in graph_variables_axes.items():
         graph_name = variable_name + '_axis' + '.PNG'
@@ -338,17 +386,3 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                     plot_filepath=os.path.join(graphs_dirpath, graph_name),
                                                     explicit_label=False)
 
-    # # 5) Soil
-    # if soil_df is not None:
-    #     graph_variables_soil = {'soil_water_potential': u'Total water potential of soil (MPa)'}
-    #     for variable_name, variable_label in graph_variables_soil.items():
-    #         graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
-    #         turgorgrowth_tools.plot_turgorgrowth_ouputs(soil_df,
-    #                                                         x_name=x_name,
-    #                                                         y_name=variable_name,
-    #                                                         x_label=x_label,
-    #                                                         y_label=variable_label,
-    #                                                         colors=['blue'],
-    #                                                         filters={'plant': 1, 'axis': 'MS'},
-    #                                                         plot_filepath=os.path.join(graphs_dirpath, graph_name),
-    #                                                         explicit_label=False)

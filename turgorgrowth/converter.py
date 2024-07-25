@@ -13,11 +13,6 @@ import pandas as pd
 
 from turgorgrowth import model, simulation
 
-#: the columns of the outputs dataframe at SOIL scale
-SOIL_VARIABLES = simulation.Simulation.SOIL_INDEXES + simulation.Simulation.SOIL_RUN_VARIABLES
-SOIL_OUTPUTS_VARIABLES = SOIL_VARIABLES
-SOIL_OUTPUTS_RUN_VARIABLES = simulation.Simulation.SOIL_RUN_VARIABLES
-
 #: the columns of the outputs dataframe at PLANT scale
 PLANTS_VARIABLES = simulation.Simulation.PLANTS_INDEXES + simulation.Simulation.PLANTS_RUN_VARIABLES
 
@@ -49,21 +44,19 @@ TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING = {model.Organ: 'organs', model
 DATAFRAME_TO_TURGORGROWTH_ELEMENTS_NAMES_MAPPING = {'HiddenElement': 'enclosed_element', 'StemElement': 'exposed_element', 'LeafElement1': 'exposed_element'}
 
 
-def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs=None, soil_inputs=None):
+def from_dataframes(axes_inputs = None, hiddenzones_inputs=None, elements_inputs=None, organs_inputs=None):
     """
     If `elements_inputs` and `hiddenzones_inputs` are not `None`, converts `elements_inputs` and `hiddenzones_inputs` to a :class:`population <model.Population>`.
 
     :param pandas.DataFrame hiddenzones_inputs: Hidden zone inputs, with one line per hidden zone.
     :param pandas.DataFrame elements_inputs: Element inputs, with one line per element.
     :param pandas.DataFrame organs_inputs: Organs (xylem and roots) inputs, with one line per organ.
-    :param pandas.DataFrame soil_inputs: Soil inputs, with one line per soil.
 
     :return: If `elements_inputs` and `hiddenzones_inputs` are not `None`, returns a :class:`population <model.Population>`
     :rtype: (model.Population, dict)
     """
 
-    convert_dataframes_to_population = elements_inputs is not None and hiddenzones_inputs is not None and organs_inputs is not None
-    # convert_dataframe_to_soils_dict = soil_inputs is not None
+    convert_dataframes_to_population = axes_inputs is not None and elements_inputs is not None and hiddenzones_inputs is not None and organs_inputs is not None
 
     if convert_dataframes_to_population:
         population = model.Population()
@@ -157,96 +150,18 @@ def from_dataframes(hiddenzones_inputs=None, elements_inputs=None, organs_inputs
                         # create a new hidden zone
                         hiddenzone = model.HiddenZone(TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING[model.HiddenZone], **hiddenzone_dict)
                         phytomer.hiddenzone = hiddenzone
-                        # # Topology
-                        # mapping_topology['predecessor'][phytomer.hiddenzone] = last_elongated_internode
-                        # mapping_topology['successor'][last_elongated_internode].append(phytomer.hiddenzone)
-
-                    # # Topoly of elements
-                    # if phytomer.lamina and phytomer.lamina.exposed_element:
-                    #     if phytomer.sheath:
-                    #         if phytomer.sheath.exposed_element:
-                    #             mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.sheath.exposed_element
-                    #             mapping_topology['successor'][phytomer.sheath.exposed_element] = phytomer.lamina.exposed_element
-                    #         elif phytomer.sheath.enclosed_element:
-                    #             mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.sheath.enclosed_element
-                    #             mapping_topology['successor'][phytomer.sheath.enclosed_element] = phytomer.lamina.exposed_element
-                    #     else:
-                    #         mapping_topology['predecessor'][phytomer.lamina.exposed_element] = phytomer.hiddenzone
-                    #         mapping_topology['successor'][phytomer.hiddenzone] = phytomer.lamina.exposed_element
-                    #
-                    # if phytomer.internode:
-                    #     if phytomer.internode.enclosed_element:
-                    #         mapping_topology['predecessor'][phytomer.internode.enclosed_element] = last_elongated_internode
-                    #         mapping_topology['successor'][last_elongated_internode].append(phytomer.internode.enclosed_element)
-                    #         last_elongated_internode = phytomer.internode.enclosed_element
-                    #         mapping_topology['successor'][phytomer.internode.enclosed_element] = []
-                    #
-                    #     if phytomer.internode.exposed_element:
-                    #         if phytomer.internode.enclosed_element:
-                    #             mapping_topology['predecessor'][phytomer.internode.exposed_element] = phytomer.internode.enclosed_element
-                    #             mapping_topology['successor'][phytomer.internode.enclosed_element] = phytomer.internode.exposed_element
-                    #         else:
-                    #             mapping_topology['predecessor'][phytomer.internode.exposed_element] = phytomer.hiddenzone
-                    #             mapping_topology['successor'][phytomer.hiddenzone] = phytomer.internode.exposed_element
-                    #
-                    # if phytomer.sheath:
-                    #     if phytomer.sheath.exposed_element:
-                    #         if phytomer.sheath.enclosed_element:
-                    #             mapping_topology['predecessor'][phytomer.sheath.exposed_element] = phytomer.sheath.enclosed_element
-                    #             mapping_topology['successor'][phytomer.sheath.enclosed_element] = phytomer.sheath.exposed_element
-                    #         elif phytomer.hiddenzone:
-                    #             mapping_topology['predecessor'][phytomer.sheath.exposed_element] = phytomer.hiddenzone
-                    #             mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.exposed_element
-                    #         else:
-                    #             mapping_topology['predecessor'][phytomer.sheath.exposed_element] = last_elongated_internode
-                    #             mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.exposed_element)
-                    #     if phytomer.sheath.enclosed_element:
-                    #         if phytomer.internode:
-                    #             if phytomer.internode.exposed_element:
-                    #                 mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.exposed_element
-                    #                 mapping_topology['successor'][phytomer.internode.exposed_element] = phytomer.sheath.enclosed_element
-                    #             else:
-                    #                 mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.internode.enclosed_element
-                    #                 mapping_topology['successor'][phytomer.internode.enclosed_element].append(phytomer.sheath.enclosed_element)
-                    #
-                    #         elif phytomer.hiddenzone:
-                    #             mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = phytomer.hiddenzone
-                    #             mapping_topology['successor'][phytomer.hiddenzone] = phytomer.sheath.enclosed_element
-                    #         else:
-                    #             mapping_topology['predecessor'][phytomer.sheath.enclosed_element] = last_elongated_internode
-                    #             mapping_topology['successor'][last_elongated_internode].append(phytomer.sheath.enclosed_element)
 
                 plant.axes.append(axis)
 
-    # if convert_dataframe_to_soils_dict:
-    #     soils = {}
-    #     for soil_id, soil_group in soil_inputs.groupby(simulation.Simulation.SOIL_INDEXES):
-    #         # create a new soil
-    #         soil_attributes = soil_group.loc[soil_group.first_valid_index(), simulation.Simulation.SOIL_STATE].to_dict()
-    #         soil = model.Soil(**soil_attributes) # arguments paquetes en kward qui se comporte comme un dictionnaire
-    #         soils[soil_id] = soil
-    #
-    #
-    # if convert_dataframes_to_population and convert_dataframe_to_soils_dict:
-    #     return population, soils, mapping_topology
-    # elif convert_dataframes_to_population:
-    #     return population, mapping_topology
-    # else:
-    #     return soils
-
-    # return population, mapping_topology, soils
     return population, mapping_topology
 
 
-def to_dataframes(population=None, soils=None):
+def to_dataframes(population=None):
     """
     Convert a Turgor-Growth :class:`population <model.Population>` to Pandas dataframes.
     If `population` is not None, convert `population` to Pandas dataframes.
-    If `soil` is not None, convert `soil` to Pandas dataframe.
-
 
     :param model.Population population: The Turgor-Growth population to convert.
-    :param dict soil: The soil to convert.
 
     :return: If `population` is not None, return :class:`dataframes <pandas.DataFrame>` describing the internal state and compartments of the population at each scale:
                  * hidden zones: plant index, axis id, phytomer index, state parameters, state variables, intermediate variables,
@@ -256,17 +171,11 @@ def to_dataframes(population=None, soils=None):
                  * xylem scale: xylem index, state parameters, state variables, intermediate variables,
                  fluxes and integrative variables of xylem (see :mod:`XYLEM_VARIABLES`)
 
-            and/or
-
-            if `soil` is not None, return a :class:`dataframe <pandas.DataFrame>` describing internal state and compartments of the soil, with one line per soil:
-                * plant index, axis id, state parameters, state variables, intermediate variables, fluxes and integrative variables of each soil (see :mod:`SOIL_RUN_VARIABLES`)
-
 
     :rtype: (pandas.DataFrame, pandas.DataFrame)
     """
 
     convert_population_to_dataframes = population is not None
-    convert_soils_to_dataframe = soils is not None
 
     def append_row(model_object, indexes, attributes_names, inputs_df):
         # function to append a row to a dataframe
@@ -327,19 +236,7 @@ def to_dataframes(population=None, soils=None):
         all_hiddenzones_df.reset_index(drop=True, inplace=True)
         all_elements_df.reset_index(drop=True, inplace=True)
 
-    if convert_soils_to_dataframe:
-        all_soil_df = pd.DataFrame(columns=SOIL_VARIABLES)
-        for soil_id, soil in soils.items():
-            append_row(soil, list(soil_id), simulation.Simulation.SOIL_RUN_VARIABLES, all_soil_df)
-        all_soil_df.sort_values(by=SOIL_VARIABLES, inplace=True)
-        all_soil_df['plant'] = all_soil_df['plant'].astype(int)
-        all_soil_df.reset_index(drop=True, inplace=True)
-    
-    if convert_population_to_dataframes and convert_soils_to_dataframe:
-        return all_plants_df, all_axes_df, all_phytomers_df, all_organs_df, all_hiddenzones_df, all_elements_df, all_soil_df
-    elif convert_population_to_dataframes:
-        return all_plants_df, all_axes_df, all_phytomers_df, all_organs_df, all_hiddenzones_df, all_elements_df
-    else:
-        return all_soil_df
 
-    ##return all_plants_df, all_axes_df, all_phytomers_df, all_organs_df, all_hiddenzones_df, all_elements_df
+    if convert_population_to_dataframes :
+        return all_plants_df, all_axes_df, all_phytomers_df, all_organs_df, all_hiddenzones_df, all_elements_df
+
