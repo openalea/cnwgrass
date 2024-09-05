@@ -65,7 +65,7 @@ HIDDENZONE_INDEXES = turgorgrowth_simulation.Simulation.HIDDENZONE_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
 HIDDENZONE_T_INDEXES = turgorgrowth_simulation.Simulation.HIDDENZONE_T_INDEXES
 #: hidden zones post-processing variables
-HIDDENZONE_POSTPROCESSING_VARIABLES = ['conc_C_vol', 'conc_C_mass', 'conc_fructan_vol', 'conc_sucrose_vol']
+HIDDENZONE_POSTPROCESSING_VARIABLES = ['conc_solutes_vol', 'conc_solutes_mass', 'conc_fructan_vol', 'conc_sucrose_vol']
 HIDDENZONE_RUN_VARIABLES_ADDITIONAL = []
 #: concatenation of :attr:`HIDDENZONE_T_INDEXES`, :attr:`HIDDENZONE_RUN_VARIABLES <turgorgrowth.simulation.Simulation.HIDDENZONE_RUN_VARIABLES>` and :attr:`HIDDENZONE_POSTPROCESSING_VARIABLES`
 HIDDENZONE_RUN_POSTPROCESSING_VARIABLES = HIDDENZONE_T_INDEXES + turgorgrowth_simulation.Simulation.HIDDENZONE_RUN_VARIABLES + HIDDENZONE_RUN_VARIABLES_ADDITIONAL + HIDDENZONE_POSTPROCESSING_VARIABLES
@@ -136,34 +136,39 @@ class HiddenZone:
         return conc_fructan_vol
 
     @staticmethod
-    def calculate_conc_C_vol(sucrose, fructan, volume):
-        """Dry mass
+    def calculate_conc_solutes_vol(sucrose, fructan, amino_acids, volume):
+        """Volumic concentration of solutes used for osmotic water potential calculation
 
         :param float sucrose: Amount of sucrose (µmol` C)
+        :param float amino_acids: Amount of amino acids (µmol` N)
+        :param float fructan: Amount of fructan (µmol` C)
         :param float volume: Volume (m3)
 
-        :return: Sucrose volumic concentration (µmol m-3)
+        :return: Solutes volumic concentration (mol m-3)
         :rtype: float
         """
 
-        conc_C_vol = (sucrose + fructan) / volume
+        conc_solutes_vol = (sucrose + fructan + amino_acids) * 1E-06 / volume
 
-        return conc_C_vol
+        return conc_solutes_vol
 
     @staticmethod
-    def calculate_conc_C_mass(fructan, sucrose, mstruct):
-        """Dry mass
+    def calculate_conc_solutes_mass(fructan, sucrose, amino_acids, mstruct):
+        """Massic concentration of solutes used for osmotic water potential calculation
 
         :param float sucrose: Amount of sucrose (µmol` C)
-        :param float volume: Volume (m3)
+        :param float amino_acids: Amount of amino acids (µmol` N)
+        :param float fructan: Amount of fructan (µmol` C)
 
-        :return: Sucrose volumic concentration (µmol m-3)
+        :param float mstruct: Structural mass (g)
+
+        :return: Solutes massique concentration (mol m-3)
         :rtype: float
         """
 
-        conc_C_mass = (fructan + sucrose) / mstruct
+        conc_solutes_mass = (fructan + sucrose + amino_acids) * 1E-06 / mstruct
 
-        return conc_C_mass
+        return conc_solutes_mass
 
 class Element:
     """
@@ -239,10 +244,10 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
 
     # hidden zones
     if hiddenzones_df is not None:
-        hiddenzones_df.loc[:, 'conc_C_mass'] = HiddenZone.calculate_conc_C_mass(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['mstruct'])
+        hiddenzones_df.loc[:, 'conc_solutes_mass'] = HiddenZone.calculate_conc_solutes_mass(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['amino_acids'], hiddenzones_df['mstruct'])
         hiddenzones_df.loc[:, 'conc_fructan_vol'] = HiddenZone.calculate_conc_fructan_vol(hiddenzones_df['fructan'], hiddenzones_df['volume'])
         hiddenzones_df.loc[:, 'conc_sucrose_vol'] = HiddenZone.calculate_conc_sucrose_vol(hiddenzones_df['sucrose'], hiddenzones_df['volume'])
-        hiddenzones_df.loc[:, 'conc_C_vol'] = HiddenZone.calculate_conc_C_vol(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['volume'])
+        hiddenzones_df.loc[:, 'conc_solutes_vol'] = HiddenZone.calculate_conc_solutes_vol(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['amino_acids'], hiddenzones_df['volume'])
 
         pp_hiddenzones_df = pd.concat([hiddenzones_df, pd.DataFrame(columns=HIDDENZONE_POSTPROCESSING_VARIABLES)], sort=False)
         pp_hiddenzones_df = pp_hiddenzones_df.reindex(columns=HIDDENZONE_RUN_POSTPROCESSING_VARIABLES, copy=False)
@@ -307,7 +312,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 1) Photosynthetic organs
     if elements_df is not None:
-        graph_variables_ph_elements = {'is_growing': u'is_growing', 'vstorage': u'vstorage', 'age': u'Age (°Cd)', 'organ_volume': 'Volume of organ based on dimensions (m3)', 'epsilon_volume': 'Volumetric elasticity (Mpa)', 'Total_Transpiration_turgor': u'Total transpiration of turgor model (g H2O)', 'length': u'Length (m)',
+        graph_variables_ph_elements = {'is_growing': u'is_growing', 'age': u'Age (°Cd)', 'organ_volume': 'Volume of organ based on dimensions (m3)', 'epsilon_volume': 'Volumetric elasticity (Mpa)', 'Total_Transpiration_turgor': u'Total transpiration of turgor model (g H2O)', 'length': u'Length (m)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'thickness': u'Thickness (m)', 'total_water_potential': u'Total water potential (MPa)',
                                        'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow from Xylem (g)',  'width': u'Width (m)', 'WC_mstruct': u'ratio WC_mstruct (%)',
                                        'resistance': u'Resistance (MPa s g$^{-1}$)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids', 'fructan': u'Fructans', }
@@ -327,10 +332,9 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = {'conc_C_vol': u'conc_C_vol', 'conc_C_mass': u'conc_C_mass', 'conc_fructan_vol': u'conc_fructan_vol', 'conc_sucrose_vol': u'conc_sucrose_vol',
-                                        'DP': u'Degree of fructans polymerization', 'fructan': u'Fructan',
-                                       # 'lamina_Lmax': u'Maximal length of blade (m)',
-                                       'contribution': u'contribution parameters', 'vstorage': u'vstorage', 'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
+        graph_variables_hiddenzones = {'conc_solutes_vol': u'conc_solutes_vol', 'conc_solutes_mass': u'conc_solutes_mass', 'conc_fructan_vol': u'conc_fructan_vol', 'conc_sucrose_vol': u'conc_sucrose_vol',
+                                        'omega': u'Solutes contribution to osmoregulation', 'fructan': u'Fructan',
+                                       'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
                                         'phi_length': u'Extensibility parameter  for length (Mpa-1 h-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1 h-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1 h-1)',
                                         'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)', 'hiddenzone_age': u'Age (s)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',

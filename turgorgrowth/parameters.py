@@ -21,6 +21,7 @@ NB_C_SUCROSE = 12  #: Number of C in 1 mol of sucrose
 SUCROSE_MOLAR_MASS = 342  #: g mol-1
 AMINO_ACIDS_N_RATIO = 1.17  #: Mean number of mol of N in 1 mol of the major amino acids of plants (Glu, Gln, Ser, Asp, Ala, Gly)
 WATER_MOLAR_MASS = 18  #: g mol-1
+VSTORAGE = 0.8  #: Storage portion of the volume of the organ (-)
 
 VANT_HOFF_SUCROSE = 1  #: Van't Hoff coefficient of sucrose (dimensionless)
 VANT_HOFF_AMINO_ACIDS = 1.25  #: Van't Hoff coefficient estimated for amino acids (dimensionless)
@@ -184,8 +185,7 @@ class HiddenZoneParameters(OrganParameters):
         #: Calibration 06.24
         self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 10, 'y': 8, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.phi_initial = {'x': 4E-06, 'y': 4E-06, 'z': 4E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        self.phi_initial = {'x': 1E-06, 'y': 1E-06, 'z': 4E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        self.phi_initial = {'x': 1E-06, 'y': 1E-06, 'z': 3E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # turgor-growth phi-function
         # self.tend = 2500000  # 300 * 3600 * 24 / 12   #: Lamina age when extensibility reaches 0 (s at 12°C). Calculated from elongwheat parameter for phase 2
@@ -195,7 +195,7 @@ class HiddenZoneParameters(OrganParameters):
         # elong-wheat beta-function
         self.tend = 2160000  #: end of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         self.tmax = 1473120  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tbase = -822960  #: beginning of leaf elongation in automte growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.tbase = -822960  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
 
         L0 = abs((1 + (self.tend / (self.tend - self.tmax))) * (min(1.0, float(-self.tbase) / float(self.tend - self.tbase)) ** ((self.tend - self.tbase) / (self.tend - self.tmax))))  #: Leaf length at t=0 in automate growth (beta function) (m)
         FITTED_L0 = 0.01557936  #: Fitted value of leaf length at t=0 after rescaling the beta function with L0 (m); Fournier 2005 sur courbe corrigee
@@ -227,8 +227,7 @@ class HiddenZoneInitCompartments(object):
         self.mstruct = 1.26E-07    #: g
         self.leaf_enclosed_mstruct = 1.26E-07    #: g
 
-        self.delta_teq = 3600               #: s     #: time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010). Value from inputs file
-        self.res = 0               #: s     #: time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010). Value from inputs file
+        self.delta_teq = 3600   #: s     #: time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010). Value from inputs file
 
         self.SRWC = 80  #: %
         # self.volume = self.mstruct / RATIO_MSTRUCT_DM * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME  #: m3
@@ -237,24 +236,22 @@ class HiddenZoneInitCompartments(object):
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
         self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential   #: MPa
 
-        self.contribution = None     #: -
-        self.DP = None     #: -
-
+        self.omega = None     #: -
         self.leaf_pseudostem_length = 4E-6   #: m
         self.leaf_L = 4E-6                   #: m
         self.lamina_Lmax = None                 #: m
         self.leaf_Wmax = None                 #: m
         self.leaf_is_growing = True                #: -
-        # self.width = 0.0025                 #: m
-        # self.thickness = 0.0004     #: m
         self.width = 0.003                 #: m
         self.thickness = 0.0005     #: m
-
         self.volume = self.leaf_L * self.width * self.thickness
         self.water_content = self.volume * RHO_WATER
 
         self.water_influx = 0                 #: g H2O
         self.water_outflow = 0                 #: g H2O
+
+        self.width_prev = 0.003                #: m
+        self.thickness_prev = 0.0005                #: m
 
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneInitCompartments` for current process
@@ -336,6 +333,7 @@ class PhotosyntheticOrganElementParameters(object):
         # self.epsilon = {'x': 15, 'y': 12, 'z': 15}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.epsilon = {'x': 150, 'y': 120, 'z': 150}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 1500, 'y': 1200, 'z': 1500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 500, 'y': 200, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 90, 'y': 90, 'z': 90}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
@@ -373,7 +371,6 @@ class PhotosyntheticOrganElementInitCompartments(object):
         # TODO as function of volume and dimensions
 
         self.volume = self.water_content / RHO_WATER
-        self.vstorage = 0.8
 
         self.SRWC = 80  #: %
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
@@ -466,7 +463,7 @@ class SheathElementParameters(OrganParameters):
         # self.epsilon = {'x': 5, 'y': 2.5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.epsilon = {'x': 150, 'y': 120, 'z': 150}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 1500, 'y': 1200, 'z': 1500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 15, 'y': 12, 'z': 15}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+        # self.epsilon = {'x': 500, 'y': 200, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 90, 'y': 90, 'z': 90}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         # self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 

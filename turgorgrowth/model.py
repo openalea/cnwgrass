@@ -115,6 +115,7 @@ class Axis(object):
         self.plant_water_content = None #: plant water content (g H2O)
         self.plant_WC_DM = None #: relative plant water content per structural mass of the shoot axis (%)
         self.green_area_rep = None  #: gree area (m2)
+        self.green_area = None  #: gree area (m2)
         self.LAI_turgor = None  #: leaf area index
         self.delta_plant_water_content = None   #: plant delta water content (g H2O)
 
@@ -128,6 +129,7 @@ class Axis(object):
         self.plant_water_content = 0
         self.plant_WC_DM = 0
         self.green_area_rep = 0
+        self.green_area = 0
         self.LAI_turgor = 0
         self.delta_plant_water_content = 0
 
@@ -135,6 +137,7 @@ class Axis(object):
             phytomer.calculate_aggregated_variables()
             self.Total_Transpiration_turgor += phytomer.Total_Transpiration_turgor * phytomer.nb_replications
             self.green_area_rep += phytomer.green_area * phytomer.nb_replications
+            self.green_area += phytomer.green_area * phytomer.nb_replications
             self.LAI_turgor = self.green_area_rep * parameters.PLANT_PARAMETERS.plant_density
             self.plant_water_content += phytomer.water_content * phytomer.nb_replications
             if phytomer != phytomer.hiddenzone:
@@ -360,13 +363,13 @@ class HiddenZone(Organ):
     INIT_COMPARTMENTS = parameters.HIDDEN_ZONE_INIT_COMPARTMENTS  #: the initial values of compartments and state parameters
 
     def __init__(self, label='hiddenzone', fructan=INIT_COMPARTMENTS.fructan, leaf_enclosed_mstruct=INIT_COMPARTMENTS.leaf_enclosed_mstruct, leaf_pseudo_age=INIT_COMPARTMENTS.leaf_pseudo_age, hiddenzone_age=INIT_COMPARTMENTS.hiddenzone_age, amino_acids=INIT_COMPARTMENTS.amino_acids, proteins=INIT_COMPARTMENTS.proteins, sucrose=INIT_COMPARTMENTS.sucrose,
+                 width_prev = INIT_COMPARTMENTS.width_prev, thickness_prev = INIT_COMPARTMENTS.thickness_prev,
                  temperature=INIT_COMPARTMENTS.temperature, mstruct=INIT_COMPARTMENTS.mstruct, osmotic_water_potential=INIT_COMPARTMENTS.osmotic_water_potential,
                  total_water_potential=INIT_COMPARTMENTS.total_water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length,
-                 leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, contribution=INIT_COMPARTMENTS.contribution, DP=INIT_COMPARTMENTS.DP,
+                 leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, omega=INIT_COMPARTMENTS.omega,
                  turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_content=INIT_COMPARTMENTS.water_content,
                  Tr=INIT_COMPARTMENTS.Tr, green_area=INIT_COMPARTMENTS.green_area, water_influx=INIT_COMPARTMENTS.water_influx, water_outflow=INIT_COMPARTMENTS.water_outflow, cohorts=None, cohorts_replications=None, leaf_Wmax = INIT_COMPARTMENTS.leaf_Wmax, lamina_Lmax = INIT_COMPARTMENTS.lamina_Lmax,
-                 # leaf_Lmax=INIT_COMPARTMENTS.leaf_Lmax, leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, lamina_Lmax=INIT_COMPARTMENTS.lamina_Lmax, sheath_Lmax = INIT_COMPARTMENTS.sheath_Lmax, leaf_Wmax = INIT_COMPARTMENTS.leaf_Wmax, delta_teq = INIT_COMPARTMENTS.delta_teq, res = INIT_COMPARTMENTS.res):
-                 leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, delta_teq = INIT_COMPARTMENTS.delta_teq, res = INIT_COMPARTMENTS.res):
+                 leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, delta_teq = INIT_COMPARTMENTS.delta_teq):
 
         super(HiddenZone, self).__init__(label)
 
@@ -392,9 +395,12 @@ class HiddenZone(Organ):
         self.Tr = Tr                            #: #: mmol H20 m-2 s-1
         self.green_area = green_area            #: m²
         self.delta_teq = delta_teq
-        self.res = res
-
-        # state variables
+        self.length = min(leaf_L, leaf_pseudostem_length)       #: m
+        self.leaf_pseudostem_length = leaf_pseudostem_length    #: m
+        self.width = width                                      #: m
+        self.thickness = thickness                              #: m
+        self.width_prev = width_prev   #: m
+        self.thickness_prev = thickness_prev   #: m
         self.water_content = water_content      #: g H2O
 
         # fluxes from xylem
@@ -408,17 +414,11 @@ class HiddenZone(Organ):
         self.resistance = None  #: resistance of water flux between two organs (MPa s g-1)
         self.extensibility = None    #: MPa-1
         self.turgor_water_potential = turgor_water_potential    #: MPa
-        self.vstorage = None  #: storage portion of the organ volume
-        self.contribution = None    #: -
-        self.DP = DP    #: -
-        # self.lamina_Lmax = lamina_Lmax                     #: m
-        # self.leaf_Wmax = leaf_Wmax                     #: m
+        self.leaf_Lmax = None   #: m
 
         # intermediate variables
-        self.length = min(leaf_L, leaf_pseudostem_length)       #: m
-        self.leaf_pseudostem_length = leaf_pseudostem_length    #: m
-        self.width = width                                      #: m
-        self.thickness = thickness                              #: m
+        self.omega = omega    #: -
+
 
     @property
     def nb_replications(self):
@@ -431,25 +431,23 @@ class HiddenZone(Organ):
         self.Growth = self.calculate_delta_water_content(self.water_influx, self.water_outflow)
 
     #:  Model equations for water flux
-    @staticmethod
-    def calculate_vstorage(leaf_pseudo_age, vstorage):
-
-        """ Storage portion of the Hidden zone volume. The left over is assumed to be xylem vessels.
-
-        :param float leaf_pseudo_age: Hidden zone leaf pseudo age (°Cd)
-
-        :return: vstorage
-        :rtype: float
-        """
-
-        if leaf_pseudo_age <= HiddenZone.PARAMETERS.tend:
-            # vstorage = 2 / (1 + exp(1.5/1E07 * leaf_pseudo_age))
-            # vstorage = 2 / (1 + exp((0.05 * leaf_pseudo_age / 216000))) #: v1
-            vstorage = 2 / (1 + exp((0.045 * leaf_pseudo_age / 216000))) #: v2
-        else:
-            vstorage = vstorage
-
-        return vstorage
+    # @staticmethod
+    # def calculate_vstorage(leaf_pseudo_age, vstorage):
+    #
+    #     """ Storage portion of the Hidden zone volume. The left over is assumed to be xylem vessels.
+    #
+    #     :param float leaf_pseudo_age: Hidden zone leaf pseudo age (°Cd)
+    #
+    #     :return: vstorage
+    #     :rtype: float
+    #     """
+    #
+    #     if leaf_pseudo_age <= HiddenZone.PARAMETERS.tend:
+    #         vstorage = 2 / (1 + exp((0.045 * leaf_pseudo_age / 216000))) #: v2
+    #     else:
+    #         vstorage = vstorage
+    #
+    #     return vstorage
 
 
     @staticmethod
@@ -482,88 +480,28 @@ class HiddenZone(Organ):
         return water_content / parameters.RHO_WATER
 
     @staticmethod
-    def calculate_DP(leaf_pseudo_age, fructan, sucrose, index, mstruct, volume, amino_acids):
+    def calculate_solutes_contribution(fructan, sucrose, amino_acids, volume):
         """
         #: TODO: doc
         """
 
-        # DP = 1 / (0.3 + exp(-3 * leaf_pseudo_age / 2.16E06))  #: Degree of polymerisation of fructan
-        # DP = 1 / (0.4 + exp(-3 * leaf_pseudo_age / 2.16E06))  #: Degree of polymerisation of fructan
-        # DP = 1 / (0.4 + exp(-5.5 * leaf_pseudo_age / 2.16E06))  #: Degree of polymerisation of fructan
-        # DP = 1 / (0.25 + exp(-3 * leaf_pseudo_age / 2.16E06))  #: Degree of polymerisation of fructan
+        solutes = (sucrose + fructan + amino_acids) / (volume * parameters.RHO_WATER)
+        # omega = solutes * 0.00043 + 0.006       # Po = -0.7 MPa
+        # omega = solutes * 0.0004 + 0.0064       # Po = -0.65 MPa
+        # omega = solutes * 0.0003 + 0.0052       # Po = -0.8 MPa
+        # omega = solutes * 0.0004 + 0.0056       # Po = -0.75 MPa
 
-        # #: Michaelis-Menten function
-        # DPmax = 12
-        # K = 35000
-        # C = (sucrose + fructan) / mstruct
-        # DP = (DPmax * C) / (K + C)
+        # omega = solutes * 0.000375 + 0.015       # Po = -0.8 MPa   bis
 
-        # DPmax = 8
-        # K = 3.175E09
-        # C = (sucrose + fructan) / volume
-        # DP = (DPmax * C) / (K + C)
+        # SIGMOID
+        # omega = 0.033 / (0.033 + exp(- solutes / 220))
+        omega = 0.03 / (0.03 + exp(- solutes / 172))
 
-        # TEST EXCEL - FONCTION LINEAIRE
-        # C = (sucrose + fructan) / volume
-        # DP = 3E-09 * C - 0.0242
-        # DP = 2.45E-09 * C
-        # DP = 1E-09 * C - 0.0449  #: TO TRY L7
-        # DP = 1E-09 * C - 0.0098  #: TO TRY ALL LEAF
+        return omega
 
-        # TEST EXCEL - FONCTION EXPONENTIELLE
-        C = (sucrose + fructan) / volume
-        DP = exp(C / 850000000) - 0.935
-        # DP = exp(C / 850000000) - 0.8
-
-        return max(1, DP)
 
     @staticmethod
-    def calculate_contribution(leaf_L, leaf_pseudostem_length, leaf_pseudo_age, index):
-        """ Contribution of organic solutes to the osmotic water potential of the organ
-
-        :return: Contribution
-        :rtype: float
-        """
-
-        #: TODO : mettre en paramètres
-
-        # if leaf_pseudo_age > 0:
-            #: factor DP
-            # contribution = 1 / (0.5 + exp(-3 * log(leaf_pseudo_age / 2E06))) #: v0
-            # contribution = 1 / (0.5 + exp(-2 * log(leaf_pseudo_age / 2E06))) #: v1
-            # contribution = 1 / (0.1 + exp(-3 * log(leaf_pseudo_age / 2.16E06))) #: v2
-            # contribution = 0.3 / (0.1 + exp(-5 * log(leaf_pseudo_age / 2.16E06))) #: v3
-
-            #: factor 1 / DP
-            # contribution = 1.5 / (7 + exp(-10 * log(leaf_pseudo_age / 2160000)))    #: v4
-            # contribution = 2 / (13 + exp(-4 * log(leaf_pseudo_age / 2160000)))    #: v4
-            # contribution = 1.4 / (13 + exp(-4 * log(leaf_pseudo_age / 2160000)))    #: v4
-            # contribution = 1.2 / (13 + exp(-3 * log(leaf_pseudo_age / 2160000)))    #: v4
-
-        # mstruct
-        # else:
-        #     contribution = 0.01807
-        #
-        # return max(0.01807, contribution)
-
-        # volume
-        # if leaf_pseudo_age > 0:
-        #     # contribution = 1 / (2 * (1 + exp(2 * leaf_pseudo_age / 2160000)))    # v1
-        #     # contribution = 1 / (2 * (1 + exp(1.7 * leaf_pseudo_age / 2160000))) # v2
-        #     # contribution = 1 / (2.5 * (1 + exp(1.7 * leaf_pseudo_age / 2160000))) # v3
-        #     contribution = 1 / (3 * (1 + exp(1.2 * leaf_pseudo_age / 2160000))) # v4
-        #
-        # else:
-        #     contribution = 0.17
-        #
-        # return max(0.1, contribution)
-
-        contribution = 0.2
-
-        return contribution
-
-    @staticmethod
-    def calculate_osmotic_water_potential(fructan, sucrose, amino_acids, volume, temperature, vstorage, contribution, DP):
+    def calculate_osmotic_water_potential(fructan, sucrose, amino_acids, volume, temperature, omega):
         """ Osmotic water potential of the organ calculated according to metabolites
 
         :param float fructan: µmol C under the form of fructan
@@ -571,22 +509,25 @@ class HiddenZone(Organ):
         :param float amino_acids: µmol N under the form of amino acids
         :param float volume: (m3)
         :param float temperature: air temperature (°C)
-        :param float vstorage: storage portion of the hiddenzone volume
-        :param float contribution: contribution of organic solutes to osmotic water potential
-        :param float DP: TODO doc
+        :param float omega: TODO doc
 
         :return: Osmotic water potential (MPa)
         :rtype: float
         """
         temperature_K = temperature + parameters.CELSIUS_2_KELVIN
 
-        sucrose = (sucrose * 1E-6) / (parameters.NB_C_SUCROSE * DP) * parameters.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE * DP) * parameters.VANT_HOFF_SUCROSE
+        # sucrose = (sucrose * 1E-6) / (parameters.NB_C_SUCROSE * DP) * parameters.VANT_HOFF_SUCROSE
+        # amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
+        # fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE * DP) * parameters.VANT_HOFF_SUCROSE
 
-        osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (volume * parameters.RHO_WATER * vstorage * contribution)
+        #: update contribution of solutes - 07.2024
+        sucrose = (sucrose * 1E-6) / (parameters.NB_C_SUCROSE)
+        amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO)
+        fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE)
+        osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (omega * volume * parameters.RHO_WATER * parameters.VSTORAGE)
 
-        # return max(-1.0, osmotic_water_potential)
+        # osmotic_water_potential = -0.8
+
         return osmotic_water_potential
 
     @staticmethod
@@ -782,14 +723,13 @@ class HiddenZone(Organ):
         return organ_volume
 
     @staticmethod
-    def calculate_delta_turgor_water_potential(phi, turgor_water_potential, volume, delta_water_content, vstorage):
+    def calculate_delta_turgor_water_potential(phi, turgor_water_potential, volume, delta_water_content):
         """ Delta of turgor water potential of hidden zone.
 
         :param dict [str, float] phi: float phi: dict of cell wall extensibility (MPa). Keys = ['x', 'y', 'z]
         :param float turgor_water_potential: MPa
         :param float volume: m3
         :param float delta_water_content: delta water content integrated over delta t (g)
-        :param float vstorage: storage portion of the hidden zone volume
 
         :return: Delta of turgor water potential (MPa)
         :rtype: float
@@ -800,7 +740,7 @@ class HiddenZone(Organ):
         plastic_component = (phi['x'] + phi['y'] + phi['z'])   #: Plastic irreversible growth
         organ_volume = volume
 
-        delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * vstorage)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
+        delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
@@ -973,8 +913,7 @@ class PhotosyntheticOrganElement(object):
                  Tr = INIT_COMPARTMENTS.Tr, sucrose = INIT_COMPARTMENTS.sucrose, amino_acids = INIT_COMPARTMENTS.amino_acids, proteins = INIT_COMPARTMENTS.proteins, fructan = INIT_COMPARTMENTS.fructan,
                  osmotic_water_potential = INIT_COMPARTMENTS.osmotic_water_potential, total_water_potential = INIT_COMPARTMENTS.total_water_potential,
                  turgor_water_potential = INIT_COMPARTMENTS.turgor_water_potential, water_influx = INIT_COMPARTMENTS.water_influx, Wmax = INIT_COMPARTMENTS.Wmax,
-                 length=INIT_COMPARTMENTS.length, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, water_content = INIT_COMPARTMENTS.water_content, vstorage = INIT_COMPARTMENTS.vstorage,
-                 cohorts=None, cohorts_replications=None):
+                 length=INIT_COMPARTMENTS.length, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, water_content = INIT_COMPARTMENTS.water_content, cohorts=None, cohorts_replications=None):
 
         self.label = label                                      #: the label of the element
         if cohorts is None:  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
@@ -1006,7 +945,6 @@ class PhotosyntheticOrganElement(object):
 
         # state variables
         self.water_content = water_content                     #: g H2O
-        self.vstorage = vstorage
 
         # fluxes to xylem
         self.water_influx = water_influx  #: current flow of water from xylem to organ integrated over delta t (g H2O)
@@ -1105,34 +1043,30 @@ class PhotosyntheticOrganElement(object):
 
 
     @staticmethod
-    def calculate_osmotic_water_potential(sucrose, amino_acids, volume, temperature, vstorage, fructan):
+    def calculate_osmotic_water_potential(sucrose, amino_acids, volume, temperature, fructan):
         """ Osmotic water potential of the hiddenzone calculated according to metabolites
 
         :param float sucrose: µmol C under the form of sucrose
         :param float amino_acids: µmol N under the form of amino acids
         :param float volume: (m3)
         :param float temperature: air temperature (°C)
-        :param float vstorage: storage portion of the element volume
         :param float fructan: µmol C under the form of fructan
 
         :return: Osmotic water potential (MPa)
         :rtype: float
 
-        TODO : DP et contribution dans parameters.py
+        TODO : contribution dans parameters.py
         """
         temperature_K = temperature + parameters.CELSIUS_2_KELVIN
 
-        sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE) * parameters.VANT_HOFF_SUCROSE
-        amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO) * parameters.VANT_HOFF_AMINO_ACIDS
-        DP = 2  #: Degree of polymerisation of fructan
-        fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE * DP) * parameters.VANT_HOFF_SUCROSE   # TODO : quels paramètres ?
-
+        sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE)
+        amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO)
+        fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE)
 
         # Contribution des solutés organiques au potentiel osmotique (Baca Cabrera et al., 2020; Bajji et al., 2000; Thomas, 1991)
-        # contribution = 0.3
-        contribution = 0.1
+        contribution = 0.3
 
-        osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (volume * parameters.RHO_WATER * vstorage * contribution)
+        osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (volume * parameters.RHO_WATER * parameters.VSTORAGE * contribution)
 
         return osmotic_water_potential
 
@@ -1176,7 +1110,7 @@ class PhotosyntheticOrganElement(object):
 
 
     @staticmethod
-    def calculate_delta_turgor_water_potential(volume, delta_water_content, vstorage):
+    def calculate_delta_turgor_water_potential(volume, delta_water_content):
         """ Delta of turgor water potential according to organ volume and elasticity.
         Extensibility (phi) is supposed to be 0 as this tissue is mature (growth completed).
 
@@ -1190,7 +1124,7 @@ class PhotosyntheticOrganElement(object):
         elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
         plastic_component = 0   #: Plastic irreversible growth (MPa)
         organ_volume = volume
-        delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * vstorage)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
+        delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
