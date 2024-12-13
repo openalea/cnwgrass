@@ -65,7 +65,7 @@ HIDDENZONE_INDEXES = turgorgrowth_simulation.Simulation.HIDDENZONE_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
 HIDDENZONE_T_INDEXES = turgorgrowth_simulation.Simulation.HIDDENZONE_T_INDEXES
 #: hidden zones post-processing variables
-HIDDENZONE_POSTPROCESSING_VARIABLES = ['conc_solutes_vol', 'conc_solutes_mass', 'conc_fructan_vol', 'conc_sucrose_vol']
+HIDDENZONE_POSTPROCESSING_VARIABLES = ['conc_solutes_vol', 'conc_solutes_mass', 'LER']
 HIDDENZONE_RUN_VARIABLES_ADDITIONAL = []
 #: concatenation of :attr:`HIDDENZONE_T_INDEXES`, :attr:`HIDDENZONE_RUN_VARIABLES <turgorgrowth.simulation.Simulation.HIDDENZONE_RUN_VARIABLES>` and :attr:`HIDDENZONE_POSTPROCESSING_VARIABLES`
 HIDDENZONE_RUN_POSTPROCESSING_VARIABLES = HIDDENZONE_T_INDEXES + turgorgrowth_simulation.Simulation.HIDDENZONE_RUN_VARIABLES + HIDDENZONE_RUN_VARIABLES_ADDITIONAL + HIDDENZONE_POSTPROCESSING_VARIABLES
@@ -106,34 +106,19 @@ class HiddenZone:
         pass
 
     @staticmethod
-    def calculate_conc_sucrose_vol(sucrose, volume):
-        """Dry mass
+    def calculate_LER(leaf_L, init_leaf_L):
+        """Leaf elongation phase in phase II
 
         :param float sucrose: Amount of sucrose (µmol` C)
-        :param float volume: Volume (m3)
+        :param float amino_acids: Amount of amino acids (µmol` N)
 
-        :return: Sucrose volumic concentration (µmol m-3)
+        :return: Leaf elongation rate (mm h-1)
         :rtype: float
         """
 
-        conc_sucrose_vol = sucrose / volume
+        LER = (leaf_L - init_leaf_L ) * 1E03
 
-        return conc_sucrose_vol
-
-    @staticmethod
-    def calculate_conc_fructan_vol(fructan, volume):
-        """Dry mass
-
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float volume: Volume (m3)
-
-        :return: Sucrose volumic concentration (µmol m-3)
-        :rtype: float
-        """
-
-        conc_fructan_vol = fructan / volume
-
-        return conc_fructan_vol
+        return LER
 
     @staticmethod
     def calculate_conc_solutes_vol(sucrose, fructan, amino_acids, volume):
@@ -148,7 +133,7 @@ class HiddenZone:
         :rtype: float
         """
 
-        conc_solutes_vol = (sucrose + fructan + amino_acids) * 1E-06 / volume
+        conc_solutes_vol = (sucrose / turgorgrowth_parameters.NB_C_SUCROSE + fructan / turgorgrowth_parameters.NB_C_SUCROSE + amino_acids / turgorgrowth_parameters.AMINO_ACIDS_N_RATIO) * 1E-06 / (volume * turgorgrowth_parameters.VSTORAGE)
 
         return conc_solutes_vol
 
@@ -245,9 +230,8 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     # hidden zones
     if hiddenzones_df is not None:
         hiddenzones_df.loc[:, 'conc_solutes_mass'] = HiddenZone.calculate_conc_solutes_mass(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['amino_acids'], hiddenzones_df['mstruct'])
-        hiddenzones_df.loc[:, 'conc_fructan_vol'] = HiddenZone.calculate_conc_fructan_vol(hiddenzones_df['fructan'], hiddenzones_df['volume'])
-        hiddenzones_df.loc[:, 'conc_sucrose_vol'] = HiddenZone.calculate_conc_sucrose_vol(hiddenzones_df['sucrose'], hiddenzones_df['volume'])
         hiddenzones_df.loc[:, 'conc_solutes_vol'] = HiddenZone.calculate_conc_solutes_vol(hiddenzones_df['fructan'], hiddenzones_df['sucrose'], hiddenzones_df['amino_acids'], hiddenzones_df['volume'])
+        hiddenzones_df.loc[:, 'LER'] = HiddenZone.calculate_LER(hiddenzones_df['leaf_L'], hiddenzones_df['init_leaf_L'])
 
         pp_hiddenzones_df = pd.concat([hiddenzones_df, pd.DataFrame(columns=HIDDENZONE_POSTPROCESSING_VARIABLES)], sort=False)
         pp_hiddenzones_df = pp_hiddenzones_df.reindex(columns=HIDDENZONE_RUN_POSTPROCESSING_VARIABLES, copy=False)
@@ -326,14 +310,13 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                             x_label=x_label,
                                                             y_label=variable_label,
                                                             colors=[colors[i - 1] for i in elements_df.metamer.unique().tolist()],
-                                                            filters={'organ': org_ph},
+                                                            filters={'organ': org_ph, 'axis': 'MS'},
                                                             plot_filepath=os.path.join(graphs_dirpath, graph_name),
                                                             explicit_label=False)
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = {'conc_solutes_vol': u'conc_solutes_vol', 'conc_solutes_mass': u'conc_solutes_mass', 'conc_fructan_vol': u'conc_fructan_vol', 'conc_sucrose_vol': u'conc_sucrose_vol',
-                                        'omega': u'Solutes contribution to osmoregulation', 'fructan': u'Fructan',
+        graph_variables_hiddenzones = {'delta_hiddenzone_dimensions_plastic': u'dl / dt plastic (mm h-1)', 'LER': u'LER in phase II(mm h-1)', 'conc_solutes_vol': u'conc_solutes_vol', 'conc_solutes_mass': u'conc_solutes_mass', 'fructan': u'Fructan',
                                        'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
                                         'phi_length': u'Extensibility parameter  for length (Mpa-1 h-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1 h-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1 h-1)',
                                         'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)', 'hiddenzone_age': u'Age (s)',
