@@ -363,7 +363,7 @@ class HiddenZone(Organ):
     INIT_COMPARTMENTS = parameters.HIDDEN_ZONE_INIT_COMPARTMENTS  #: the initial values of compartments and state parameters
 
     def __init__(self, label='hiddenzone', fructan=INIT_COMPARTMENTS.fructan, leaf_enclosed_mstruct=INIT_COMPARTMENTS.leaf_enclosed_mstruct, leaf_pseudo_age=INIT_COMPARTMENTS.leaf_pseudo_age, hiddenzone_age=INIT_COMPARTMENTS.hiddenzone_age, amino_acids=INIT_COMPARTMENTS.amino_acids, proteins=INIT_COMPARTMENTS.proteins, sucrose=INIT_COMPARTMENTS.sucrose,
-                 width_prev = INIT_COMPARTMENTS.width_prev, thickness_prev = INIT_COMPARTMENTS.thickness_prev, init_leaf_L = INIT_COMPARTMENTS.init_leaf_L,
+                 width_prev = INIT_COMPARTMENTS.width_prev, thickness_prev = INIT_COMPARTMENTS.thickness_prev, init_leaf_L = INIT_COMPARTMENTS.init_leaf_L, length_hz_En = INIT_COMPARTMENTS.length_hz_En,
                  temperature=INIT_COMPARTMENTS.temperature, mstruct=INIT_COMPARTMENTS.mstruct, osmotic_water_potential=INIT_COMPARTMENTS.osmotic_water_potential,
                  total_water_potential=INIT_COMPARTMENTS.total_water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length,
                  leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, omega=INIT_COMPARTMENTS.omega,
@@ -402,6 +402,7 @@ class HiddenZone(Organ):
         self.width_prev = width_prev   #: m
         self.thickness_prev = thickness_prev   #: m
         self.init_leaf_L = init_leaf_L   #: m
+        self.length_hz_En = length_hz_En   #: m
         self.water_content = water_content      #: g H2O
 
         # fluxes from xylem
@@ -416,6 +417,7 @@ class HiddenZone(Organ):
         self.extensibility = None    #: MPa-1
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.leaf_Lmax = None   #: m
+        self.leaf_Wmax = leaf_Wmax   #: m
 
         # intermediate variables
         self.omega = omega    #: -
@@ -594,7 +596,14 @@ class HiddenZone(Organ):
         # conc_solutes_eff = (290 / (0.675 + exp(-1 * conc_solutes / 60)))   # test beta 6bis
         # conc_solutes_eff = (290 / (0.675 + exp(-1.5 * conc_solutes / 60)))   # test beta 8
 
+        # v9
         # conc_solutes_eff = (312.5 / (0.8 + exp(-3.5 * conc_solutes / 100)))   # test beta 9
+        # v9 - v2
+        conc_solutes_eff = (305 / (0.8 + exp(-3.25 * conc_solutes / 100)))   # test beta 9
+        # v9 - v3
+        # conc_solutes_eff = (305 / (0.8 + exp(-5 * conc_solutes / 500)))   # test beta 9
+        # conc_solutes_eff = (300 / (0.675 + exp(-7 * conc_solutes / 500)))   # test beta 9
+
         # conc_solutes_eff = (280 / (0.725 + exp(-4 * conc_solutes / 100)))   # test beta 10
 
         # conc_solutes_eff = (270 / (0.7 + exp(-4.5 * conc_solutes / 100)))   # test beta 11 (1) init
@@ -609,7 +618,27 @@ class HiddenZone(Organ):
 
         # conc_solutes_eff = (600 / (1.5 + exp(-10 * conc_solutes / 300)))   # test beta 11 TODO : lower delta
 
-        conc_solutes_eff = (600 / (1.25 + exp(-7.5 * conc_solutes / 1500)))   # test beta 11 TODO : lower delta
+        # conc_solutes_eff = (600 / (1.25 + exp(-7.5 * conc_solutes / 1500)))   # test beta 11 lower delta -> A
+        # conc_solutes_eff = (600 / (1.25 + exp(-3.75 * conc_solutes / 1500)))   # test beta 11 lower delta (2) -> B
+
+        # -------------
+        # conc_solutes_eff = (282.5 / (0.70 + exp(-9 * conc_solutes / 1500)))   # test beta 11 -> C
+        # conc_solutes_eff = (256.5 / (0.70 + exp(-9 * conc_solutes / 1500)))   # test beta 11 -> C
+
+        # conc_solutes_eff = (260 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C (2)
+
+        # 50%
+        # 0.775 - 0.1
+        # conc_solutes_eff = (235 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
+        # 0.8 - 0.125
+        # conc_solutes_eff = (230 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
+        # 0.725 - 0.1
+        # conc_solutes_eff = (230 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
+        # Wmax 0.775 - 0.1
+        conc_solutes_eff = (226 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
+
+        # TEST
+        # conc_solutes_eff = (216 / (0.5 + exp(-8 * conc_solutes / 1250)))   # test beta 11 -> C
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -794,43 +823,43 @@ class HiddenZone(Organ):
 
             # TEST 2
 
-            if age <= HiddenZone.PARAMETERS.tend:
-                # Function of Coussement et al. (2018)
-                beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (
-                            HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
-                                      * ((age - HiddenZone.PARAMETERS.tbase) / (
-                                    HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
-                                      ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (
-                                                  HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-            else:
-                beta_function_norm = 0
+            # if age <= HiddenZone.PARAMETERS.tend:
+            #     # Function of Coussement et al. (2018)
+            #     beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (
+            #                 HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
+            #                           * ((age - HiddenZone.PARAMETERS.tbase) / (
+            #                         HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
+            #                           ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (
+            #                                       HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
+            # else:
+            #     beta_function_norm = 0
 
             # TEST 3
 
-            # if phi_init_dimensions == 'x':      #: width
-            #     if age <= HiddenZone.PARAMETERS.te:
-            #         # Function of Coussement et al. (2018)
-            #         beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.te - age) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm))
-            #                               * ((age - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb)) **
-            #                               ((HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm)))
-            #     else:
-            #         beta_function_norm = 0
-            # if phi_init_dimensions == 'y':      #: thickness
-            #     if age <= HiddenZone.PARAMETERS.te:
-            #         # Function of Coussement et al. (2018)
-            #         beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.te - age) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm))
-            #                               * ((age - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb)) **
-            #                               ((HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm)))
-            #     else:
-            #         beta_function_norm = 0
-            # if phi_init_dimensions == 'z':      #: length
-            #     if age <= HiddenZone.PARAMETERS.tend:
-            #         # Function of Coussement et al. (2018)
-            #         beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
-            #                               * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
-            #                               ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-            #     else:
-            #         beta_function_norm = 0
+            if phi_init_dimensions == 'x':      #: width
+                if age <= HiddenZone.PARAMETERS.te:
+                    # Function of Coussement et al. (2018)
+                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.te - age) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm))
+                                          * ((age - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb)) **
+                                          ((HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm)))
+                else:
+                    beta_function_norm = 0
+            if phi_init_dimensions == 'y':      #: thickness
+                if age <= HiddenZone.PARAMETERS.te:
+                    # Function of Coussement et al. (2018)
+                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.te - age) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm))
+                                          * ((age - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb)) **
+                                          ((HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm)))
+                else:
+                    beta_function_norm = 0
+            if phi_init_dimensions == 'z':      #: length
+                if age <= HiddenZone.PARAMETERS.tend:
+                    # Function of Coussement et al. (2018)
+                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
+                                          * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
+                                          ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
+                else:
+                    beta_function_norm = 0
 
             phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t * (delta_teq / delta_t)
 

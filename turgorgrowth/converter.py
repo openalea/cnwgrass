@@ -42,6 +42,7 @@ TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING = {model.Organ: 'organs', model
 
 #: the mapping of the name of each element, from Dataframe to Turgor-Growth
 DATAFRAME_TO_TURGORGROWTH_ELEMENTS_NAMES_MAPPING = {'HiddenElement': 'enclosed_element', 'StemElement': 'exposed_element', 'LeafElement1': 'exposed_element'}
+DATAFRAME_TO_TURGORGROWTH_LEAF_NAMES_MAPPING = {'LeafElement1': 'exposed_element'}
 
 
 def from_dataframes(axes_inputs = None, hiddenzones_inputs=None, elements_inputs=None, organs_inputs=None):

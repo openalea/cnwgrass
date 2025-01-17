@@ -317,12 +317,12 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
     # 2) Hidden zones
     if hiddenzones_df is not None:
         graph_variables_hiddenzones = {'delta_hiddenzone_dimensions_plastic': u'dl / dt plastic (mm h-1)', 'LER': u'LER in phase II(mm h-1)', 'conc_solutes_vol': u'conc_solutes_vol', 'conc_solutes_mass': u'conc_solutes_mass', 'fructan': u'Fructan',
-                                       'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
+                                       'length_hz_En' : u'Length of HZ after En (m)', 'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
                                         'phi_length': u'Extensibility parameter  for length (Mpa-1 h-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1 h-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1 h-1)',
                                         'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)', 'hiddenzone_age': u'Age (s)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',
                                        'turgor_water_potential': u'Turgor water potential (MPa)', 'water_content': u'Water content (g)', 'water_influx': u'Water flow Xylem (g)',
-                                       'resistance': u'Resistance (MPa s g$^{-1}$)', 'thickness': u'Thickness (m)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids', 'WC_mstruct': u'ratio WC_mstruct'}
+                                       'resistance': u'Resistance (MPa s g$^{-1}$)', 'thickness': u'Thickness (m)', 'volume': u'Volume (m3)', 'sucrose': u'Sucrose', 'proteins': u'Proteins', 'amino_acids': u'Amino acids', 'WC_mstruct': u'ratio WC_mstruct', 'leaf_Wmax': u'Maximal leaf width (m)'}
     
         for variable_name, variable_label in graph_variables_hiddenzones.items():
             graph_name = variable_name + '_hz' + '.PNG'
