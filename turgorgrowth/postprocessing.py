@@ -137,6 +137,7 @@ class HiddenZone:
 
         return conc_solutes_vol
 
+
     @staticmethod
     def calculate_conc_solutes_mass(fructan, sucrose, amino_acids, mstruct):
         """Massic concentration of solutes used for osmotic water potential calculation

@@ -728,16 +728,27 @@ class Simulation(object):
                             # hiddenzone.width = hiddenzone.width_prev
                             # hiddenzone.thickness = hiddenzone.thickness_prev
 
-                            # width_ratio = 0.7   # (C)
-                            # thickness_ratio = 0.225   # (C)
+                            width_ratio = 0.7
+                            # thickness_ratio = 0.125
+                            thickness_ratio = 0.2
 
-                            width_ratio = 0.775   # (C)
-                            thickness_ratio = 0.2   # (C)
-                            # thickness_ratio = 0.1   # (C)
+                            # thickness_ratio = 0.12
+                            # linear function
+                            # width_ratio = 0.05 * phytomer.index + 0.25      # croissante v1
+                            # width_ratio = 0.0857 * phytomer.index + 0.0571      # croissante v2
+                            # thickness_ratio = 0.17   # (C)
+                            # thickness_ratio = 0.0025 * phytomer.index + 0.165      # croissante v3
+
+                            # polynomial function
+                            # width_ratio = -0.0021 * phytomer.index**3 + 0.0355 * phytomer.index**2 - 0.1527 * phytomer.index + 0.75     # polynomial
+                            # thickness_ratio = -0.0009 * phytomer.index**3 + 0.0175 * phytomer.index**2 -0.1 * phytomer.index + 0.35   # polynomial
+
+                            # hiddenzone.width = parameters.HIDDEN_ZONE_PARAMETERS.leaf_Wmax_Marion[phytomer.index]
 
                             hiddenzone.width = hiddenzone.leaf_L * width_ratio
                             hiddenzone.thickness = hiddenzone.leaf_L * thickness_ratio
                             hiddenzone.leaf_Wmax = hiddenzone.width
+                            # hiddenzone.thickness = 0.00055
 
                             #: Volume & water content as function of dimensions
                             hiddenzone.volume = hiddenzone.length * hiddenzone.width * hiddenzone.thickness
@@ -857,7 +868,7 @@ class Simulation(object):
                         if hiddenzone.leaf_pseudo_age > 0:  #: After previous leaf emergence
                             #: Derivatives
                             #: Delta turgor pressure
-                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz)
+                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz, hiddenzone.length, hiddenzone.thickness, hiddenzone.width)
                             #: Dimensions with plastic and elastic deformation
                             hiddenzone_dimensions = {'length': hiddenzone.length, 'width': hiddenzone.width, 'thickness': hiddenzone.thickness}
                             delta_hiddenzone_dimensions_plastic = hiddenzone.calculate_delta_organ_dimensions_plastic(hiddenzone.turgor_water_potential, phi, hiddenzone_dimensions)
@@ -872,8 +883,6 @@ class Simulation(object):
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
                                 # Elastic deformation
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width']
-                                hiddenzone.leaf_Wmax += delta_hiddenzone_dimensions_plastic['width']
-                                # y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width'] + delta_hiddenzone_dimensions_plastic['width']
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions_elastic['thickness']
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions_elastic['length']
 
@@ -882,10 +891,10 @@ class Simulation(object):
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']] = delta_turgor_water_potential
                                 #  Plastic deformation
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions_elastic['thickness'] + delta_hiddenzone_dimensions_plastic['thickness']
-                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width'] + delta_hiddenzone_dimensions_plastic['width']
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions_elastic['length'] + delta_hiddenzone_dimensions_plastic['length']
-                                hiddenzone.leaf_Wmax += delta_hiddenzone_dimensions_plastic['width']
+                                y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width'] + delta_hiddenzone_dimensions_plastic['width']
 
+                            hiddenzone.leaf_Wmax += delta_hiddenzone_dimensions_plastic['width']
                             hiddenzone.organ_volume = hiddenzone.calculate_organ_volume(hiddenzone_dimensions)
                             hiddenzone.WC_mstruct = hiddenzone.water_content / (hiddenzone.water_content + hiddenzone.mstruct) * 100
 

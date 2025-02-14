@@ -543,14 +543,34 @@ class HiddenZone(Organ):
         # conc_solutes = (fructan + sucrose + amino_acids) / volume * parameters.VSTORAGE
         conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
 
+        # TEST 04.02.2025
+        # conc_solutes_eff = 360 / (1 + exp(- conc_solutes * 0.007))  # (1)
+        # conc_solutes_eff = 327 / (0.92 + exp(- conc_solutes * 0.009))  # (3)
+        # conc_solutes_eff = 320 / (0.95 + exp(- conc_solutes * 0.0125))  # (2020)
+        # conc_solutes_eff = 356 / (1 + exp(- 6 * conc_solutes / 1000))  # (v4 x 0.7 y 0.175)
+        conc_solutes_eff = 270 / (1 + exp(- 6 * conc_solutes / 1000))  # (v8 x 0.7 y 0.2)
+        # conc_solutes_eff = 330 / (1 + exp(- 6 * conc_solutes / 800))  # (v8 x 0.7 y 0.185 70% GAMMA 0.2)
+        # conc_solutes_eff = 185 / (0.45 + exp(- 6 * conc_solutes / 800))  # (v3 x v1 x 0.18)
+
+        #: 6T
+        # conc_solutes_eff = 180 / (0.4 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.185 100% GAMMA 0.2)
+        #: 20T
+        # conc_solutes_eff = 175 / (0.475 + exp(- 8 * conc_solutes / 700))  # (v8 x 0.7 y 0.185 100%  GAMMA 0.2)
+
         # v1 : conc_solutes_eff = 600 / (1 + exp(- conc_solutes / 30))
         # v2 : conc_solutes_eff = 500 / (1 + exp(- conc_solutes / 50))
-        # v3 : conc_solutes_eff = 250 / (0.1 + exp(- conc_solutes / 200))
+        # conc_solutes_eff = 250 / (0.1 + exp(- conc_solutes / 200))  # v3
+
+        # conc_solutes_eff = 175 / (0.1 + exp(- conc_solutes / 200))  # v3
+        # conc_solutes_eff = 200 / (0.1 + exp(- 7 * conc_solutes / 800))  # v3
+        # conc_solutes_eff = 252 / (0.6 + exp(- 8 * conc_solutes / 250))  # v3 12T
+        # conc_solutes_eff = 230 / (0.8 + exp(- 8 * conc_solutes / 210))  # v3 20T
+
         # v4 : conc_solutes_eff = 275 / (0.1 + exp(- conc_solutes / 200))
         # v5 : conc_solutes_eff = 275 / (0.1 + exp(- conc_solutes / 300))
         # v6 : conc_solutes_eff = 275 / (0.1 + exp(- conc_solutes / 150))
         # v7 : conc_solutes_eff = 350 / (0.1 + exp(- conc_solutes / 250))
-        # v8 : conc_solutes_eff = solutes_eff = 250 / (0.1 + exp(- conc_solutes / 175))
+        # v8 : conc_solutes_eff = 250 / (0.1 + exp(- conc_solutes / 175))
         # v9 : conc_solutes_eff = 195 / (0.1 + exp(- 2 * conc_solutes / 175))
 
         # v9
@@ -599,7 +619,7 @@ class HiddenZone(Organ):
         # v9
         # conc_solutes_eff = (312.5 / (0.8 + exp(-3.5 * conc_solutes / 100)))   # test beta 9
         # v9 - v2
-        conc_solutes_eff = (305 / (0.8 + exp(-3.25 * conc_solutes / 100)))   # test beta 9
+        # conc_solutes_eff = (305 / (0.8 + exp(-3.25 * conc_solutes / 100)))   # test beta 9
         # v9 - v3
         # conc_solutes_eff = (305 / (0.8 + exp(-5 * conc_solutes / 500)))   # test beta 9
         # conc_solutes_eff = (300 / (0.675 + exp(-7 * conc_solutes / 500)))   # test beta 9
@@ -610,13 +630,6 @@ class HiddenZone(Organ):
         # conc_solutes_eff = (270 / (0.7 + exp(-5 * conc_solutes / 100)))   # test beta 11 (1)
         # conc_solutes_eff = (190 / (0.475 + exp(-5.5 * conc_solutes / 100)))   # test beta 11 (2)
         # conc_solutes_eff = (190 / (0.475 + exp(-5.35 * conc_solutes / 100)))   # test beta 11 (3)
-
-        # conc_solutes_eff = (194 / (0.5 + exp(-5.5 * conc_solutes / 100)))   # test beta 11  TODO : minimum
-        # conc_solutes_eff = (190 / (0.475 + exp(-5.3 * conc_solutes / 100)))   # test beta 11 TODO : vitesse de décroissance
-        # conc_solutes_eff = (185 / (0.485 + exp(-5.4 * conc_solutes / 100)))   # test beta 11 TODO : maximum
-        # conc_solutes_eff = (185 / (0.485 + exp(-5 * conc_solutes / 100)))   # test beta 11 TODO : maximum x vitesse de décroissance
-
-        # conc_solutes_eff = (600 / (1.5 + exp(-10 * conc_solutes / 300)))   # test beta 11 TODO : lower delta
 
         # conc_solutes_eff = (600 / (1.25 + exp(-7.5 * conc_solutes / 1500)))   # test beta 11 lower delta -> A
         # conc_solutes_eff = (600 / (1.25 + exp(-3.75 * conc_solutes / 1500)))   # test beta 11 lower delta (2) -> B
@@ -630,15 +643,40 @@ class HiddenZone(Organ):
         # 50%
         # 0.775 - 0.1
         # conc_solutes_eff = (235 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
-        # 0.8 - 0.125
-        # conc_solutes_eff = (230 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
-        # 0.725 - 0.1
-        # conc_solutes_eff = (230 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
-        # Wmax 0.775 - 0.1
-        conc_solutes_eff = (226 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
 
         # TEST
-        # conc_solutes_eff = (216 / (0.5 + exp(-8 * conc_solutes / 1250)))   # test beta 11 -> C
+        # conc_solutes_eff = (240 / (0.5 + exp(-8 * conc_solutes / 1250)))   # test beta 11 -> C
+
+        # Wmax parameters
+        # conc_solutes_eff = (245 / (0.6 + exp(-7 * conc_solutes / 1500)))   # config (2) = (20T) puis (2)
+        # conc_solutes_eff = (245 / (0.6 + exp(-7 * conc_solutes / 900)))   # = (1)
+
+        # Wmax function
+        # conc_solutes_eff = (245 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test décroissance
+        # conc_solutes_eff = (232.5 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test croissance
+        # conc_solutes_eff = (240 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test Ljutovac
+
+        # delta Po
+        # conc_solutes_eff = (304 / (0.9 + exp(-8 * conc_solutes / 400)))   # test beta 11 -> C
+        # conc_solutes_eff = (356 / (1 + exp(-6 * conc_solutes / 1000)))   # test beta 11 -> C
+        # conc_solutes_eff = (342.5 / (1 + exp(-6.5 * conc_solutes / 800)))   # test beta 11 -> C
+        # conc_solutes_eff = (345 / (1.1 + exp(-6.5 * conc_solutes / 600)))   # test beta 11 -> C
+
+        # delta Po x croissante
+        # conc_solutes_eff = (355 / (1 + exp(-6 * conc_solutes / 1000)))   # test beta 11 -> C
+        # v2
+        # conc_solutes_eff = (335 / (1 + exp(-5 * conc_solutes / 900)))   # test beta 11 -> C
+        # A
+        # conc_solutes_eff = (250 / (0.7 + exp(-6 * conc_solutes / 1000)))   # test beta 11 -> C
+        # B
+        # conc_solutes_eff = (255 / (0.65 + exp(-6 * conc_solutes / 800)))   # test beta 11 -> C
+
+        # polynomial
+        # conc_solutes_eff = (335 / (1 + exp(-4 * conc_solutes / 600)))   # test beta 11 -> C
+        # conc_solutes_eff = (315 / (0.9 + exp(-6 * conc_solutes / 600)))   # test beta 11 -> C
+
+        # polynomial bis
+        # conc_solutes_eff = (340 / (1.1 + exp(-7 * conc_solutes / 600)))   # test beta 11 -> C
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -882,7 +920,7 @@ class HiddenZone(Organ):
         return organ_volume
 
     @staticmethod
-    def calculate_delta_turgor_water_potential(phi, turgor_water_potential, volume, delta_water_content):
+    def calculate_delta_turgor_water_potential(phi, turgor_water_potential, volume, delta_water_content, length, thickness, width):
         """ Delta of turgor water potential of hidden zone.
 
         :param dict [str, float] phi: float phi: dict of cell wall extensibility (MPa). Keys = ['x', 'y', 'z]
@@ -899,8 +937,10 @@ class HiddenZone(Organ):
         plastic_component = (phi['x'] + phi['y'] + phi['z'])   #: Plastic irreversible growth
 
         organ_volume = volume
+        # organ_volume = length * thickness * width
 
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
+        # delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 

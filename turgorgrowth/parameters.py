@@ -175,30 +175,43 @@ class HiddenZoneParameters(OrganParameters):
         #: Calibration 06.24
         self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
+        # TEST 04.02.2025
+        # self.phi_initial = {'x': 18E-09, 'y': 18E-09, 'z': 32.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # (3)
+        # self.phi_initial = {'x': 33E-09, 'y': 33E-09, 'z': 33E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # (2020)
+        # self.phi_initial = {'x': 30E-09, 'y': 30E-09, 'z': 32E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # V4 x 0.7 y 0.175
+        # self.phi_initial = {'x': 19E-09, 'y': 13E-09, 'z': 39E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # V8 x 0.7 y 0.2
+        self.phi_initial = {'x': 18E-09, 'y': 17.5E-09, 'z': 39E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # V8 x 0.7 y 0.185 GAMMA 0.2 70 %
+        # self.phi_initial = {'x': 20E-09, 'y': 17.5E-09, 'z': 35E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # V3 x_ratio v1 et y_ratio 0.18
+        # self.phi_initial = {'x': 17E-09, 'y': 13E-09, 'z': 37E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 0.05E-06, 'y': 0.04E-06, 'z': 34E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+
+        # V8 x 0.7 y 0.185 100 % VOLUME * GAMMA 0.2
+        # self.phi_initial = {'x': 29E-09, 'y': 15E-09, 'z': 29E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # 1000
+        # self.phi_initial = {'x': 0.041E-06, 'y': 11E-09, 'z': 33E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 0.050E-06, 'y': 10E-09, 'z': 30E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # 100
+        # self.phi_initial = {'x': 5E-09, 'y': 5E-09, 'z': 14E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+
         # LER CALIBRATION
         # self.phi_initial = {'x': 1E-06, 'y': 1E-06, 'z': 20E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # self.phi_initial = {'x': 3E-06, 'y': 1E-06, 'z': 18E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
-        # PHYLLOCHRON CALIBRATION
-        # 2
-        # self.phi_initial = {'x': 5E-06, 'y': 1E-06, 'z': 30E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # beta
-        # self.phi_initial = {'x': 12E-06, 'y': 1E-06, 'z': 31.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-
         # BETA
         # self.phi_initial = {'x': 14E-06, 'y': 3E-06, 'z': 33E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-
-        # v5
-        # self.phi_initial = {'x': 12.5E-06, 'y': 3E-06, 'z': 24E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # beta
-        # self.phi_initial = {'x': 13.5E-06, 'y': 3E-06, 'z': 27E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # thickness & xy_ratio
         #Po v9
         # self.phi_initial = {'x': 20E-06, 'y': 5E-06, 'z': 30E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # v9 - v2
         # self.phi_initial = {'x': 3E-08, 'y': 2E-08, 'z': 27.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        self.phi_initial = {'x': 2.5E-08, 'y': 1E-08, 'z': 24.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 2.5E-08, 'y': 1E-08, 'z': 24.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # PO INIT
         # self.phi_initial = {'x': 15.5E-06, 'y': 5E-06, 'z': 26.2E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
@@ -235,18 +248,43 @@ class HiddenZoneParameters(OrganParameters):
         # self.phi_initial = {'x': 140E-06, 'y': 130E-06, 'z': 260E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # 50% - 0.775-0.1 - Wmax
-        self.phi_initial = {'x': 162E-09, 'y': 130E-09, 'z': 192E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 120E-09, 'y': 120E-09, 'z': 100E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # TEST PO
-        # self.phi_initial = {'x': 5E-08, 'y': 5E-08, 'z': 75E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 1E-08, 'y': 3E-08, 'z': 45E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # BETA
+        # self.phi_initial = {'x': 5E-09, 'y': 3E-09, 'z': 10E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # Wmax parameters
+        # self.phi_initial = {'x': 12E-09, 'y': 40E-09, 'z': 120E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # Wmax function
+        # self.phi_initial = {'x': 120E-09, 'y': 120E-09, 'z': 100E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 50E-09, 'y': 120E-09, 'z': 110E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 1E-06, 'y': 10E-06, 'z': 140E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # delta Po
+        # self.phi_initial = {'x': 18E-09, 'y': 25E-09, 'z': 38E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 30E-09, 'y': 20E-09, 'z': 50E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # delta Po x croissante
+        # self.phi_initial = {'x': 45E-09, 'y': 20E-09, 'z': 60E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # polynomial
+        # self.phi_initial = {'x': 20E-09, 'y': 20E-09, 'z': 50E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # polynomial bis
+        # self.phi_initial = {'x': 25E-09, 'y': 20E-09, 'z': 45E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+
+        # v3
+        # 12T
+        # self.phi_initial = {'x': 8E-08, 'y': 8E-07, 'z': 18E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 8E-08, 'y': 4E-06, 'z': 25E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # 20T
+        # self.phi_initial = {'x': 9E-08, 'y': 6E-06, 'z': 35E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 2E-08, 'y': 6E-06, 'z': 35E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # Length
         self.tend = 2160000  #: en of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         self.tmax = 1473120  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         self.tbase = -822960  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         # Width & thickness
-        self.te = self.tend * 50 / 100  #: en of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tm = self.tmax * 50 / 100  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tb = self.tbase * 50 / 100  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.te = self.tend * 100 / 100  #: en of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.tm = self.tmax * 100 / 100  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.tb = self.tbase * 100 / 100  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
 
         # Maximal leaf length
         self.leaf_Lmax_MAX = 0.45  #: Maximum leaf_Lmax (m) (Gauthier et al., 2021)
@@ -260,8 +298,7 @@ class HiddenZoneParameters(OrganParameters):
         self.RATIO_MSTRUCT_DM = 0.8  #: Ratio mstruct/dry matter (dimensionless). From growthwheat model.
         self.SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
         self.OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
-        self.GAMMA = 0.3    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa)
-
+        self.GAMMA = 0.2    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneParameters` for current process
 HIDDEN_ZONE_PARAMETERS = HiddenZoneParameters()
@@ -286,19 +323,16 @@ class HiddenZoneInitCompartments(object):
 
         self.delta_teq = 3600   #: s     #: time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010). Value from inputs file
 
-        self.SRWC = 80  #: %
-        # self.volume = self.mstruct / RATIO_MSTRUCT_DM * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME  #: m3
-        # self.water_content = ((self.mstruct / RATIO_MSTRUCT_DM) * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME) * RHO_WATER  #: g
-        self.osmotic_water_potential = -0.8
-        self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
-        self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential   #: MPa
-
         self.omega = None     #: -
         self.leaf_pseudostem_length = 4E-6   #: m
         self.leaf_L = 4E-6                   #: m
         self.lamina_Lmax = None                 #: m
         self.leaf_Wmax = None                 #: m
         self.leaf_is_growing = True                #: -
+        # self.WL_ratio = 0.7    #: -
+        # self.TL_ratio = 0.15    #: -m
+        # self.width = self.WL_ratio * self.leaf_L                #: m
+        # self.thickness = self.thickness * self.leaf_L     #: m
         self.width = 0.003                 #: m
         self.thickness = 0.0005     #: m
         self.volume = self.leaf_L * self.width * self.thickness
@@ -311,6 +345,18 @@ class HiddenZoneInitCompartments(object):
         self.thickness_prev = 0.0005                #: m
         self.init_leaf_L = 4E-6                   #: m
         self.length_hz_En = None                #: m
+
+        self.SRWC = 80  #: %
+        # self.volume = self.mstruct / RATIO_MSTRUCT_DM * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME  #: m3
+        # self.water_content = ((self.mstruct / RATIO_MSTRUCT_DM) * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME) * RHO_WATER  #: g
+        self.osmotic_water_potential = -0.8
+
+        # self.conc_solutes = (self.fructan + self.sucrose + self.amino_acids) / (self.volume * VSTORAGE)
+        # self.conc_solutes_eff = 200 / (0.6 + exp(- 8 * self.conc_solutes / 1000))
+        # self.osmotic_water_potential = - R * (self.temperature + CELSIUS_2_KELVIN) * self.conc_solutes_eff / RHO_WATER
+
+        self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
+        self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential  #: MPa
 
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneInitCompartments` for current process
