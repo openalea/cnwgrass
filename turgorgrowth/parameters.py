@@ -182,9 +182,11 @@ class HiddenZoneParameters(OrganParameters):
         # (2020)
         # self.phi_initial = {'x': 30E-09, 'y': 30E-09, 'z': 32E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # V4 x 0.7 y 0.175
-        # self.phi_initial = {'x': 19E-09, 'y': 13E-09, 'z': 39E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 19E-09, 'y': 13E-09, 'z': 38E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # V8 x 0.7 y 0.2
-        self.phi_initial = {'x': 18E-09, 'y': 17.5E-09, 'z': 39E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 18E-09, 'y': 10E-09, 'z': 41E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        self.phi_initial = {'x': 12E-09, 'y': 10E-09, 'z': 40.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+
         # V8 x 0.7 y 0.185 GAMMA 0.2 70 %
         # self.phi_initial = {'x': 20E-09, 'y': 17.5E-09, 'z': 35E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # V3 x_ratio v1 et y_ratio 0.18
@@ -324,8 +326,8 @@ class HiddenZoneInitCompartments(object):
         self.delta_teq = 3600   #: s     #: time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010). Value from inputs file
 
         self.omega = None     #: -
-        self.leaf_pseudostem_length = 4E-6   #: m
-        self.leaf_L = 4E-6                   #: m
+        self.leaf_pseudostem_length = 4E-5   #: m
+        self.leaf_L = 5E-5                   #: m
         self.lamina_Lmax = None                 #: m
         self.leaf_Wmax = None                 #: m
         self.leaf_is_growing = True                #: -
@@ -343,7 +345,7 @@ class HiddenZoneInitCompartments(object):
 
         self.width_prev = 0.003                #: m
         self.thickness_prev = 0.0005                #: m
-        self.init_leaf_L = 4E-6                   #: m
+        self.init_leaf_L = 5E-5                   #: m
         self.length_hz_En = None                #: m
 
         self.SRWC = 80  #: %

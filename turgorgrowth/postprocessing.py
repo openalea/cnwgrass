@@ -121,6 +121,20 @@ class HiddenZone:
         return LER
 
     @staticmethod
+    def calculate_LER_tiller(leaf_rank, LER):
+        """Leaf elongation rate of the tiller in phase II
+
+        :return: Leaf elongation rate of the tiller (mm h-1 tiller -1)
+        :rtype: float
+        """
+
+        LER_tiller = 0
+        for i in leaf_rank.unique:
+           LER_tiller += LER
+
+        return LER_tiller
+
+    @staticmethod
     def calculate_conc_solutes_vol(sucrose, fructan, amino_acids, volume):
         """Volumic concentration of solutes used for osmotic water potential calculation
 
@@ -216,8 +230,6 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         pp_axes_df = pp_axes_df.reindex(AXES_RUN_POSTPROCESSING_VARIABLES, axis=1, copy=False)
         pp_axes_df['plant'] = pp_axes_df['plant'].astype(int)
         returned_dataframes.append(pp_axes_df)
-        # xylem
-        # roots
 
     # # metamers
     # if metamers_df is not None:

@@ -728,9 +728,24 @@ class Simulation(object):
                             # hiddenzone.width = hiddenzone.width_prev
                             # hiddenzone.thickness = hiddenzone.thickness_prev
 
-                            width_ratio = 0.7
-                            # thickness_ratio = 0.125
-                            thickness_ratio = 0.2
+                            width_ratio = 0.725
+                            thickness_ratio = 0.135
+                            # thickness_ratio = 0.115
+
+                            # width_ratio = max(0.84, 0.001825 * phytomer.index**3 - 0.034 * phytomer.index**2 + 0.1527 * phytomer.index + 0.7)     # polynomial
+
+                            # if phytomer.index == 5:
+                            #     width_ratio = 0.75
+                            # if phytomer.index == 6:
+                            #     width_ratio = 0.725
+                            # if phytomer.index == 7:
+                            #     width_ratio = 0.625
+                            # if phytomer.index == 8:
+                            #     width_ratio = 0.625
+                            # if phytomer.index == 9:
+                            #     width_ratio = 0.75
+                            # if phytomer.index == 10:
+                            #     width_ratio = 0.725
 
                             # thickness_ratio = 0.12
                             # linear function
