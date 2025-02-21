@@ -175,7 +175,7 @@ class HiddenZoneParameters(OrganParameters):
         # self.phi_initial = {'x': 19E-09, 'y': 13E-09, 'z': 38E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
         # V8 x 0.7 y 0.2
         # self.phi_initial = {'x': 18E-09, 'y': 10E-09, 'z': 41E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        self.phi_initial = {'x': 12E-09, 'y': 10E-09, 'z': 40.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        self.phi_initial = {'x': 10E-09, 'y': 10E-09, 'z': 39E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # V8 x 0.7 y 0.185 GAMMA 0.2 70 %
         # self.phi_initial = {'x': 20E-09, 'y': 17.5E-09, 'z': 35E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)

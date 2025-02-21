@@ -765,7 +765,7 @@ class Simulation(object):
                             thickness_ratio = 0.135
                             # thickness_ratio = 0.115
 
-                            # width_ratio = max(0.84, 0.001825 * phytomer.index**3 - 0.034 * phytomer.index**2 + 0.1527 * phytomer.index + 0.7)     # polynomial
+                            # width_ratio = min(0.84, 0.001825 * phytomer.index**3 - 0.034 * phytomer.index**2 + 0.1527 * phytomer.index + 0.7)     # polynomial
 
                             # if phytomer.index == 5:
                             #     width_ratio = 0.75

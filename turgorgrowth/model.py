@@ -521,7 +521,9 @@ class HiddenZone(Organ):
         # conc_solutes_eff = 320 / (0.95 + exp(- conc_solutes * 0.0125))  # (2020)
         # conc_solutes_eff = 356 / (1 + exp(- 6 * conc_solutes / 1000))  # (v4 x 0.7 y 0.175)
         # conc_solutes_eff = 350 / (1 + exp(- 6 * conc_solutes / 800))  # (v8 x 0.7 y 0.2)
-        conc_solutes_eff = 265 / (1 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
+
+        # conc_solutes_eff = 265 / (1 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
+        conc_solutes_eff = 260 / (1 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
 
         #: 6T
         # conc_solutes_eff = 180 / (0.4 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.185 100% GAMMA 0.2)
@@ -1387,10 +1389,8 @@ class Soil(object):
         :rtype: float
         """
         #: TO DO declaration of parameters into parameters.py
-        # soil_water_potential = - exp((-SRWC + 39.765) / 18.902)
-
         # Test calibration
-        soil_water_potential = - exp((-SRWC + (39.765 / 2.5)) / 18.902)
+        soil_water_potential = - exp(-SRWC + (15.906 / 18.902))
 
         return soil_water_potential
 
