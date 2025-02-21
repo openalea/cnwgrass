@@ -68,8 +68,8 @@ class Simulation(object):
                                 model.Phytomer: [],
                                 model.Organ: [],
                                 model.HiddenZone: ['leaf_L', 'turgor_water_potential', 'water_content', 'width', 'thickness'],
-                                model.PhotosyntheticOrganElement: ['length', 'turgor_water_potential', 'water_content', 'width', 'thickness']
-                                }
+                                model.PhotosyntheticOrganElement: ['length', 'turgor_water_potential', 'water_content', 'width', 'thickness'],
+                                model.Soil: ['water_content']}
 
     #: the time index
     T_INDEX = ['t']
@@ -205,6 +205,28 @@ class Simulation(object):
     #: all the variables computed during a run step of the simulation at organ scale
     ELEMENTS_RUN_VARIABLES = ELEMENTS_STATE + ELEMENTS_INTERMEDIATE_VARIABLES + ELEMENTS_FLUXES + ELEMENTS_INTEGRATIVE_VARIABLES
 
+
+    # ---------- SOIL scale ----------
+
+    #: the indexes to locate the soils in the modeled system
+    SOILS_INDEXES = ['plant', 'axis']
+    #: concatenation of :attr:`T_INDEX` and :attr:`SOILS_INDEXES`
+    SOILS_T_INDEXES = T_INDEX + SOILS_INDEXES
+    #: the parameters which define the state of the modeled system at soil scale
+    SOILS_STATE_PARAMETERS = []
+    #: the variables which define the state of the modeled system at soil scale,
+    #: formed be the concatenation of :attr:`SOILS_STATE_PARAMETERS` and the names
+    #: of the compartments associated to each soil (see :attr:`MODEL_COMPARTMENTS_NAMES`)
+    SOILS_STATE = SOILS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Soil, [])
+    #: the variables that we need to compute in order to compute fluxes and/or compartments values at soil scale
+    SOILS_INTERMEDIATE_VARIABLES = ['SRWC', 'water_potential']
+    #: the fluxes exchanged between the compartments at soil scale
+    SOILS_FLUXES = []
+    #: the variables computed by integrating values of soil components parameters/variables recursively
+    SOILS_INTEGRATIVE_VARIABLES = []
+    #: all the variables computed during a run step of the simulation at soil scale
+    SOILS_RUN_VARIABLES = SOILS_STATE + SOILS_INTERMEDIATE_VARIABLES + SOILS_FLUXES + SOILS_INTEGRATIVE_VARIABLES
+
     #: a dictionary of all the variables which define the state of the modeled system, for each scale
     ALL_STATE_PARAMETERS = {model.Plant: PLANTS_STATE_PARAMETERS,
                             model.Axis: AXES_STATE_PARAMETERS,
@@ -212,7 +234,7 @@ class Simulation(object):
                             model.Phytomer: PHYTOMERS_STATE_PARAMETERS,
                             model.HiddenZone: HIDDENZONE_STATE_PARAMETERS,
                             model.PhotosyntheticOrganElement: ELEMENTS_STATE_PARAMETERS,
-                            }
+                            model.Soil: SOILS_STATE_PARAMETERS}
 
     #: the names of the elements forcings
     ELEMENTS_FORCINGS = ('green_area', 'Tr')
@@ -234,7 +256,11 @@ class Simulation(object):
     def __init__(self, delta_t=1, interpolate_forcings=False, elements_forcings_delta_t=None, hiddenzone_forcings_delta_t=None):
 
         self.population = model.Population()  #: the population to simulate on
-        self.mapping_topology = {}  #: a dict describing plant topology at element scale
+        #: The inputs of the soils.
+        #:
+        #: `soils` is a dictionary of objects of type :class:`model.Soil`:
+        #:     {(plant_index, axis_label): soil_object, ...}
+        self.soils = {}
 
         self.initial_conditions = []  #: the initial conditions of the compartments in the population and soil
         self.initial_conditions_mapping = {}  #: dictionary to map the compartments to their indexes in :attr:`initial_conditions`
@@ -269,6 +295,8 @@ class Simulation(object):
                 # elements_compartments_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.ELEMENTS_RUN_VARIABLES))
                 organs_compartments_logger = logging.getLogger('turgorgrowth.compartments.organs')
                 organs_compartments_logger.debug(sep.join(Simulation.ORGANS_T_INDEXES + Simulation.ORGANS_STATE))
+                soils_compartments_logger = logging.getLogger('turgorgrowth.compartments.soils')
+                soils_compartments_logger.debug(sep.join(Simulation.SOILS_T_INDEXES + Simulation.SOILS_STATE))
             if derivatives_logger.isEnabledFor(logging.DEBUG):
                 plants_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.plants')
                 plants_derivatives_logger.debug(sep.join(Simulation.PLANTS_T_INDEXES + Simulation.PLANTS_STATE))
@@ -286,6 +314,8 @@ class Simulation(object):
                 # elements_derivatives_logger.debug(sep.join(Simulation.ELEMENTS_T_INDEXES + Simulation.HIDDENZONE_RUN_VARIABLES))
                 organs_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.organs')
                 organs_derivatives_logger.debug(sep.join(Simulation.ORGANS_T_INDEXES + Simulation.ORGANS_STATE))
+                soils_derivatives_logger = logging.getLogger('turgorgrowth.derivatives.soils')
+                soils_derivatives_logger.debug(sep.join(Simulation.SOILS_T_INDEXES + Simulation.SOILS_STATE))
 
         logger = logging.getLogger(__name__)
         if logger.isEnabledFor(logging.DEBUG):
@@ -320,17 +350,18 @@ class Simulation(object):
 
         self.nfev_total = 0  #: cumulative number of RHS function evaluations
 
-    def initialize(self, population, mapping_topology, SRWC=80):
+    def initialize(self, population, soils):
         """
         Initialize:
             * :attr:`population`,
+            * :attr:`soils`,
             * :attr:`initial_conditions_mapping`,
             * and :attr:`initial_conditions`
 
-        from `population`
+        from `population` and `soils`.
 
         :param model.Population population: a population of plants.
-        :param dict mapping_topology: a dictionary with the topological mapping of the predecessor and successor of each organ
+        :param dict soils: the soil associated to each axis. `soils` must be a dictionary with the same structure as :attr:`soils`
         """
 
         logger = logging.getLogger(__name__)
@@ -339,14 +370,13 @@ class Simulation(object):
 
         # clean the attributes of the simulation
         del self.population.plants[:]
-
+        self.soils.clear()
         del self.initial_conditions[:]
         self.initial_conditions_mapping.clear()
 
-        self.mapping_topology = mapping_topology
-
-        # create new population
+        # create new population and soil
         self.population.plants.extend(population.plants)
+        self.soils.update(soils)
 
         # check the consistency of population
         if len(self.population.plants) != 0:  # population must contain at least 1 plant
@@ -401,6 +431,11 @@ class Simulation(object):
                                                                                        axis.label)
                             logger.exception(message)
                             raise SimulationInitializationError(message)
+                        if (plant.index, axis.label) not in self.soils:  # each axis must be associated to a soil
+                            message = 'No soil found in (plant={},axis={})'.format(plant.index,
+                                                                                   axis.label)
+                            logger.exception(message)
+                            raise SimulationInitializationError(message)
                 else:
                     message = 'No axis found in (plant={})'.format(plant.index)
                     logger.exception(message)
@@ -435,17 +470,6 @@ class Simulation(object):
                                         if element_id in self.previous_forcings_values:
                                             setattr(element, forcing_label, self.previous_forcings_values[element_id][forcing_label])
 
-        # Update SRWC using weather data
-        for plant in self.population.plants:
-            plant.SRWC = SRWC
-
-        # # Update SRWC using weather data
-        # for plant in self.population.plants:
-        #     for axis in plant.axes:
-        #         for organ in (axis.xylem, axis.roots):
-        #             if organ == axis.xylem:
-        #                 axis.xylem.SRWC = SRWC
-
         # initialize initial conditions
         def _init_initial_conditions(model_object, i):
             class_ = model_object.__class__
@@ -465,6 +489,9 @@ class Simulation(object):
             return i
 
         i = 0
+
+        for soil in soils.values():
+            i = _init_initial_conditions(soil, i)
 
         for plant in self.population.plants:
             i = _init_initial_conditions(plant, i)
@@ -612,6 +639,9 @@ class Simulation(object):
         i = 0
         all_rows = dict([(class_, []) for class_ in loggers_names])
 
+        for soil_id, soil in self.soils.items():
+            i = update_rows(soil, (t,) + soil_id, all_rows[model.Soil], i)
+
         for plant in self.population.plants:
             for axis in plant.axes:
                 for organ in (axis.roots, axis.xylem):
@@ -701,17 +731,20 @@ class Simulation(object):
 
         y_derivatives = np.zeros_like(y)
 
+        # TODO: TEMP !!!!
+        soil_water_outputs = 0
+        soil = self.soils[(1, 'MS')]
+        soil.water_content = y[self.initial_conditions_mapping[soil]['water_content']]
+        soil.SRWC = soil.calculate_SRWC(soil.water_content)
+        soil.water_potential = soil.calculate_water_potential(soil.SRWC)
+
+
         #: Water flux with xylem and organs
         for plant in self.population.plants:
             for axis in plant.axes:
                 # Xylem
-                #: Soil water potential
-                axis.xylem.Ksoil = axis.xylem.calculate_soil_conductivity(axis.LAI_turgor)
-                axis.xylem.soil_water_potential = axis.xylem.calculate_soil_water_potential(plant.SRWC)
-                #: SRWC
-                axis.xylem.SRWC = plant.SRWC
                 #: Total water potential
-                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(axis.xylem.soil_water_potential, axis.total_water_influx, axis.Growth, axis.xylem.Ksoil, self.delta_t)
+                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(soil.water_potential, axis.total_water_influx, axis.Growth, self.delta_t)
 
                 for phytomer in axis.phytomers:
                     # Hidden zone
@@ -972,6 +1005,12 @@ class Simulation(object):
                             #: Dimensions volume of element
                             element.organ_volume = element.calculate_organ_volume(element.organ_dimensions)
                             element.WC_mstruct = element.water_content / (element.water_content + element.mstruct) * 100
+
+                # Store water used from soil for eahc axis
+                soil_water_outputs += (axis.total_water_influx + axis.Growth)
+
+        # compute the derivative of each compartment of soil
+        y_derivatives[self.initial_conditions_mapping[soil]['water_content']] = soil.calculate_water_content_derivative(soil_water_outputs, soil.constant_water_content)
 
 
         derivatives_logger = logging.getLogger('turgorgrowth.derivatives')

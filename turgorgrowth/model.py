@@ -41,14 +41,6 @@ class Population(object):
             plant.calculate_aggregated_variables()
 
 
-class Soil(object):
-    """
-    The class :class:`Soil` defines the soil water potential as function of the soil relative water content.
-    """
-
-    PARAMETERS = parameters.SOIL_PARAMETERS  #: the internal parameters of the soil
-
-
 class Plant(object):
     """
     The class :class:`Plant` defines the water flow at plant scale.
@@ -128,7 +120,6 @@ class Axis(object):
         self.xylem_water_potential = 0
         self.plant_water_content = 0
         self.plant_WC_DM = 0
-        self.green_area_rep = 0
         self.green_area = 0
         self.LAI_turgor = 0
         self.delta_plant_water_content = 0
@@ -136,9 +127,7 @@ class Axis(object):
         for phytomer in self.phytomers:
             phytomer.calculate_aggregated_variables()
             self.Total_Transpiration_turgor += phytomer.Total_Transpiration_turgor * phytomer.nb_replications
-            self.green_area_rep += phytomer.green_area * phytomer.nb_replications
             self.green_area += phytomer.green_area * phytomer.nb_replications
-            self.LAI_turgor = self.green_area_rep * parameters.PLANT_PARAMETERS.plant_density
             self.plant_water_content += phytomer.water_content * phytomer.nb_replications
             if phytomer != phytomer.hiddenzone:
                 self.total_water_influx += phytomer.total_water_influx
@@ -294,23 +283,6 @@ class Xylem(Organ):
         self.xylem_water_potential = self.calculate_xylem_water_potential(self.soil_water_potential, self.total_water_influx, self.Growth, self.Total_Transpiration_turgor, self.delta_t)
 
     #:  Model equations for water flux
-    @staticmethod
-    def calculate_soil_water_potential(SRWC):
-        """Total water potential of the xylem
-        Equation from Chen et al., 1998 (Genotypic variation in drought tolerance of poplar in relation to abscisic acid)
-
-        :param float SRWC: %
-
-        :return: Total water potential (MPa)
-        :rtype: float
-        """
-        #: TO DO declaration of parameters into parameters.py
-        # soil_water_potential = - exp((-SRWC + 39.765) / 18.902)
-
-        # Test calibration
-        soil_water_potential = - exp((-SRWC + (39.765 / 2.5)) / 18.902)
-
-        return soil_water_potential
 
     @staticmethod
     def calculate_soil_conductivity(LAI_turgor):
@@ -327,7 +299,7 @@ class Xylem(Organ):
         return Ksoil
 
     @staticmethod
-    def calculate_xylem_water_potential(soil_water_potential, total_water_influx, Growth, Ksoil, delta_t):
+    def calculate_xylem_water_potential(soil_water_potential, total_water_influx, Growth, delta_t):
         """Total water potential of the xylem
 
         :param float soil_water_potential: MPa
@@ -347,7 +319,7 @@ class Xylem(Organ):
         total_water_potential = soil_water_potential - ((Growth + total_water_influx) * Xylem.PARAMETERS.R_soil * delta_t)
 
         # Martre et al. (2001)
-        Ksoil = ((21.2 + 7.2) * 18 * 1E-03) * 0.2
+        # Ksoil = ((21.2 + 7.2) * 18 * 1E-03) * 0.2
         # total_water_potential = soil_water_potential - ((Growth + total_water_influx) * (1E-04 / Ksoil * delta_t))
         # total_water_potential = soil_water_potential - ((Growth + total_water_influx) * (1E-02 / Ksoil * delta_t))
 
@@ -1371,3 +1343,72 @@ class SheathElement(PhotosyntheticOrganElement):
 
     PARAMETERS = parameters.SHEATH_ELEMENT_PARAMETERS                   #: the internal parameters of the sheath
     INIT_COMPARTMENTS = parameters.SHEATH_ELEMENT_INIT_COMPARTMENTS     #: the initial values of compartments and state parameters
+
+
+class Soil(object):
+    """
+    The class :class:`Soil` defines the soil water potential as function of the soil relative water content.
+    """
+
+    PARAMETERS = parameters.SOIL_PARAMETERS  #: the internal parameters of the soil
+
+    def __init__(self, water_content=None):
+
+        self.constant_water_content = True  #: If True, the model run with a constant soil water content (bool)
+
+        # state variables
+        self.water_content = water_content  #: water content of the soil (g)
+
+        # intermediate variables
+        self.SRWC = (self.water_content / self.PARAMETERS.AWC) * 100 #: Soil Relative Water Content (%)
+        self.water_potential = None  #: Water potential of the soil (MPa)
+
+
+    # VARIABLES
+    @staticmethod
+    def calculate_SRWC(water_content):
+        """Soil Relative Water Content
+
+        :param float water_content: soil water content (g)
+
+        :return: SRWC (dimensionless)
+        :rtype: %
+        """
+        return (water_content / Soil.PARAMETERS.AWC) * 100
+
+    @staticmethod
+    def calculate_water_potential(SRWC):
+        """Total water potential of the xylem
+        Equation from Chen et al., 1998 (Genotypic variation in drought tolerance of poplar in relation to abscisic acid)
+
+        :param float SRWC: %
+
+        :return: Total water potential (MPa)
+        :rtype: float
+        """
+        #: TO DO declaration of parameters into parameters.py
+        # soil_water_potential = - exp((-SRWC + 39.765) / 18.902)
+
+        # Test calibration
+        soil_water_potential = - exp((-SRWC + (39.765 / 2.5)) / 18.902)
+
+        return soil_water_potential
+
+    # COMPARTMENTS
+
+    @staticmethod
+    def calculate_water_content_derivative(soil_water_outputs, constant_water_content):
+        """delta soil nitrates.
+
+        :param float soil_water_outputs: Sum of water used for plant transpiration of growth over delta_t (g)
+        :param bool constant_water_content: whether the water content is constant or not
+
+        :return: delta water_content (g)
+        :rtype: float
+        """
+        irrigation = 0
+
+        if constant_water_content:
+            irrigation = soil_water_outputs
+
+        return irrigation - soil_water_outputs

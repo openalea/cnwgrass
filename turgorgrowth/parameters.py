@@ -75,16 +75,6 @@ class PopulationParameters(object):
 #: The instance of class :class:`turgorgrowth.parameters.PopulationParameters` for current process
 POPULATION_PARAMETERS = PopulationParameters()
 
-class SoilParameters(object):
-    """
-    Internal parameters of soil.
-    """
-    def __init__(self):
-        pass
-
-#: The instance of class :class:`turgorgrowth.parameters.SoilParameters` for current process
-SOIL_PARAMETERS = SoilParameters()
-
 
 class PlantParameters(object):
     """
@@ -592,3 +582,15 @@ class SheathElementInitCompartments(object):
 
 #: The instance of class :class:`turgorgrowth.parameters.SheathElementInitCompartments` for current process
 SHEATH_ELEMENT_INIT_COMPARTMENTS = SheathElementInitCompartments()
+
+
+class SoilParameters(object):
+    """
+    Internal parameters of soil.
+    """
+    def __init__(self):
+        self.AWC = 100  # Available Water Capacity (g)
+
+
+#: The instance of class :class:`cnwheat.parameters.SoilParameters` for current process
+SOIL_PARAMETERS = SoilParameters()

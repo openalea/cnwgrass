@@ -15,6 +15,7 @@ from __future__ import division  # use "//" to do integer division
 import os
 
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from turgorgrowth import simulation as turgorgrowth_simulation, parameters as turgorgrowth_parameters
 from turgorgrowth import tools as turgorgrowth_tools
@@ -80,6 +81,14 @@ ELEMENTS_RUN_VARIABLES_ADDITIONAL = []
 #: concatenation of :attr:`ELEMENTS_T_INDEXES`, :attr:`ELEMENTS_RUN_VARIABLES <turgorgrowth.simulation.Simulation.ELEMENTS_RUN_VARIABLES>` and :attr:`ELEMENTS_POSTPROCESSING_VARIABLES`
 ELEMENTS_RUN_POSTPROCESSING_VARIABLES = ELEMENTS_T_INDEXES + turgorgrowth_simulation.Simulation.ELEMENTS_RUN_VARIABLES + ELEMENTS_RUN_VARIABLES_ADDITIONAL + ELEMENTS_POSTPROCESSING_VARIABLES
 
+#: the indexes to locate the soils in the modeled system
+SOILS_INDEXES = turgorgrowth_simulation.Simulation.SOILS_INDEXES
+#: concatenation of :attr:`T_INDEX` and :attr:`SOILS_INDEXES`
+SOILS_T_INDEXES = turgorgrowth_simulation.Simulation.SOILS_T_INDEXES
+#: soils post-processing variables
+SOILS_POSTPROCESSING_VARIABLES = []
+#: concatenation of :attr:`SOILS_T_INDEXES`, :attr:`SOILS_RUN_VARIABLES <cnwheat.simulation.Simulation.SOILS_RUN_VARIABLES>` and :attr:`SOILS_POSTPROCESSING_VARIABLES`
+SOILS_RUN_POSTPROCESSING_VARIABLES = SOILS_T_INDEXES + turgorgrowth_simulation.Simulation.SOILS_RUN_VARIABLES + SOILS_POSTPROCESSING_VARIABLES
 
 # ---------------------------------------------------
 #           POST-PROCESSING FUNCTIONS               -
@@ -187,7 +196,7 @@ class Organ:
 #           PLEASE USE THIS FUNCTION TO APPLY POST-PROCESSING ON THE OUTPUT OF TURGOR-GROWTH     -
 # ------------------------------------------------------------------------------------------------
 
-def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, delta_t=1):
+def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, soils_df=None, delta_t=1):
     """
     Compute post-processing from Turgor-Growth outputs, and format the post-processing to :class:`dataframes <pandas.DataFrame>`.
 
@@ -202,12 +211,14 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     :param pandas.DataFrame hiddenzones_df: Turgor-Growth outputs at hidden zone scale (see :attr:`simulation.Simulation.HIDDENZONE_RUN_VARIABLES`)
     :param pandas.DataFrame elements_df: Turgor-Growth outputs at element scale (see :attr:`simulation.Simulation.ELEMENTS_RUN_VARIABLES`)
     :param pandas.DataFrame organ_df: Turgor-Growth outputs at xylem scale (see :attr:`simulation.Simulation. ORGAN_RUN_VARIABLES`)
+    :param pandas.DataFrame soils_df: CN-Wheat outputs at soil scale (see :attr:`simulation.Simulation.SOILS_RUN_VARIABLES`)
     :param float delta_t: Delta t between 2 outputs (in seconds).
 
     :return: :class:`dataframes <pandas.DataFrame>` of post-processing for each scale:
             * hidden zone (see :attr:`HIDDENZONE_RUN_POSTPROCESSING_VARIABLES`)
             * element (see :attr:`ELEMENTS_RUN_POSTPROCESSING_VARIABLES`)
             * xylem (see :attr:`XYLEM_RUN_POSTPROCESSING_VARIABLES`)
+            * and soil (see :attr:`SOILS_RUN_POSTPROCESSING_VARIABLES`)
 
     :rtype tuple [pandas.DataFrame]
     """
@@ -283,6 +294,15 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         pp_organs_df['plant'] = pp_organs_df['plant'].astype(int)
         returned_dataframes.append(pp_organs_df)
 
+    # soils
+    if soils_df is not None:
+        pp_soils_df = pd.concat([soils_df, pd.DataFrame(columns=SOILS_POSTPROCESSING_VARIABLES)])
+        pp_soils_df = pp_soils_df.reindex(columns=SOILS_RUN_POSTPROCESSING_VARIABLES, copy=False)
+        pp_soils_df[['plant']] = pp_soils_df[['plant']].astype(int)
+        returned_dataframes.append(pp_soils_df)
+    else:
+        returned_dataframes.append(pd.DataFrame({'A': []}))
+
     return tuple(returned_dataframes)
 
 
@@ -291,7 +311,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
 #           PLEASE USE THIS FUNCTION FOR THE GENERATION OF GRAPHS     -
 # ---------------------------------------------------------------------
 
-def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, graphs_dirpath='.'):
+def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, soils_df=None, graphs_dirpath='.'):
 
     """
     Generate graphs to validate the outputs of Turgor-Growth, and save them in directory `graphs_dirpath`.
@@ -299,6 +319,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
     :param pandas.DataFrame hiddenzones_df: Turgor-Growth outputs at hidden zone scale (see :attr:`HIDDENZONE_RUN_POSTPROCESSING_VARIABLES`)
     :param pandas.DataFrame elements_df: Turgor-Growth outputs at element scale (see :attr:`ELEMENTS_RUN_POSTPROCESSING_VARIABLES`)
     :param pandas.DataFrame organ_df: Turgor-Growth outputs at organ scale (see :attr:`ORGANS_RUN_POSTPROCESSING_VARIABLES`)
+    :param pandas.DataFrame soils_df: CN-Wheat outputs at soil scale (see :attr:`SOILS_RUN_POSTPROCESSING_VARIABLES`)
     :param str graphs_dirpath: the path of the directory to save the generated graphs
     """
 
@@ -351,10 +372,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 3) Roots and xylem
     if organs_df is not None:
-        graph_variables_organs = {'total_water_potential': u'Total water potential (MPa)',
-                                  # 'Ksoil': u'Soil axial conductivity (g s-1 Mpa-1)';
-                                  'soil_water_potential': u'Soil water potential (Mpa)', 'SRWC': u'SRWC (%)'}
-
+        graph_variables_organs = {'total_water_potential': u'Total water potential (MPa)'}
         for org in (['roots'], ['xylem']):
             for variable_name, variable_label in graph_variables_organs.items():
                 graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
@@ -386,3 +404,24 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                     plot_filepath=os.path.join(graphs_dirpath, graph_name),
                                                     explicit_label=False)
 
+    # 5) Soil
+    if soils_df is not None:
+        _, (ax1) = plt.subplots(1)
+        SRWC = soils_df['SRWC']
+        ax1.plot(soils_df['t'], SRWC)
+        ax1.set_ylabel(u'SRWC')
+        ax1.set_xlabel('Time (hour)')
+        ax1.set_title = 'SRWC'
+        ax1.set_ylim(bottom=0)
+        plt.savefig(os.path.join(graphs_dirpath, 'SRWC.PNG'), format='PNG', bbox_inches='tight')
+        plt.close()
+
+        _, (ax1) = plt.subplots(1)
+        water_potential = soils_df['water_potential']
+        ax1.plot(soils_df['t'], water_potential)
+        ax1.set_ylabel(u'Soil water potential (MPa)')
+        ax1.set_xlabel('Time (hour)')
+        ax1.set_title = 'Soil water potential'
+        ax1.set_ylim(bottom=0)
+        plt.savefig(os.path.join(graphs_dirpath, 'Soil water potential.PNG'), format='PNG', bbox_inches='tight')
+        plt.close()

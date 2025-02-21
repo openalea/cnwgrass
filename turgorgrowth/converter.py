@@ -37,6 +37,10 @@ ORGANS_VARIABLES = simulation.Simulation.ORGANS_INDEXES + simulation.Simulation.
 ORGANS_OUTPUTS_VARIABLES = ORGANS_VARIABLES
 ORGANS_OUTPUTS_RUN_VARIABLES = simulation.Simulation.ORGANS_RUN_VARIABLES
 
+#: the columns of the outputs dataframe at SOIL scale
+SOILS_VARIABLES = simulation.Simulation.SOILS_INDEXES + simulation.Simulation.SOILS_RUN_VARIABLES
+
+
 #: the mapping of the Turgor-Growth organs classes to organs names in MTG
 TURGORGROWTH_CLASSES_TO_DATAFRAME_ORGANS_MAPPING = {model.Organ: 'organs', model.Internode: 'internode', model.Lamina: 'blade', model.Sheath: 'sheath',  model.HiddenZone: 'hiddenzone', model.Roots: 'roots', model.Xylem: 'xylem'}
 
@@ -45,19 +49,24 @@ DATAFRAME_TO_TURGORGROWTH_ELEMENTS_NAMES_MAPPING = {'HiddenElement': 'enclosed_e
 DATAFRAME_TO_TURGORGROWTH_LEAF_NAMES_MAPPING = {'LeafElement1': 'exposed_element'}
 
 
-def from_dataframes(axes_inputs = None, hiddenzones_inputs=None, elements_inputs=None, organs_inputs=None):
+def from_dataframes(axes_inputs=None, hiddenzones_inputs=None, elements_inputs=None, organs_inputs=None, soils_inputs=None):
     """
     If `elements_inputs` and `hiddenzones_inputs` are not `None`, converts `elements_inputs` and `hiddenzones_inputs` to a :class:`population <model.Population>`.
 
     :param pandas.DataFrame hiddenzones_inputs: Hidden zone inputs, with one line per hidden zone.
     :param pandas.DataFrame elements_inputs: Element inputs, with one line per element.
     :param pandas.DataFrame organs_inputs: Organs (xylem and roots) inputs, with one line per organ.
+    :param pandas.DataFrame soils_inputs: Soils inputs, with one line by soil.
 
     :return: If `elements_inputs` and `hiddenzones_inputs` are not `None`, returns a :class:`population <model.Population>`
+             and/or
+             if `soils_inputs` is not `None`,  return a :class:`dict` of :class:`soils <model.Soil>`.
+
     :rtype: (model.Population, dict)
     """
 
     convert_dataframes_to_population = axes_inputs is not None and elements_inputs is not None and hiddenzones_inputs is not None and organs_inputs is not None
+    convert_dataframe_to_soils_dict = soils_inputs is not None
 
     if convert_dataframes_to_population:
         population = model.Population()
@@ -154,15 +163,30 @@ def from_dataframes(axes_inputs = None, hiddenzones_inputs=None, elements_inputs
 
                 plant.axes.append(axis)
 
-    return population, mapping_topology
+    if convert_dataframe_to_soils_dict:
+        soils = {}
+        for soil_id, soil_group in soils_inputs.groupby(simulation.Simulation.SOILS_INDEXES):
+            # create a new soil
+            soil_attributes = soil_group.loc[soil_group.first_valid_index(), simulation.Simulation.SOILS_STATE].to_dict()
+            soil = model.Soil(**soil_attributes)
+            soils[soil_id] = soil
+
+    if convert_dataframes_to_population and convert_dataframe_to_soils_dict:
+        return population, soils
+    elif convert_dataframes_to_population:
+        return population
+    else:
+        return soils
 
 
-def to_dataframes(population=None):
+def to_dataframes(population=None, soils=None):
     """
-    Convert a Turgor-Growth :class:`population <model.Population>` to Pandas dataframes.
+    Convert a Turgor-Growth :class:`population <model.Population>` to Pandas dataframes and/or a dictionary of :class:`soils <model.Soil>` to Pandas dataframes.
     If `population` is not None, convert `population` to Pandas dataframes.
+    If `soils` is not None, convert `soils` to Pandas dataframe.
 
     :param model.Population population: The Turgor-Growth population to convert.
+    :param dict soils: The soils to convert.
 
     :return: If `population` is not None, return :class:`dataframes <pandas.DataFrame>` describing the internal state and compartments of the population at each scale:
                  * hidden zones: plant index, axis id, phytomer index, state parameters, state variables, intermediate variables,
@@ -171,12 +195,18 @@ def to_dataframes(population=None):
                  fluxes and integrative variables of each element (see :mod:`ELEMENTS_VARIABLES`)
                  * xylem scale: xylem index, state parameters, state variables, intermediate variables,
                  fluxes and integrative variables of xylem (see :mod:`XYLEM_VARIABLES`)
+       and/or
+
+        if `soils` is not None, return a :class:`dataframe <pandas.DataFrame>` describing internal state and compartments of the soils, with one line per soil:
+
+            * plant index, axis id, state parameters, state variables, intermediate variables, fluxes and integrative variables of each soil (see :mod:`SOILS_RUN_VARIABLES`)
 
 
     :rtype: (pandas.DataFrame, pandas.DataFrame)
     """
 
     convert_population_to_dataframes = population is not None
+    convert_soils_to_dataframe = soils is not None
 
     def append_row(model_object, indexes, attributes_names, inputs_df):
         # function to append a row to a dataframe
@@ -237,7 +267,17 @@ def to_dataframes(population=None):
         all_hiddenzones_df.reset_index(drop=True, inplace=True)
         all_elements_df.reset_index(drop=True, inplace=True)
 
+    if convert_soils_to_dataframe:
+        all_soils_df = pd.DataFrame(columns=SOILS_VARIABLES)
+        for soil_id, soil in soils.items():
+            append_row(soil, list(soil_id), simulation.Simulation.SOILS_RUN_VARIABLES, all_soils_df)
+        all_soils_df.sort_values(by=SOILS_VARIABLES, inplace=True)
+        all_soils_df['plant'] = all_soils_df['plant'].astype(int)
+        all_soils_df.reset_index(drop=True, inplace=True)
 
-    if convert_population_to_dataframes :
+    if convert_population_to_dataframes and convert_soils_to_dataframe:
+        return all_plants_df, all_axes_df, all_phytomers_df, all_organs_df, all_hiddenzones_df, all_elements_df, all_soils_df
+    elif convert_population_to_dataframes:
         return all_plants_df, all_axes_df, all_phytomers_df, all_organs_df, all_hiddenzones_df, all_elements_df
-
+    else:
+        return all_soils_df
