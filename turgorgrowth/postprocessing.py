@@ -422,6 +422,6 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
         ax1.set_ylabel(u'Soil water potential (MPa)')
         ax1.set_xlabel('Time (hour)')
         ax1.set_title = 'Soil water potential'
-        ax1.set_ylim(bottom=0)
+        #ax1.set_ylim(bottom=0)
         plt.savefig(os.path.join(graphs_dirpath, 'Soil water potential.PNG'), format='PNG', bbox_inches='tight')
         plt.close()
