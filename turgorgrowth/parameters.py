@@ -588,7 +588,7 @@ class SoilParameters(object):
     Internal parameters of soil.
     """
     def __init__(self):
-        self.AWC = 100  # Available Water Capacity (g)
+        self.AWC = 50  # Available Water Capacity (g)
 
 
 #: The instance of class :class:`cnwheat.parameters.SoilParameters` for current process

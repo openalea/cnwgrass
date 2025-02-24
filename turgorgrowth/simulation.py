@@ -761,22 +761,20 @@ class Simulation(object):
                             # hiddenzone.width = hiddenzone.width_prev
                             # hiddenzone.thickness = hiddenzone.thickness_prev
 
-                            thickness_ratio = 0.14
-                            width_ratio = 0.75
+                            thickness_ratio = 0.13
+                            width_ratio = 0.725
 
-                            # width_ratio = min(0.84, 0.001825 * phytomer.index**3 - 0.034 * phytomer.index**2 + 0.1527 * phytomer.index + 0.7)     # polynomial
-
-                            # linear function
+                            #: linear function
                             # width_ratio = 0.05 * phytomer.index + 0.25      # croissante v1
                             # width_ratio = 0.0857 * phytomer.index + 0.0571      # croissante v2
                             # thickness_ratio = 0.17   # (C)
                             # thickness_ratio = 0.0025 * phytomer.index + 0.165      # croissante v3
 
-                            # polynomial function
+                            #: polynomial function
                             # width_ratio = -0.0021 * phytomer.index**3 + 0.0355 * phytomer.index**2 - 0.1527 * phytomer.index + 0.75     # polynomial
                             # thickness_ratio = -0.0009 * phytomer.index**3 + 0.0175 * phytomer.index**2 -0.1 * phytomer.index + 0.35   # polynomial
+                            # width_ratio = min(0.84, 0.001825 * phytomer.index**3 - 0.034 * phytomer.index**2 + 0.1527 * phytomer.index + 0.7)     # polynomial
 
-                            # hiddenzone.width = parameters.HIDDEN_ZONE_PARAMETERS.leaf_Wmax_Marion[phytomer.index]
 
                             hiddenzone.width = hiddenzone.leaf_L * width_ratio
                             hiddenzone.thickness = hiddenzone.leaf_L * thickness_ratio
