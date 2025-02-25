@@ -522,7 +522,8 @@ class HiddenZone(Organ):
         # conc_solutes_eff = 356 / (1 + exp(- 6 * conc_solutes / 1000))  # (v4 x 0.7 y 0.175)
         # conc_solutes_eff = 350 / (1 + exp(- 6 * conc_solutes / 800))  # (v8 x 0.7 y 0.2)
 
-        conc_solutes_eff = 263 / (1 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
+        # conc_solutes_eff = 263 / (1 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
+        conc_solutes_eff = 263 / (1 + exp(- 8 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
 
         #: 6T
         # conc_solutes_eff = 180 / (0.4 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.185 100% GAMMA 0.2)

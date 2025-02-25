@@ -763,7 +763,6 @@ class Simulation(object):
 
                             thickness_ratio = 0.14
                             width_ratio = 0.725
-                            # width_ratio = 0.75
 
                             #: linear function
                             # width_ratio = 0.05 * phytomer.index + 0.25      # croissante v1
