@@ -125,23 +125,10 @@ class HiddenZone:
         :rtype: float
         """
 
-        LER = (leaf_L - init_leaf_L ) * 1E03
+        LER = (leaf_L - init_leaf_L) * 1E03
 
         return LER
 
-    @staticmethod
-    def calculate_LER_tiller(leaf_rank, LER):
-        """Leaf elongation rate of the tiller in phase II
-
-        :return: Leaf elongation rate of the tiller (mm h-1 tiller -1)
-        :rtype: float
-        """
-
-        LER_tiller = 0
-        for i in leaf_rank.unique:
-           LER_tiller += LER
-
-        return LER_tiller
 
     @staticmethod
     def calculate_conc_solutes_vol(sucrose, fructan, amino_acids, volume):
@@ -155,7 +142,6 @@ class HiddenZone:
         :return: Solutes volumic concentration (mol m-3)
         :rtype: float
         """
-
         conc_solutes_vol = (sucrose / turgorgrowth_parameters.NB_C_SUCROSE + fructan / turgorgrowth_parameters.NB_C_SUCROSE + amino_acids / turgorgrowth_parameters.AMINO_ACIDS_N_RATIO) * 1E-06 / (volume * turgorgrowth_parameters.VSTORAGE)
 
         return conc_solutes_vol
@@ -350,8 +336,8 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     # 2) Hidden zones
     if hiddenzones_df is not None:
-        graph_variables_hiddenzones = {'delta_hiddenzone_dimensions_plastic': u'dl / dt plastic (mm h-1)', 'LER': u'LER in phase II(mm h-1)', 'conc_solutes_vol': u'conc_solutes_vol', 'conc_solutes_mass': u'conc_solutes_mass', 'fructan': u'Fructan',
-                                       'length_hz_En' : u'Length of HZ after En (m)', 'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
+        graph_variables_hiddenzones = {'delta_hiddenzone_dimensions_plastic': u'dl / dt plastic (mm h-1)', 'LER': u'LER in phase II (mm h-1)', 'conc_solutes_vol': u'conc_solutes_vol', 'conc_solutes_mass': u'conc_solutes_mass', 'fructan': u'Fructan',
+                                       'length_hz_En': u'Length of HZ after En (m)', 'organ_volume': u'Volume of hz based on dimensions (m3)', 'phi_volume': u'Volumetric extensibility (MPa-1 h-1) ', 'epsilon_volume': u'Volumetric elasticity (Mpa)', 'leaf_pseudo_age': u'Leaf pseudo age (°Cd)',
                                         'phi_length': u'Extensibility parameter  for length (Mpa-1 h-1)', 'phi_width': u'Extensibility parameter  for width (Mpa-1 h-1)', 'phi_thickness': u'Extensibility parameter  for thickness (Mpa-1 h-1)',
                                         'leaf_L': 'Total leaf length (m)', 'length': u'Length of hz (m)', 'hiddenzone_age': u'Age (s)',
                                        'osmotic_water_potential': u'Osmotic water potential (MPa)', 'width': u'Width (m)', 'total_water_potential': u'Total water potential (MPa)',
@@ -387,9 +373,8 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                         explicit_label=False)
 
     # 4) Axes
-    graph_variables_axes = {'xylem_water_potential':u'Xylem water potential (Mpa)', 'Total_Transpiration_turgor': u'Total transpiration from turgor model (g H2O)', 'Growth': u'Growth (g H2O)',
-                            # 'LAI_turgor': u'LAI calculated in turgor model',
-                            'total_water_influx':u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)',
+    graph_variables_axes = {'xylem_water_potential': u'Xylem water potential (Mpa)', 'Total_Transpiration_turgor': u'Total transpiration from turgor model (g H2O)', 'Growth': u'Growth (g H2O)',
+                            'total_water_influx': u' Water flux from xylem to HZ and photosynthetic organs (g H2O)', 'plant_water_content': u'Total water content of the plant (g H2O)',
                             'delta_plant_water_content': u'Delta water content of the plant (g H2O)', 'plant_WC_DM': u'Ratio of plant water content per structural mass (%)'}
 
     for variable_name, variable_label in graph_variables_axes.items():

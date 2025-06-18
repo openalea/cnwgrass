@@ -104,11 +104,10 @@ class Axis(object):
         self.Growth = None  #: the hiddenzone growth (g H2O)
         self.total_water_influx = None  #: water influx between xylem and photosynthetic organ element (g H2O)
         self.xylem_water_potential = None  #: xylem water potential (Mpa)
-        self.plant_water_content = None #: plant water content (g H2O)
+        self.plant_water_content = None  #: plant water content (g H2O)
         self.plant_WC_DM = None #: relative plant water content per structural mass of the shoot axis (%)
         self.green_area_rep = None  #: gree area (m2)
         self.green_area = None  #: gree area (m2)
-        self.LAI_turgor = None  #: leaf area index
         self.delta_plant_water_content = None   #: plant delta water content (g H2O)
 
     def calculate_aggregated_variables(self):
@@ -121,7 +120,6 @@ class Axis(object):
         self.plant_water_content = 0
         self.plant_WC_DM = 0
         self.green_area = 0
-        self.LAI_turgor = 0
         self.delta_plant_water_content = 0
 
         for phytomer in self.phytomers:
@@ -283,21 +281,6 @@ class Xylem(Organ):
         self.xylem_water_potential = self.calculate_xylem_water_potential(self.soil_water_potential, self.total_water_influx, self.Growth, self.Total_Transpiration_turgor, self.delta_t)
 
     #:  Model equations for water flux
-
-    @staticmethod
-    def calculate_soil_conductivity(LAI_turgor):
-        """Axial conductivity between soil and xylem as function of LAI
-
-        :param float LAI_turgor
-
-        :return: Axial conductivity between soil and xylem g s-1 Mpa -1
-        :rtype: float
-        """
-        # Implementation of a soil conductivity as function of LAI
-        Ksoil = 0.0015 * LAI_turgor + 0.032
-
-        return Ksoil
-
     @staticmethod
     def calculate_xylem_water_potential(soil_water_potential, total_water_influx, Growth, delta_t):
         """Total water potential of the xylem
@@ -310,18 +293,8 @@ class Xylem(Organ):
         :return: Total water potential (MPa)
         :rtype: float
         """
-
-        #: TODO: doc et paramètres fonctions
-
         #: Axial resistance between soil and xylem is a fixed parameter : R_soil
-
-        # xylem_water_potential = soil_water_potential - ((Total_Transpiration * 1E-3 * 18) + Growth) * Xylem.PARAMETERS.R_soil * delta_t
         total_water_potential = soil_water_potential - ((Growth + total_water_influx) * Xylem.PARAMETERS.R_soil * delta_t)
-
-        # Martre et al. (2001)
-        # Ksoil = ((21.2 + 7.2) * 18 * 1E-03) * 0.2
-        # total_water_potential = soil_water_potential - ((Growth + total_water_influx) * (1E-04 / Ksoil * delta_t))
-        # total_water_potential = soil_water_potential - ((Growth + total_water_influx) * (1E-02 / Ksoil * delta_t))
 
         return total_water_potential
 
@@ -335,13 +308,13 @@ class HiddenZone(Organ):
     INIT_COMPARTMENTS = parameters.HIDDEN_ZONE_INIT_COMPARTMENTS  #: the initial values of compartments and state parameters
 
     def __init__(self, label='hiddenzone', fructan=INIT_COMPARTMENTS.fructan, leaf_enclosed_mstruct=INIT_COMPARTMENTS.leaf_enclosed_mstruct, leaf_pseudo_age=INIT_COMPARTMENTS.leaf_pseudo_age, hiddenzone_age=INIT_COMPARTMENTS.hiddenzone_age, amino_acids=INIT_COMPARTMENTS.amino_acids, proteins=INIT_COMPARTMENTS.proteins, sucrose=INIT_COMPARTMENTS.sucrose,
-                 width_prev = INIT_COMPARTMENTS.width_prev, thickness_prev = INIT_COMPARTMENTS.thickness_prev, init_leaf_L = INIT_COMPARTMENTS.init_leaf_L, length_hz_En = INIT_COMPARTMENTS.length_hz_En,
+                 init_leaf_L=INIT_COMPARTMENTS.init_leaf_L, length_hz_En=INIT_COMPARTMENTS.length_hz_En,
                  temperature=INIT_COMPARTMENTS.temperature, mstruct=INIT_COMPARTMENTS.mstruct, osmotic_water_potential=INIT_COMPARTMENTS.osmotic_water_potential,
                  total_water_potential=INIT_COMPARTMENTS.total_water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length,
-                 leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, omega=INIT_COMPARTMENTS.omega,
+                 leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width,
                  turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_content=INIT_COMPARTMENTS.water_content,
                  Tr=INIT_COMPARTMENTS.Tr, green_area=INIT_COMPARTMENTS.green_area, water_influx=INIT_COMPARTMENTS.water_influx, water_outflow=INIT_COMPARTMENTS.water_outflow, cohorts=None, cohorts_replications=None, leaf_Wmax = INIT_COMPARTMENTS.leaf_Wmax, lamina_Lmax = INIT_COMPARTMENTS.lamina_Lmax,
-                 leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, delta_teq = INIT_COMPARTMENTS.delta_teq):
+                 leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, delta_teq=INIT_COMPARTMENTS.delta_teq, delta_weq=INIT_COMPARTMENTS.delta_weq):
 
         super(HiddenZone, self).__init__(label)
 
@@ -366,13 +339,11 @@ class HiddenZone(Organ):
         self.hiddenzone_age = hiddenzone_age                          #: °Cd
         self.Tr = Tr                            #: #: mmol H20 m-2 s-1
         self.green_area = green_area            #: m²
-        self.delta_teq = delta_teq
+        self.delta_teq = delta_teq              #: s
         self.length = min(leaf_L, leaf_pseudostem_length)       #: m
         self.leaf_pseudostem_length = leaf_pseudostem_length    #: m
         self.width = width                                      #: m
         self.thickness = thickness                              #: m
-        self.width_prev = width_prev   #: m
-        self.thickness_prev = thickness_prev   #: m
         self.init_leaf_L = init_leaf_L   #: m
         self.length_hz_En = length_hz_En   #: m
         self.water_content = water_content      #: g H2O
@@ -390,10 +361,7 @@ class HiddenZone(Organ):
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.leaf_Lmax = None   #: m
         self.leaf_Wmax = leaf_Wmax   #: m
-
-        # intermediate variables
-        self.omega = omega    #: -
-
+        self.delta_weq = delta_weq
 
     @property
     def nb_replications(self):
@@ -406,24 +374,50 @@ class HiddenZone(Organ):
         self.Growth = self.calculate_delta_water_content(self.water_influx, self.water_outflow)
 
     #:  Model equations for water flux
-    # @staticmethod
-    # def calculate_vstorage(leaf_pseudo_age, vstorage):
-    #
-    #     """ Storage portion of the Hidden zone volume. The left over is assumed to be xylem vessels.
-    #
-    #     :param float leaf_pseudo_age: Hidden zone leaf pseudo age (°Cd)
-    #
-    #     :return: vstorage
-    #     :rtype: float
-    #     """
-    #
-    #     if leaf_pseudo_age <= HiddenZone.PARAMETERS.tend:
-    #         vstorage = 2 / (1 + exp((0.045 * leaf_pseudo_age / 216000))) #: v2
-    #     else:
-    #         vstorage = vstorage
-    #
-    #     return vstorage
+    @staticmethod
+    def calculate_time_equivalent_turgor(turgor_water_potential, time):
+        """ Return the time equivalent to a reference turgor i.e. turgor-compensated time (Coussement, 2020).
 
+        :param float turgor_water_potential: turgor water potential (Mpa)
+        :param float time: time duration (s)
+
+        :return: turgor-compensated time (s)
+        :rtype: float
+        """
+        return time * (max(turgor_water_potential, parameters.HIDDEN_ZONE_PARAMETERS.GAMMA) - parameters.HIDDEN_ZONE_PARAMETERS.GAMMA)
+
+    @staticmethod
+    def calculate_leaf_pseudo_age(leaf_pseudo_age, delta_weq, delta_teq, turgor_water_potential, time):
+        """ Pseudo age of the leaf since beginning of second phase of elongation (s)
+
+        :param float leaf_pseudo_age: Previous pseudo age of the leaf since beginning of automate elongation (s)
+        :param float delta_weq: Turgor-compensated time = time duration at a reference turgor (s)
+
+        :return: Updated leaf_pseudo_age (s)
+        :rtype: float
+        """
+
+        # if delta_weq < delta_teq:
+        #     # leaf_pseudo_age = leaf_pseudo_age - delta_teq + delta_weq
+        #     if (delta_weq / delta_teq < 1) & (delta_weq / delta_teq > 0):
+        #         leaf_pseudo_age_bis = leaf_pseudo_age * (1 - (delta_weq / delta_teq))
+        #     else:
+        #         leaf_pseudo_age_bis = leaf_pseudo_age
+        # else:
+        #     leaf_pseudo_age_bis = leaf_pseudo_age
+
+        # 1
+        leaf_pseudo_age_bis = leaf_pseudo_age - delta_teq + (delta_teq * (1 - (delta_weq / delta_teq)))
+        # 2
+        # leaf_pseudo_age_bis = leaf_pseudo_age * (1 - (delta_weq / delta_teq))
+
+        #3
+        if turgor_water_potential > parameters.HIDDEN_ZONE_PARAMETERS.GAMMA:
+            leaf_pseudo_age_bis = leaf_pseudo_age
+        else:
+            leaf_pseudo_age_bis = leaf_pseudo_age - delta_teq
+
+        return leaf_pseudo_age_bis
 
     @staticmethod
     def calculate_initial_volume(mstruct, leaf_L, thickness, width):
@@ -436,8 +430,6 @@ class HiddenZone(Organ):
         """
         dry_mass = mstruct / HiddenZone.PARAMETERS.RATIO_MSTRUCT_DM  #: total dry mass (g)
         volume = dry_mass * HiddenZone.PARAMETERS.SLOPE_MASS_VOLUME + HiddenZone.PARAMETERS.OFFSET_MASS_VOLUME  #: m3
-
-        # volume = leaf_L * thickness * width
 
         water_content = volume * parameters.RHO_WATER  #: g
 
@@ -455,42 +447,7 @@ class HiddenZone(Organ):
         return water_content / parameters.RHO_WATER
 
     @staticmethod
-    def calculate_solutes_contribution(fructan, sucrose, amino_acids, volume):
-        """
-        #: TODO: doc
-        """
-
-        solutes = (sucrose + fructan + amino_acids) / (volume * 1E06)
-
-        # SIGMOID
-        # omega = 0.033 / (0.033 + exp(- solutes / 220))  # v1
-        # omega = 0.03 / (0.03 + exp(- solutes / 220))  # v2
-        # omega = 0.0275 / (0.0275 + exp(- solutes / 220))  # v3
-        # omega = 0.025 / (0.025 + exp(- solutes / 220))  # v4
-        # omega = 0.02 / (0.02 + exp(- solutes / 200))  # v5
-
-        # CALIBRAGE L3 - L4
-        # - v1
-        # omega = 0.02 / (0.02 + exp(- solutes / 170))  # v5    OK avec 16.45E-06 et L4 x = 0.0034 et y = 0.00051
-        # - v1 bis
-        omega = 0.0215 / (0.0215 + exp(- solutes / 190))  # v5    OK avec 15.5E-06 et L4 x = 0.0034 et y = 0.00051 et LPA = 857000
-        # omega = 0.01475 / (0.01475 + exp(- solutes / 180))  # v5    OK avec 15.5E-06 et L4 x = 0.0034 et y = 0.00051 et LPA = 857000
-        # omega = 0.00025 * solutes + 0.0008
-        # omega = 0.001 * solutes - 0.12
-
-        # v2
-        # omega = 0.0175 / (0.0075 + exp(- 1.3 * solutes / 220))
-        # omega = 0.0155 / (0.0065 + exp(- 1.3 * solutes / 220))
-
-        # fixed meteo
-        # omega = 0.0145 / (0.0145 + exp(- solutes / 110))  # v5    OK avec 15.5E-06 et L4 x = 0.0034 et y = 0.00051 et LPA = 857000
-
-        # return max(0.01, omega)
-        return omega
-
-
-    @staticmethod
-    def calculate_osmotic_water_potential(fructan, sucrose, amino_acids, volume, temperature, omega):
+    def calculate_osmotic_water_potential(fructan, sucrose, amino_acids, volume, temperature):
         """ Osmotic water potential of the organ calculated according to metabolites
 
         :param float fructan: µmol C under the form of fructan
@@ -498,162 +455,25 @@ class HiddenZone(Organ):
         :param float amino_acids: µmol N under the form of amino acids
         :param float volume: (g H2O)
         :param float temperature: air temperature (°C)
-        :param float omega: TODO doc
 
         :return: Osmotic water potential (MPa)
         :rtype: float
         """
         temperature_K = temperature + parameters.CELSIUS_2_KELVIN
 
+        #: Concentration of solutes
         sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
         amino_acids = (amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO
         fructan = (fructan * 1E-6) / parameters.NB_C_SUCROSE
-
-        # osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (omega * volume * parameters.RHO_WATER * parameters.VSTORAGE)
-
-        #: EFFECTIVE CONCENTRATION OF SOLUTES - 10.2024
-        # conc_solutes = (fructan + sucrose + amino_acids) / volume * parameters.VSTORAGE
         conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
 
-        # TEST 04.02.2025
-        # conc_solutes_eff = 360 / (1 + exp(- conc_solutes * 0.007))  # (1)
-        # conc_solutes_eff = 327 / (0.92 + exp(- conc_solutes * 0.009))  # (3)
-        # conc_solutes_eff = 320 / (0.95 + exp(- conc_solutes * 0.0125))  # (2020)
-        # conc_solutes_eff = 356 / (1 + exp(- 6 * conc_solutes / 1000))  # (v4 x 0.7 y 0.175)
-        # conc_solutes_eff = 350 / (1 + exp(- 6 * conc_solutes / 800))  # (v8 x 0.7 y 0.2)
-
-        # conc_solutes_eff = 263 / (1 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
-        conc_solutes_eff = 263 / (1 + exp(- 8 * conc_solutes / 800))  # (v8 x 0.7 y 0.2 GAMMA 0.2)
-
-        #: 6T
-        # conc_solutes_eff = 180 / (0.4 + exp(- 7 * conc_solutes / 800))  # (v8 x 0.7 y 0.185 100% GAMMA 0.2)
-        #: 20T
-        # conc_solutes_eff = 175 / (0.475 + exp(- 8 * conc_solutes / 700))  # (v8 x 0.7 y 0.185 100%  GAMMA 0.2)
-
-        # v1 : conc_solutes_eff = 600 / (1 + exp(- conc_solutes / 30))
-        # v2 : conc_solutes_eff = 500 / (1 + exp(- conc_solutes / 50))
-        # conc_solutes_eff = 250 / (0.1 + exp(- conc_solutes / 200))  # v3
-
-        # conc_solutes_eff = 175 / (0.1 + exp(- conc_solutes / 200))  # v3
-        # conc_solutes_eff = 200 / (0.1 + exp(- 7 * conc_solutes / 800))  # v3
-        # conc_solutes_eff = 252 / (0.6 + exp(- 8 * conc_solutes / 250))  # v3 12T
-        # conc_solutes_eff = 230 / (0.8 + exp(- 8 * conc_solutes / 210))  # v3 20T
-
-        # v4 : conc_solutes_eff = 275 / (0.1 + exp(- conc_solutes / 200))
-        # v5 : conc_solutes_eff = 275 / (0.1 + exp(- conc_solutes / 300))
-        # v6 : conc_solutes_eff = 275 / (0.1 + exp(- conc_solutes / 150))
-        # v7 : conc_solutes_eff = 350 / (0.1 + exp(- conc_solutes / 250))
-        # v8 : conc_solutes_eff = 250 / (0.1 + exp(- conc_solutes / 175))
-        # v9 : conc_solutes_eff = 195 / (0.1 + exp(- 2 * conc_solutes / 175))
-
-        # v9
-
-        # 1 - init with tend, tmax and tbase calibration
-        # conc_solutes_eff = 230 / (0.1 + exp(- 2 * conc_solutes / 175))    # 1
-        # conc_solutes_eff = 220 / (0.1 + exp(- 2 * conc_solutes / 200))    # 2
-        # conc_solutes_eff = 220 / (0.1 + exp(- 2.1 * conc_solutes / 200))    # 3
-
-        # 2 - osmotic water potential calibration
-        # conc_solutes_eff = 190 / (0.1 + exp(- 3 * conc_solutes / 75))     # 2
-        # conc_solutes_eff = 210 / (0.2 + exp(- 3 * conc_solutes / 175))    # 2.1
-        # conc_solutes_eff = 240 / (0.3 + exp(- 4 * conc_solutes / 130))      # 2.2
-        # conc_solutes_eff = 220 / (0.3 + exp(- 4 * conc_solutes / 140))      # 2.2
-        # conc_solutes_eff = 220 / (0.35 + exp(- 5 * conc_solutes / 150))      # 2.2
-        # conc_solutes_eff = 250 / (0.35 + exp(- 5.2 * conc_solutes / 200))      # 2.2
-        # conc_solutes_eff = 235 / (0.35 + exp(- 6 * conc_solutes / 200))      # 2.2
-
-        # 3 - meteo calibration
-        # conc_solutes_eff = 246 / (0.45 + exp(- 8 * conc_solutes / 200))      # 1
-        # conc_solutes_eff = 500 / (1 + exp(-8 * conc_solutes / 200))     # 2
-        # conc_solutes_eff = 250 / (0.55 + exp(-6 * conc_solutes / 100))    # 3
-        # conc_solutes_eff = 290 / (0.65 + exp(-6 * conc_solutes / 100))    # 4
-
-        # 4 - LER calibration
-        # conc_solutes_eff = 400 / (0. + exp(- 8 * conc_solutes / 200))     # v1
-        # conc_solutes_eff = 500 / (0.9 + exp(-6 * conc_solutes / 600))     # v2
-        # conc_solutes_eff = 575 / (1 + exp(-5 * conc_solutes / 600))     # v3
-        # conc_solutes_eff = 625 / (1 + exp(-4 * conc_solutes / 600))      # v4
-        # conc_solutes_eff = 750 / (1.5 + exp(-4 * conc_solutes / 1000))      # v5
-
-        # 5 - PHYLLOCHRON
-        # conc_solutes_eff = 750 / (1.5 + exp(-4 * conc_solutes / 1000))      # v5
-        # conc_solutes_eff = (275 / (0.45 + exp(-3 * conc_solutes / 100)))  # test beta
-        # conc_solutes_eff = (245 / (0.4 + exp(- 4.5 * conc_solutes / 125)))    # test 2
-
-        # conc_solutes_eff = (290 / (0.6 + exp(-4.75 * conc_solutes / 90)))  # test beta
-        # conc_solutes_eff = (270 / (0.565 + exp(-4.1 * conc_solutes / 70)))  # test beta 2
-        # conc_solutes_eff = (290 / (0.675 + exp(-5 * conc_solutes / 60)))   # test beta 5   # Po moins bas
-
-        # xy_ratio
-        # conc_solutes_eff = (290 / (0.675 + exp(-3 * conc_solutes / 60)))   # test beta 6
-        # conc_solutes_eff = (290 / (0.675 + exp(-1 * conc_solutes / 60)))   # test beta 6bis
-        # conc_solutes_eff = (290 / (0.675 + exp(-1.5 * conc_solutes / 60)))   # test beta 8
-
-        # v9
-        # conc_solutes_eff = (312.5 / (0.8 + exp(-3.5 * conc_solutes / 100)))   # test beta 9
-        # v9 - v2
-        # conc_solutes_eff = (305 / (0.8 + exp(-3.25 * conc_solutes / 100)))   # test beta 9
-        # v9 - v3
-        # conc_solutes_eff = (305 / (0.8 + exp(-5 * conc_solutes / 500)))   # test beta 9
-        # conc_solutes_eff = (300 / (0.675 + exp(-7 * conc_solutes / 500)))   # test beta 9
-
-        # conc_solutes_eff = (280 / (0.725 + exp(-4 * conc_solutes / 100)))   # test beta 10
-
-        # conc_solutes_eff = (270 / (0.7 + exp(-4.5 * conc_solutes / 100)))   # test beta 11 (1) init
-        # conc_solutes_eff = (270 / (0.7 + exp(-5 * conc_solutes / 100)))   # test beta 11 (1)
-        # conc_solutes_eff = (190 / (0.475 + exp(-5.5 * conc_solutes / 100)))   # test beta 11 (2)
-        # conc_solutes_eff = (190 / (0.475 + exp(-5.35 * conc_solutes / 100)))   # test beta 11 (3)
-
-        # conc_solutes_eff = (600 / (1.25 + exp(-7.5 * conc_solutes / 1500)))   # test beta 11 lower delta -> A
-        # conc_solutes_eff = (600 / (1.25 + exp(-3.75 * conc_solutes / 1500)))   # test beta 11 lower delta (2) -> B
-
-        # -------------
-        # conc_solutes_eff = (282.5 / (0.70 + exp(-9 * conc_solutes / 1500)))   # test beta 11 -> C
-        # conc_solutes_eff = (256.5 / (0.70 + exp(-9 * conc_solutes / 1500)))   # test beta 11 -> C
-
-        # conc_solutes_eff = (260 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C (2)
-
-        # 50%
-        # 0.775 - 0.1
-        # conc_solutes_eff = (235 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test beta 11 -> C
-
-        # TEST
-        # conc_solutes_eff = (240 / (0.5 + exp(-8 * conc_solutes / 1250)))   # test beta 11 -> C
-
-        # Wmax parameters
-        # conc_solutes_eff = (245 / (0.6 + exp(-7 * conc_solutes / 1500)))   # config (2) = (20T) puis (2)
-        # conc_solutes_eff = (245 / (0.6 + exp(-7 * conc_solutes / 900)))   # = (1)
-
-        # Wmax function
-        # conc_solutes_eff = (245 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test décroissance
-        # conc_solutes_eff = (232.5 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test croissance
-        # conc_solutes_eff = (240 / (0.6 + exp(-7 * conc_solutes / 1500)))   # test Ljutovac
-
-        # delta Po
-        # conc_solutes_eff = (304 / (0.9 + exp(-8 * conc_solutes / 400)))   # test beta 11 -> C
-        # conc_solutes_eff = (356 / (1 + exp(-6 * conc_solutes / 1000)))   # test beta 11 -> C
-        # conc_solutes_eff = (342.5 / (1 + exp(-6.5 * conc_solutes / 800)))   # test beta 11 -> C
-        # conc_solutes_eff = (345 / (1.1 + exp(-6.5 * conc_solutes / 600)))   # test beta 11 -> C
-
-        # delta Po x croissante
-        # conc_solutes_eff = (355 / (1 + exp(-6 * conc_solutes / 1000)))   # test beta 11 -> C
-        # v2
-        # conc_solutes_eff = (335 / (1 + exp(-5 * conc_solutes / 900)))   # test beta 11 -> C
-        # A
-        # conc_solutes_eff = (250 / (0.7 + exp(-6 * conc_solutes / 1000)))   # test beta 11 -> C
-        # B
-        # conc_solutes_eff = (255 / (0.65 + exp(-6 * conc_solutes / 800)))   # test beta 11 -> C
-
-        # polynomial
-        # conc_solutes_eff = (335 / (1 + exp(-4 * conc_solutes / 600)))   # test beta 11 -> C
-        # conc_solutes_eff = (315 / (0.9 + exp(-6 * conc_solutes / 600)))   # test beta 11 -> C
-
-        # polynomial bis
-        # conc_solutes_eff = (340 / (1.1 + exp(-7 * conc_solutes / 600)))   # test beta 11 -> C
+        #: Effective concentration of solutes
+        conc_solutes_eff = 260 / (0.9 + exp(- 8.5 * conc_solutes / 1000))
+        # conc_solutes_eff = 260 / (0.7 + exp(- 8.5 * conc_solutes / 1000))
+        # conc_solutes_eff = 260 / (1.05 + exp(- 8.5 * conc_solutes / 1000))
+        # conc_solutes_eff = 260 / (1 + exp(- 8.5 * conc_solutes / 1000))
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
-
-        # osmotic_water_potential = -0.8
 
         return osmotic_water_potential
 
@@ -691,15 +511,9 @@ class HiddenZone(Organ):
         :return: resistance (MPa s g-1)
         :rtype: float
 
-        #: TODO : doc
         """
         #: Coussement et al. (2018)
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_hz * (hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']))
-
-        #: Martre et al. (2001)
-        Kr = 21.2 * 18 * 1E-03
-        # resistance = 0.5 * (1E-04 / Kr) * hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness'])
-        # resistance = 0.5 * (1/ Kr) * hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness'])
 
         return resistance
 
@@ -734,70 +548,6 @@ class HiddenZone(Organ):
         return water_influx - water_outflow
 
     @staticmethod
-    def calculate_extensibility_init(age, delta_t):
-
-        """ Hidden zone extensibility in each dimension in relation to non-reversible dimensional changes.
-
-        :param float age: hidden zone age (°Cd)
-        :param float delta_t: time step of the simulation (s)
-
-        :return: Extensibility z, y and x (MPa-1): {'z': float, 'y': float, 'x': float}
-        :rtype: dict
-        """
-        if age <= HiddenZone.PARAMETERS.tend:
-            beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
-                                  * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
-                                  ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))) + HiddenZone.PARAMETERS.OFFSET_LEAF
-        else:
-            beta_function_norm = 0
-
-        phi = {}
-
-        for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
-            phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
-        return phi
-
-    @staticmethod
-    def calculate_extensibility_dimensions(age, delta_t):
-
-        """ Hidden zone extensibility in each dimension in relation to non-reversible dimensional changes.
-
-        :param float age: hidden zone age (°Cd)
-        :param float delta_t: time step of the simulation (s)
-
-        :return: Extensibility z, y and x (MPa-1): {'z': float, 'y': float, 'x': float}
-        :rtype: dict
-        """
-        #: TODO parameters into parameters.py
-        phi = {}
-
-        for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
-            if phi_init_dimensions == 'x': #: width
-                # Function of Liu et al. (2007)
-                if age <= HiddenZone.PARAMETERS.tend:
-                    beta_function_norm = 2 / (1 + exp(3/1E06 * age))
-                else:
-                    beta_function_norm = 0
-            if phi_init_dimensions == 'y': #: thickness
-                # Function of Liu et al. (2007)
-                if age <= HiddenZone.PARAMETERS.tend:
-                    beta_function_norm = 2 / (1 + exp(3/1E06 * age))
-                else:
-                    beta_function_norm = 0
-            if phi_init_dimensions == 'z': #: length
-                # Function of Coussement et al. (2018)
-                if age <= HiddenZone.PARAMETERS.tend:
-                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
-                                          * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
-                                          ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-                else:
-                    beta_function_norm = 0
-
-            phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t
-
-        return phi
-
-    @staticmethod
     def calculate_extensibility_temperature(age, delta_teq, delta_t):
 
         """ Hidden zone extensibility in each dimension in relation to non-reversible dimensional changes.
@@ -809,28 +559,10 @@ class HiddenZone(Organ):
         :return: Extensibility z, y and x (MPa-1): {'z': float, 'y': float, 'x': float}
         :rtype: dict
         """
-        #: TODO parameters into parameters.py
 
         phi = {}
 
         for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
-
-            # TEST 1
-
-            # if phi_init_dimensions == 'x':      #: width
-            #     # Function of Liu et al. (2007)
-            #     beta_function_norm = 2 / (1 + exp(4 / 1E06 * age))
-            # if phi_init_dimensions == 'y':      #: thickness
-            #     # Function of Liu et al. (2007)
-            #     beta_function_norm = 2 / (1 + exp(4 / 1E06 * age))
-            # if phi_init_dimensions == 'z':      #: length
-            #     if age <= HiddenZone.PARAMETERS.tend:
-            #         # Function of Coussement et al. (2018)
-            #         beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
-            #                               * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
-            #                               ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-            #     else:
-            #         beta_function_norm = 0
 
             # TEST 2
 
@@ -913,33 +645,9 @@ class HiddenZone(Organ):
         # organ_volume = length * thickness * width
 
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
-        # delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
-    @staticmethod
-    def calculate_delta_organ_dimensions(delta_turgor_water_potential, turgor_water_potential, phi, organ_dimensions):
-        """ Delta of organ dimensions according to turgor water potential, dimensions, extensibility and plasticity.
-        Hidden zone geometry is supposed to be a rectangular prism.
-
-        :param float delta_turgor_water_potential: delta of turgor water potential integrated over delta t (MPa)
-        :param float turgor_water_potential: MPa
-        :param dict phi: dict of cell wall extensibility (MPa). Keys = ['x', 'y', 'z]
-        :param dict organ_dimensions: dict of organ dimensions at time t. Keys = [length', 'width', 'thickness'] (m)
-
-        :return: Delta of organ specific-dimensions (m). Keys = ['leaf_L', 'width', 'thickness']
-        :rtype: dict
-        """
-        delta_organ_dimensions = {}
-        epsilon_dict = HiddenZone.PARAMETERS.epsilon
-        mapping_dimensions = {'x': 'width', 'y': 'thickness', 'z': 'length'}
-
-        for epsilon_dimension, epsilon_value in epsilon_dict.items():
-            delta_organ_dimensions[mapping_dimensions[epsilon_dimension]] = ((1 / epsilon_value) * delta_turgor_water_potential +
-                                                                             phi[epsilon_dimension] * (max(turgor_water_potential, HiddenZone.PARAMETERS.gamma) - HiddenZone.PARAMETERS.gamma)) *\
-                                                                            organ_dimensions[mapping_dimensions[epsilon_dimension]]
-
-        return delta_organ_dimensions
 
     @staticmethod
     def calculate_delta_organ_dimensions_plastic(turgor_water_potential, phi, organ_dimensions):
@@ -1082,11 +790,11 @@ class PhotosyntheticOrganElement(object):
     PARAMETERS = parameters.PHOTOSYNTHETIC_ORGAN_ELEMENT_PARAMETERS  #: the internal parameters of the photosynthetic organs elements
     INIT_COMPARTMENTS = parameters.PHOTOSYNTHETIC_ORGAN_ELEMENT_INIT_COMPARTMENTS  #: the initial values of compartments and state parameters
 
-    def __init__(self, label=None, is_growing = INIT_COMPARTMENTS.is_growing, temperature = INIT_COMPARTMENTS.temperature, age = INIT_COMPARTMENTS.age, green_area = INIT_COMPARTMENTS.green_area, mstruct = INIT_COMPARTMENTS.mstruct, Ts = INIT_COMPARTMENTS.Ts,
-                 Tr = INIT_COMPARTMENTS.Tr, sucrose = INIT_COMPARTMENTS.sucrose, amino_acids = INIT_COMPARTMENTS.amino_acids, proteins = INIT_COMPARTMENTS.proteins, fructan = INIT_COMPARTMENTS.fructan,
-                 osmotic_water_potential = INIT_COMPARTMENTS.osmotic_water_potential, total_water_potential = INIT_COMPARTMENTS.total_water_potential,
-                 turgor_water_potential = INIT_COMPARTMENTS.turgor_water_potential, water_influx = INIT_COMPARTMENTS.water_influx, Wmax = INIT_COMPARTMENTS.Wmax,
-                 length=INIT_COMPARTMENTS.length, thickness= INIT_COMPARTMENTS.thickness, width = INIT_COMPARTMENTS.width, water_content = INIT_COMPARTMENTS.water_content, cohorts=None, cohorts_replications=None):
+    def __init__(self, label=None, is_growing=INIT_COMPARTMENTS.is_growing, temperature=INIT_COMPARTMENTS.temperature, age=INIT_COMPARTMENTS.age, green_area=INIT_COMPARTMENTS.green_area, mstruct=INIT_COMPARTMENTS.mstruct, Ts=INIT_COMPARTMENTS.Ts,
+                 Tr=INIT_COMPARTMENTS.Tr, sucrose=INIT_COMPARTMENTS.sucrose, amino_acids=INIT_COMPARTMENTS.amino_acids, proteins=INIT_COMPARTMENTS.proteins, fructan=INIT_COMPARTMENTS.fructan,
+                 osmotic_water_potential=INIT_COMPARTMENTS.osmotic_water_potential, total_water_potential=INIT_COMPARTMENTS.total_water_potential,
+                 turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_influx=INIT_COMPARTMENTS.water_influx, Wmax=INIT_COMPARTMENTS.Wmax,
+                 length=INIT_COMPARTMENTS.length, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width, water_content=INIT_COMPARTMENTS.water_content, cohorts=None, cohorts_replications=None):
 
         self.label = label                                      #: the label of the element
         if cohorts is None:  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
@@ -1095,9 +803,9 @@ class PhotosyntheticOrganElement(object):
         self.cohorts_replications = cohorts_replications  #: dictionary of number of replications per cohort rank
 
         # state parameters
-        self.is_growing = is_growing                                        #: -
+        self.is_growing = is_growing                            #: -
         self.age = age                                          #: °Cd
-        self.Wmax = Wmax                                          #: m
+        self.Wmax = Wmax                                        #: m
         self.amino_acids = amino_acids                          #: :math:`\mu mol N
         self.green_area = green_area                            #: m2
         self.mstruct = mstruct                                  #: g
@@ -1107,17 +815,17 @@ class PhotosyntheticOrganElement(object):
         self.Ts = Ts                                            #: °C
         self.temperature = temperature                          #: °C
         self.Tr = Tr                                            #: mmol H20 m-2 s-1
-        self.thickness = thickness  #: m
-        self.width = width          #: m
+        self.thickness = thickness                              #: m
+        self.width = width                                      #: m
 
         # intermediate variables
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.osmotic_water_potential = osmotic_water_potential  #: MPa
-        self.total_water_potential = total_water_potential #: MPa
-        self.length = length  #: m
+        self.total_water_potential = total_water_potential      #: MPa
+        self.length = length                                    #: m
 
         # state variables
-        self.water_content = water_content                     #: g H2O
+        self.water_content = water_content                      #: g H2O
 
         # fluxes to xylem
         self.water_influx = water_influx  #: current flow of water from xylem to organ integrated over delta t (g H2O)
@@ -1159,16 +867,9 @@ class PhotosyntheticOrganElement(object):
         :param dict lamina_dimensions: dict of lamina dimensions (m). Keys = ['length', 'width', 'thickness']
         :return: resistance (MPa s g-1)
         :rtype: float
-
-        TODO : doc
         """
         #: Coussement et al. (2018)
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
-
-        #: Martre et al. (2001)
-        Kr = 7.2 * 18 * 1E-03
-        # resistance = 0.5 * (1E-04 / Kr) * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
-        # resistance = 0.5 * (1/ Kr) * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
 
         return resistance
 
@@ -1196,13 +897,12 @@ class PhotosyntheticOrganElement(object):
         :rtype: float
         """
 
-        conversion_ratio = 18 * 1E-03 * delta_t # gH2O
+        conversion_ratio = parameters.WATER_MOLAR_MASS * 1E-03 * delta_t # gH2O
 
         return Tr * green_area * conversion_ratio
 
     # FLUXES
     #: Water flow equations common to all photosynthetic organ elements
-
     @staticmethod
     def calculate_volume(water_content):
         """ Photosynthetic element volume, assumed to be proportional to water content.
@@ -1232,14 +932,25 @@ class PhotosyntheticOrganElement(object):
         """
         temperature_K = temperature + parameters.CELSIUS_2_KELVIN
 
-        sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE)
-        amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO)
-        fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE)
+        # sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE)
+        # amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO)
+        # fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE)
+        #
+        # # Contribution of organic solutes
+        # contribution = 0.16  # from Baji et al. (2001)
+        #
+        # osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (volume * parameters.RHO_WATER * parameters.VSTORAGE * contribution)
 
-        # Contribution des solutés organiques au potentiel osmotique
-        contribution = 0.16  # From Baji et al. (2001)
+        #: Concentration of solutes
+        sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
+        amino_acids = (amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO
+        fructan = (fructan * 1E-6) / parameters.NB_C_SUCROSE
+        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
 
-        osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (volume * parameters.RHO_WATER * parameters.VSTORAGE * contribution)
+        #: Effective concentration of solutes
+        conc_solutes_eff = 260 / (0.9 + exp(- 8.5 * conc_solutes / 1000))
+
+        osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
         return max(osmotic_water_potential, -2)
 
@@ -1380,16 +1091,15 @@ class Soil(object):
 
     @staticmethod
     def calculate_water_potential(SRWC):
-        """Total water potential of the xylem
-        Equation from Chen et al., 1998 (Genotypic variation in drought tolerance of poplar in relation to abscisic acid)
+        """Total water potential of the xylem (Mpa)
+        Equation from Chen et al. (2019), adapté pour un sol limono-argileux profond (sol lessivé sur limon loessique) à Grignon.
 
         :param float SRWC: %
 
         :return: Total water potential (MPa)
         :rtype: float
         """
-        #: TO DO declaration of parameters into parameters.py
-        soil_water_potential = - exp((-SRWC + 15.906) / 18.902)
+        soil_water_potential = - exp((-SRWC + parameters.SOIL_PARAMETERS.Soil_a) / parameters.SOIL_PARAMETERS.Soil_b)
 
         return soil_water_potential
 
