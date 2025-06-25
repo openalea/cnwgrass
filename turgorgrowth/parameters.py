@@ -154,28 +154,12 @@ class HiddenZoneParameters(OrganParameters):
     def __init__(self):
         super(HiddenZoneParameters, self).__init__()
 
-        # Initial
-        # self.epsilon = {'x': 50, 'y': 50, 'z': 50}  #: 0.9 Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.phi_initial = {'x': 1E-09, 'y': 1E-09, 'z': 0.4E-05}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-
         # Elasticity
         self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
         # Extensibility
-        # self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 36E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # 0.185 phase 1 - RER init
         self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 34E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # ratio x et y LOW
-        # self.phi_initial = {'x': 16E-09, 'y': 16E-09, 'z': 28E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # ratio x et y HIGH
-        # self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 38E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 36E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # self.phi_initial = {'x': 16E-09, 'y': 10E-09, 'z': 38E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # osmotic 1.05
-        # self.phi_initial = {'x': 13E-09, 'y': 7E-09, 'z': 42E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # osmotic 1 - HIGH
-        # self.phi_initial = {'x': 13E-09, 'y': 7E-09, 'z': 43.5E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # evolution of ratio with leaf rank - osmotic 0.9
-        # self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 35E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
+        # self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 34E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # Length
         self.tend = 2160000  #: end of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
@@ -186,15 +170,23 @@ class HiddenZoneParameters(OrganParameters):
         self.tm = self.tmax * 100 / 100  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         self.tb = self.tbase * 100 / 100  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
 
+        # Parameters for temperature responses
+        self.Temp_Tref = 12  # Arbitrary reference temperature (°C)
+        self.Temp_Ea_R = 8900  # Parameter Ea/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
+        self.Temp_DS_R = 68.432  # Parameter deltaS/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (dimensionless)
+        self.Temp_DH_R = 20735.5  # Parameter deltaH/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
+        self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(°C)
+        # self.Temp_Tref = 10  # Arbitrary reference temperature (°C)
+        # self.Temp_Ea_R = 8300  # Parameter Ea/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
+        # self.Temp_DS_R = 68.6  # Parameter deltaS/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (dimensionless)
+        # self.Temp_DH_R = 20800  # Parameter deltaH/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
+        # self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(°C)
+
         # Maximal leaf length
         self.leaf_Lmax_MAX = 0.45  #: Maximum leaf_Lmax (m) (Gauthier et al., 2021)
 
         # Maximal leaf width
         self.leaf_Wmax_Marion = {1: 0.0030, 2: 0.0033, 3: 0.0040, 4: 0.0045, 5: 0.0056, 6: 0.0075, 7: 0.010, 8: 0.012, 9: 0.013, 10: 0.014, 11: 0.018}  #: m
-
-        # Width and thickness : length ratio at En-1
-        self.width_ratio = {1: 0.55, 2: 0.525, 3: 0.575, 4: 0.62, 5: 0.65, 6: 0.66, 7: 0.685, 8: 0.7, 9: 0.7, 10: 0.71, 11: 0.7, 12: 0.71, 13: 0.72, 14: 0.7, 15: 0.75, 16: 0.75, 17: 0.72, 18: 0.75, 19: 0.77, 20: 0.8}
-        self.thickness_ratio = {1: 0.18, 2: 0.17, 3: 0.18, 4: 0.18, 5: 0.17, 6: 0.16, 7: 0.15, 8: 0.15, 9: 0.16, 10: 0.14, 11: 0.13, 12: 0.14, 13: 0.145, 14: 0.15, 15: 0.145, 16: 0.15, 17: 0.145, 18: 0.14, 19: 0.13, 20: 0.135}
 
         L0 = abs((1 + (self.tend / (self.tend - self.tmax))) * (min(1.0, float(-self.tbase) / float(self.tend - self.tbase)) ** ((self.tend - self.tbase) / (self.tend - self.tmax))))  #: Leaf length at t=0 in automate growth (beta function) (m)
         FITTED_L0 = 0.01557936  #: Fitted value of leaf length at t=0 after rescaling the beta function with L0 (m); Fournier 2005 sur courbe corrigee
@@ -203,6 +195,16 @@ class HiddenZoneParameters(OrganParameters):
         self.SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
         self.OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
         self.GAMMA = 0.2    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
+
+        self.Sa = 260     #: (mol m-3)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sb = 0.9      #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sc = -8.5     #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sd = 1000    #: (mol m-3)  Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+
+        self.WL_ratio = 0.675    #: -
+        self.TL_ratio = 0.14    #: -
+        # self.WL_ratio = 0.725    #: -
+        # self.TL_ratio = 0.155    #: -
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneParameters` for current process
 HIDDEN_ZONE_PARAMETERS = HiddenZoneParameters()
@@ -225,36 +227,23 @@ class HiddenZoneInitCompartments(object):
         self.mstruct = 1.26E-07    #: g
         self.leaf_enclosed_mstruct = 1.26E-07    #: g
         self.delta_teq = 3600   #: s     #: time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010)
-        self.delta_weq = 3600   #: s     #: time equivalent to a reference turgor i.e. turgor-compensated time (Coussement et al., 2020)
+
         self.leaf_pseudostem_length = 4E-5   #: m
         self.leaf_L = 5E-5                   #: m
+        self.init_leaf_L = 5E-5                   #: m
+        self.length_hz_En = None                #: m
         self.lamina_Lmax = None                 #: m
         self.leaf_Wmax = None                 #: m
         self.leaf_is_growing = True                #: -
-        # self.WL_ratio = 0.7    #: -
-        # self.TL_ratio = 0.15    #: -
-        # self.width = self.WL_ratio * self.leaf_L                #: m
-        # self.thickness = self.thickness * self.leaf_L     #: m
         self.width = 0.003                 #: m
         self.thickness = 0.0005     #: m
         self.volume = self.leaf_L * self.width * self.thickness
-        self.water_content = self.volume * RHO_WATER
 
+        self.water_content = self.volume * RHO_WATER
         self.water_influx = 0                 #: g H2O
         self.water_outflow = 0                 #: g H2O
-
-        self.init_leaf_L = 5E-5                   #: m
-        self.length_hz_En = None                #: m
-
         self.SRWC = 80  #: %
-        # self.volume = self.mstruct / RATIO_MSTRUCT_DM * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME  #: m3
-        # self.water_content = ((self.mstruct / RATIO_MSTRUCT_DM) * SLOPE_MASS_VOLUME + OFFSET_MASS_VOLUME) * RHO_WATER  #: g
         self.osmotic_water_potential = -0.8 #: Mpa
-
-        # self.conc_solutes = (self.fructan + self.sucrose + self.amino_acids) / (self.volume * VSTORAGE)
-        # self.conc_solutes_eff = 200 / (0.6 + exp(- 8 * self.conc_solutes / 1000))
-        # self.osmotic_water_potential = - R * (self.temperature + CELSIUS_2_KELVIN) * self.conc_solutes_eff / RHO_WATER
-
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
         self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential  #: MPa
 
@@ -289,18 +278,7 @@ class XylemParameters(object):
     def __init__(self):
         super(XylemParameters, self).__init__()
 
-        # V0 - init
-        # self.R_xylem_organ = 2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023
-        # self.R_xylem_hz = 0.2    #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) # change after Tom's discussion 10/2023
-        # self.R_soil = 1E-03    #: Flow resistance between soil and xylem (Mpa s g-1 m)
-
-        # self.R_xylem_hz = 2     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
-        # self.R_soil = 1E-04    #: Flow resistance between soil and xylem (Mpa s g-1 m)
-        # self.R_xylem_organ = 0.5      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m)
-
-        # TEST METEO 2020
         self.R_xylem_hz = 1     #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) : 1
-        # self.R_soil = 1E-03    #: Flow resistance between soil and xylem (Mpa s g-1 m) : 1E-05
         self.R_soil = 1E-05    #: Flow resistance between soil and xylem (Mpa s g-1 m) : 1E-05
         self.R_xylem_organ = 0.25      #: Flow resistance between xylem and shoot organs (Mpa s g-1 m) : 0.25
 
@@ -332,20 +310,12 @@ class PhotosyntheticOrganElementParameters(object):
     def __init__(self):
         super(PhotosyntheticOrganElementParameters, self).__init__()
 
-        # self.epsilon = {'x': 10, 'y': 10, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # https://acsess.onlinelibrary.wiley.com/doi/epdf/10.2134/agronj1979.00021962007100010008x
-        # entre 10 et 30 MPa pour wheat et 18 wheatgrass
-
-        # 27.03.2024 CALIBRATION
-        # self.epsilon = {'x': 5, 'y': 2.5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 15, 'y': 12, 'z': 15}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.epsilon = {'x': 150, 'y': 120, 'z': 150}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 1500, 'y': 1200, 'z': 1500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 500, 'y': 200, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 90, 'y': 90, 'z': 90}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
-        # self.tend = 216  #: end of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.Sa = 260     #: (mol m-3)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sb = 0.9      #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sc = -8.5     #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sd = 1000    #: (mol m-3)  Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
 
 #: The instance of class :class:`cnwheat.parameters.PhotosyntheticOrganElementParameters` for current process
 PHOTOSYNTHETIC_ORGAN_ELEMENT_PARAMETERS = PhotosyntheticOrganElementParameters()
@@ -372,20 +342,15 @@ class PhotosyntheticOrganElementInitCompartments(object):
         self.thickness = 0.0005              #: m init
         self.length = 4E-5                   #: m init
 
-        self.osmotic_water_potential = -0.8   #: MPa
-        self.water_content = - R * (self.Ts + CELSIUS_2_KELVIN) * ((((self.sucrose * 1E-6) / NB_C_SUCROSE) * VANT_HOFF_SUCROSE) +
-                (((self.amino_acids * 1E-6) / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) +
-                (((self.proteins * 1E-6) / AMINO_ACIDS_N_RATIO) * VANT_HOFF_AMINO_ACIDS) ) / self.osmotic_water_potential
-        # TODO as function of volume and dimensions
-
-        self.volume = self.water_content / RHO_WATER
-
+        self.volume = self.length * self.width * self.thickness
+        self.water_content = self.volume * RHO_WATER
+        self.water_influx = 0   #: g H2O
+        self.water_outflow = 0   #: g H2O
         self.SRWC = 80  #: %
+        self.osmotic_water_potential = -0.8   #: MPa
         self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
         self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential   #: MPa
 
-        self.water_influx = 0   #: g H2O
-        self.water_outflow = 0   #: g H2O
 
 
 #: The instance of class :class:`turgorgrowth.parameters.LaminaInitCompartments` for current process
@@ -399,13 +364,6 @@ class LaminaElementParameters(OrganParameters):
     def __init__(self):
         super(LaminaElementParameters, self).__init__()
 
-        # self.epsilon = {'x': 10, 'y': 10, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-
-        # 27.03.2024 CALIBRATION
-        # self.epsilon = {'x': 5, 'y': 2.5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 1500, 'y': 1200, 'z': 1500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 90, 'y': 90, 'z': 90}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 15, 'y': 12, 'z': 15}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.epsilon = {'x': 150, 'y': 120, 'z': 150}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
 #: The instance of class :class:`turgorgrowth.parameters.LaminaParameters` for current process
@@ -434,13 +392,6 @@ class InternodeElementParameters(OrganParameters):
 
         self.epsilon = {'x': 10, 'y': 10, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
 
-        # 27.03.2024 CALIBRATION
-        # self.epsilon = {'x': 5, 'y': 2.5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 150, 'y': 120, 'z': 150}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 90, 'y': 90, 'z': 90}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 15, 'y': 12, 'z': 15}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-
 #: The instance of class :class:`turgorgrowth.parameters.InternodeParameters` for current process
 INTERNODE_ELEMENT_PARAMETERS = InternodeElementParameters()
 
@@ -465,16 +416,8 @@ class SheathElementParameters(OrganParameters):
     def __init__(self):
         super(SheathElementParameters, self).__init__()
 
-        # self.epsilon = {'x': 10, 'y': 10, 'z': 10}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-
-        # 27.03.2024 CALIBRATION
-        # self.epsilon = {'x': 5, 'y': 2.5, 'z': 5}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
         self.epsilon = {'x': 150, 'y': 120, 'z': 150}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 1500, 'y': 1200, 'z': 1500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 500, 'y': 200, 'z': 500}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 90, 'y': 90, 'z': 90}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 50, 'y': 40, 'z': 50}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
-        # self.epsilon = {'x': 15, 'y': 12, 'z': 15}  #: Dimension-specific elasticity in relation to reversible dimensional changes (MPa). x: width, y: thickness, z: length.
+
 
 #: The instance of class :class:`turgorgrowth.parameters.InternodeParameters` for current process
 SHEATH_ELEMENT_PARAMETERS = SheathElementParameters()
@@ -499,8 +442,8 @@ class SoilParameters(object):
     """
     def __init__(self):
         self.AWC = 50  # Available Water Capacity (g)
-        self.Soil_a = 15.906  #: Mpa
-        self.Soil_b = 18.902  #: %
+        self.Soil_a = 15.906  #: Mpa - Parameter for soil water function (adapté pour sol limono-argileux profond, Grignon)
+        self.Soil_b = 18.902  #: % - Parameter for soil water function (adapté pour sol limono-argileux profond, Grignon)
 
 #: The instance of class :class:`cnwheat.parameters.SoilParameters` for current process
 SOIL_PARAMETERS = SoilParameters()

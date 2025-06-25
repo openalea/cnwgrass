@@ -754,31 +754,10 @@ class Simulation(object):
 
                         if hiddenzone.leaf_pseudo_age == 0:  #: First time after previous leaf emergence
                             #: Width and thickness
-                            thickness_ratio = 0.14
-                            width_ratio = 0.675
-
-                            # LOW
-                            # thickness_ratio = 0.1
-                            # width_ratio = 0.5
-                            # HIGH
-                            # thickness_ratio = 0.18
-                            # width_ratio = 0.8
-                            # thickness_ratio = 0.16
-                            # width_ratio = 0.77
-
-                            # increasing ratio with leaf rank
-                            # width_ratio = hiddenzone.PARAMETERS.width_ratio.get(phytomer.index, hiddenzone.PARAMETERS.width_ratio[max(hiddenzone.PARAMETERS.width_ratio.keys())])
-                            # thickness_ratio = hiddenzone.PARAMETERS.thickness_ratio.get(phytomer.index, hiddenzone.PARAMETERS.thickness_ratio[max(hiddenzone.PARAMETERS.thickness_ratio.keys())])
-
-                            # width_ratio = -0.01 * phytomer.index + 0.71      # decreasing
-                            #: linear function
-                            # width_ratio = 0.05 * phytomer.index + 0.25      # croissante v1
-                            # width_ratio = 0.0857 * phytomer.index + 0.0571      # croissante v2
-                            # thickness_ratio = 0.0025 * phytomer.index + 0.165      # croissante v3
-                            #: polynomial function
-                            # width_ratio = -0.0021 * phytomer.index**3 + 0.0355 * phytomer.index**2 - 0.1527 * phytomer.index + 0.75     # polynomial
-                            # thickness_ratio = -0.0009 * phytomer.index**3 + 0.0175 * phytomer.index**2 -0.1 * phytomer.index + 0.35   # polynomial
-                            # width_ratio = min(0.84, 0.001825 * phytomer.index**3 - 0.034 * phytomer.index**2 + 0.1527 * phytomer.index + 0.7)     # polynomial
+                            thickness_ratio = parameters.HIDDEN_ZONE_PARAMETERS.TL_ratio
+                            width_ratio = parameters.HIDDEN_ZONE_PARAMETERS.WL_ratio
+                            # width_ratio = -0.02 * phytomer.index + 0.8
+                            # thickness_ratio = 0.005 * phytomer.index + 0.095
 
                             hiddenzone.width = hiddenzone.leaf_L * width_ratio
                             hiddenzone.thickness = hiddenzone.leaf_L * thickness_ratio
@@ -807,10 +786,6 @@ class Simulation(object):
                             hiddenzone.total_water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
                             #: Length
                             hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
-                            #: Turgor-compensated time
-                            hiddenzone.delta_weq = hiddenzone.calculate_time_equivalent_turgor(hiddenzone.turgor_water_potential, self.delta_t)
-                            #: Leaf pseudo-age
-                            #hiddenzone.leaf_pseudo_age = hiddenzone.calculate_leaf_pseudo_age(hiddenzone.leaf_pseudo_age, hiddenzone.delta_weq, hiddenzone.delta_teq, hiddenzone.turgor_water_potential, self.delta_t)
                         else:   #: Before previous leaf emergence (calculation in elong-wheat)
                             continue
 
@@ -889,6 +864,7 @@ class Simulation(object):
                         #: Delta water content
                         delta_water_content_hz = hiddenzone.calculate_delta_water_content(hiddenzone.water_influx, hiddenzone.water_outflow)
                         #: Extensibility
+                        # hiddenzone.delta_teq = hiddenzone.calculate_time_equivalent_Tref(hiddenzone.temperature, self.delta_t)
                         phi = hiddenzone.calculate_extensibility_temperature(hiddenzone.leaf_pseudo_age, hiddenzone.delta_teq, self.delta_t)
                         hiddenzone.phi_length = phi['z']  # extensibility for length
                         hiddenzone.phi_width = phi['x']  # extensibility for length

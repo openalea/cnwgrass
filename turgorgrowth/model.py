@@ -314,7 +314,7 @@ class HiddenZone(Organ):
                  leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width,
                  turgor_water_potential=INIT_COMPARTMENTS.turgor_water_potential, water_content=INIT_COMPARTMENTS.water_content,
                  Tr=INIT_COMPARTMENTS.Tr, green_area=INIT_COMPARTMENTS.green_area, water_influx=INIT_COMPARTMENTS.water_influx, water_outflow=INIT_COMPARTMENTS.water_outflow, cohorts=None, cohorts_replications=None, leaf_Wmax = INIT_COMPARTMENTS.leaf_Wmax, lamina_Lmax = INIT_COMPARTMENTS.lamina_Lmax,
-                 leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, delta_teq=INIT_COMPARTMENTS.delta_teq, delta_weq=INIT_COMPARTMENTS.delta_weq):
+                 leaf_is_growing=INIT_COMPARTMENTS.leaf_is_growing, delta_teq=INIT_COMPARTMENTS.delta_teq):
 
         super(HiddenZone, self).__init__(label)
 
@@ -361,7 +361,6 @@ class HiddenZone(Organ):
         self.turgor_water_potential = turgor_water_potential    #: MPa
         self.leaf_Lmax = None   #: m
         self.leaf_Wmax = leaf_Wmax   #: m
-        self.delta_weq = delta_weq
 
     @property
     def nb_replications(self):
@@ -375,52 +374,7 @@ class HiddenZone(Organ):
 
     #:  Model equations for water flux
     @staticmethod
-    def calculate_time_equivalent_turgor(turgor_water_potential, time):
-        """ Return the time equivalent to a reference turgor i.e. turgor-compensated time (Coussement, 2020).
-
-        :param float turgor_water_potential: turgor water potential (Mpa)
-        :param float time: time duration (s)
-
-        :return: turgor-compensated time (s)
-        :rtype: float
-        """
-        return time * (max(turgor_water_potential, parameters.HIDDEN_ZONE_PARAMETERS.GAMMA) - parameters.HIDDEN_ZONE_PARAMETERS.GAMMA)
-
-    @staticmethod
-    def calculate_leaf_pseudo_age(leaf_pseudo_age, delta_weq, delta_teq, turgor_water_potential, time):
-        """ Pseudo age of the leaf since beginning of second phase of elongation (s)
-
-        :param float leaf_pseudo_age: Previous pseudo age of the leaf since beginning of automate elongation (s)
-        :param float delta_weq: Turgor-compensated time = time duration at a reference turgor (s)
-
-        :return: Updated leaf_pseudo_age (s)
-        :rtype: float
-        """
-
-        # if delta_weq < delta_teq:
-        #     # leaf_pseudo_age = leaf_pseudo_age - delta_teq + delta_weq
-        #     if (delta_weq / delta_teq < 1) & (delta_weq / delta_teq > 0):
-        #         leaf_pseudo_age_bis = leaf_pseudo_age * (1 - (delta_weq / delta_teq))
-        #     else:
-        #         leaf_pseudo_age_bis = leaf_pseudo_age
-        # else:
-        #     leaf_pseudo_age_bis = leaf_pseudo_age
-
-        # 1
-        leaf_pseudo_age_bis = leaf_pseudo_age - delta_teq + (delta_teq * (1 - (delta_weq / delta_teq)))
-        # 2
-        # leaf_pseudo_age_bis = leaf_pseudo_age * (1 - (delta_weq / delta_teq))
-
-        #3
-        if turgor_water_potential > parameters.HIDDEN_ZONE_PARAMETERS.GAMMA:
-            leaf_pseudo_age_bis = leaf_pseudo_age
-        else:
-            leaf_pseudo_age_bis = leaf_pseudo_age - delta_teq
-
-        return leaf_pseudo_age_bis
-
-    @staticmethod
-    def calculate_initial_volume(mstruct, leaf_L, thickness, width):
+    def calculate_initial_volume(mstruct):
         """ Hidden zone initial volume calculated from mstruct. This calculation is only performed at t = previous leaf emergence
 
         :param float mstruct: (g)
@@ -468,10 +422,8 @@ class HiddenZone(Organ):
         conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
 
         #: Effective concentration of solutes
-        conc_solutes_eff = 260 / (0.9 + exp(- 8.5 * conc_solutes / 1000))
-        # conc_solutes_eff = 260 / (0.7 + exp(- 8.5 * conc_solutes / 1000))
-        # conc_solutes_eff = 260 / (1.05 + exp(- 8.5 * conc_solutes / 1000))
-        # conc_solutes_eff = 260 / (1 + exp(- 8.5 * conc_solutes / 1000))
+        conc_solutes_eff = HiddenZone.PARAMETERS.Sa / (HiddenZone.PARAMETERS.Sb + exp(HiddenZone.PARAMETERS.Sc *
+                            conc_solutes / HiddenZone.PARAMETERS.Sd))
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -505,6 +457,7 @@ class HiddenZone(Organ):
     def calculate_resistance(hiddenzone_dimensions):
         """ Resistance of water flow between the hiddenzone and the xylem.
         Relations were set proportional to the length and inversely proportional to the area of organ's cross section.
+        From Coussement et al. (2018)
 
         :param dict hiddenzone_dimensions: dict of hidden zone dimensions at time t. Keys = ['length', 'thickness', 'width] (m)
 
@@ -512,7 +465,7 @@ class HiddenZone(Organ):
         :rtype: float
 
         """
-        #: Coussement et al. (2018)
+
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_hz * (hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']))
 
         return resistance
@@ -547,10 +500,52 @@ class HiddenZone(Organ):
 
         return water_influx - water_outflow
 
+
+    @staticmethod
+    def calculate_time_equivalent_Tref(temperature, time):
+        """ Return the time equivalent to a reference temperature i.e. temperature-compensated time (Parent, 2010).
+
+        :param float temperature: temperature (degree Celsius)
+        :param float time: time duration (s)
+
+        :return: temperature-compensated time (s)
+        :rtype: float
+        """
+
+        def modified_Arrhenius_equation(temperature):
+            """ Return value of equation from Johnson and Lewin (1946) for temperature. The equation is modified to return zero below zero degree.
+
+            :param float temperature: organ temperature (degree Celsius)
+
+            :return: Return value of Eyring equation from Johnson and Lewin (1946) for temperature. The equation is modified to return zero below zero degree.
+            :rtype: float
+            """
+
+            def Arrhenius_equation(T):
+                return T * exp(-HiddenZone.PARAMETERS.Temp_Ea_R / T) / (
+                            1 + exp(HiddenZone.PARAMETERS.Temp_DS_R - HiddenZone.PARAMETERS.Temp_DH_R / T))
+
+            temperature_K = temperature + 273.15
+
+            if temperature < 0:
+                res = 0
+            elif temperature < HiddenZone.PARAMETERS.Temp_Ttransition:
+                res = temperature * Arrhenius_equation(
+                    HiddenZone.PARAMETERS.Temp_Ttransition + 273.15) / HiddenZone.PARAMETERS.Temp_Ttransition
+            else:
+                res = Arrhenius_equation(temperature_K)
+
+            return res
+
+        return time * modified_Arrhenius_equation(temperature) / modified_Arrhenius_equation(HiddenZone.PARAMETERS.Temp_Tref)
+
+
     @staticmethod
     def calculate_extensibility_temperature(age, delta_teq, delta_t):
 
         """ Hidden zone extensibility in each dimension in relation to non-reversible dimensional changes.
+        From Coussement et al. (2018)
+        With temperature effect on leaf_pseudo_age and on maximum extensibility.
 
         :param float age: hidden zone age (°Cd)
         :param float delta_teq: temperature-compensated time (s)
@@ -563,46 +558,12 @@ class HiddenZone(Organ):
         phi = {}
 
         for phi_init_dimensions, phi_init_value in HiddenZone.PARAMETERS.phi_initial.items():
-
-            # TEST 2
-
-            # if age <= HiddenZone.PARAMETERS.tend:
-            #     # Function of Coussement et al. (2018)
-            #     beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (
-            #                 HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
-            #                           * ((age - HiddenZone.PARAMETERS.tbase) / (
-            #                         HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
-            #                           ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (
-            #                                       HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-            # else:
-            #     beta_function_norm = 0
-
-            # TEST 3
-
-            if phi_init_dimensions == 'x':      #: width
-                if age <= HiddenZone.PARAMETERS.te:
-                    # Function of Coussement et al. (2018)
-                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.te - age) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm))
-                                          * ((age - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb)) **
-                                          ((HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm)))
-                else:
-                    beta_function_norm = 0
-            if phi_init_dimensions == 'y':      #: thickness
-                if age <= HiddenZone.PARAMETERS.te:
-                    # Function of Coussement et al. (2018)
-                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.te - age) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm))
-                                          * ((age - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb)) **
-                                          ((HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tb) / (HiddenZone.PARAMETERS.te - HiddenZone.PARAMETERS.tm)))
-                else:
-                    beta_function_norm = 0
-            if phi_init_dimensions == 'z':      #: length
-                if age <= HiddenZone.PARAMETERS.tend:
-                    # Function of Coussement et al. (2018)
-                    beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
+            if age <= HiddenZone.PARAMETERS.tend:
+                beta_function_norm = (1 - (1 + (HiddenZone.PARAMETERS.tend - age) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax))
                                           * ((age - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase)) **
                                           ((HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tbase) / (HiddenZone.PARAMETERS.tend - HiddenZone.PARAMETERS.tmax)))
-                else:
-                    beta_function_norm = 0
+            else:
+                beta_function_norm = 0
 
             phi[phi_init_dimensions] = phi_init_value * beta_function_norm * delta_t * (delta_teq / delta_t)
 
@@ -642,7 +603,6 @@ class HiddenZone(Organ):
         plastic_component = (phi['x'] + phi['y'] + phi['z'])   #: Plastic irreversible growth
 
         organ_volume = volume
-        # organ_volume = length * thickness * width
 
         delta_turgor_water_potential = ((1 / (parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
@@ -928,18 +888,8 @@ class PhotosyntheticOrganElement(object):
         :return: Osmotic water potential (MPa)
         :rtype: float
 
-        TODO : contribution dans parameters.py
         """
         temperature_K = temperature + parameters.CELSIUS_2_KELVIN
-
-        # sucrose = ((sucrose * 1E-6) / parameters.NB_C_SUCROSE)
-        # amino_acids = ((amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO)
-        # fructan = (fructan * 1E-6) / (parameters.NB_C_SUCROSE)
-        #
-        # # Contribution of organic solutes
-        # contribution = 0.16  # from Baji et al. (2001)
-        #
-        # osmotic_water_potential = - parameters.R * temperature_K * (fructan + sucrose + amino_acids) / (volume * parameters.RHO_WATER * parameters.VSTORAGE * contribution)
 
         #: Concentration of solutes
         sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
@@ -948,11 +898,12 @@ class PhotosyntheticOrganElement(object):
         conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
 
         #: Effective concentration of solutes
-        conc_solutes_eff = 260 / (0.9 + exp(- 8.5 * conc_solutes / 1000))
+        conc_solutes_eff = PhotosyntheticOrganElement.PARAMETERS.Sa / (PhotosyntheticOrganElement.PARAMETERS.Sb + exp(PhotosyntheticOrganElement.PARAMETERS.Sc *
+                            conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd))
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
-        return max(osmotic_water_potential, -2)
+        return osmotic_water_potential
 
     @staticmethod
     def calculate_water_potential(turgor_water_potential, osmotic_water_potential):
