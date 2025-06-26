@@ -159,16 +159,11 @@ class HiddenZoneParameters(OrganParameters):
 
         # Extensibility
         self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 34E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
-        # self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 34E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # Length
         self.tend = 2160000  #: end of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         self.tmax = 1473120  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
         self.tbase = -822960  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        # Width & thickness
-        self.te = self.tend * 100 / 100  #: en of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tm = self.tmax * 100 / 100  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tb = self.tbase * 100 / 100  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
 
         # Parameters for temperature responses
         self.Temp_Tref = 12  # Arbitrary reference temperature (°C)
@@ -176,11 +171,6 @@ class HiddenZoneParameters(OrganParameters):
         self.Temp_DS_R = 68.432  # Parameter deltaS/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (dimensionless)
         self.Temp_DH_R = 20735.5  # Parameter deltaH/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
         self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(°C)
-        # self.Temp_Tref = 10  # Arbitrary reference temperature (°C)
-        # self.Temp_Ea_R = 8300  # Parameter Ea/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
-        # self.Temp_DS_R = 68.6  # Parameter deltaS/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (dimensionless)
-        # self.Temp_DH_R = 20800  # Parameter deltaH/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
-        # self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(°C)
 
         # Maximal leaf length
         self.leaf_Lmax_MAX = 0.45  #: Maximum leaf_Lmax (m) (Gauthier et al., 2021)
@@ -203,8 +193,6 @@ class HiddenZoneParameters(OrganParameters):
 
         self.WL_ratio = 0.675    #: -
         self.TL_ratio = 0.14    #: -
-        # self.WL_ratio = 0.725    #: -
-        # self.TL_ratio = 0.155    #: -
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneParameters` for current process
 HIDDEN_ZONE_PARAMETERS = HiddenZoneParameters()

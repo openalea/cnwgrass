@@ -864,7 +864,7 @@ class Simulation(object):
                         #: Delta water content
                         delta_water_content_hz = hiddenzone.calculate_delta_water_content(hiddenzone.water_influx, hiddenzone.water_outflow)
                         #: Extensibility
-                        # hiddenzone.delta_teq = hiddenzone.calculate_time_equivalent_Tref(hiddenzone.temperature, self.delta_t)
+                        hiddenzone.delta_teq = hiddenzone.calculate_time_equivalent_Tref(hiddenzone.temperature, self.delta_t)
                         phi = hiddenzone.calculate_extensibility_temperature(hiddenzone.leaf_pseudo_age, hiddenzone.delta_teq, self.delta_t)
                         hiddenzone.phi_length = phi['z']  # extensibility for length
                         hiddenzone.phi_width = phi['x']  # extensibility for length
