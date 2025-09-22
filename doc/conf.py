@@ -119,8 +119,8 @@ htmlhelp_basename = project + '_documentation'
 html_context = {
     # "github_url": "https://github.com", # or your GitHub Enterprise site
     "github_user": "openalea",
-    "github_repo": "metafspm",
-    "github_version": "main",
+    "github_repo": "wheatfspm",
+    "github_version": "master",
     "doc_path": "doc",
 }
 
@@ -128,7 +128,7 @@ html_context = {
 latex_elements = {
 }
 latex_documents = [
-    (master_doc, 'wheatfspm.tex', u'metafspm Documentation',
+    (master_doc, 'wheatfspm.tex', u'WheatFspm Documentation',
      u'INRAE / inria / CIRAD', 'manual'),
 ]
 
