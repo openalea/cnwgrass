@@ -278,7 +278,7 @@ def main(simulation_length, forced_start_time=0, run_simu=True, run_postprocessi
                                                 update_shared_df=UPDATE_SHARED_DF)
 
     # -- SENESCWHEAT --
-    # Initial states    
+    # Initial states
     senescwheat_roots_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].loc[inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME]['organ'] == 'roots'][
         senescwheat_facade.converter.ROOTS_TOPOLOGY_COLUMNS +
         [i for i in senescwheat_facade.converter.SENESCWHEAT_ROOTS_INPUTS if i in inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].columns]].copy()
@@ -310,7 +310,7 @@ def main(simulation_length, forced_start_time=0, run_simu=True, run_postprocessi
                                                                update_shared_df=UPDATE_SHARED_DF)
 
     # -- FARQUHARWHEAT --
-    # Initial states    
+    # Initial states
     farquharwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME][
         farquharwheat_facade.converter.ELEMENT_TOPOLOGY_COLUMNS +
         [i for i in farquharwheat_facade.converter.FARQUHARWHEAT_ELEMENTS_INPUTS if i in inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME].columns]].copy()
@@ -331,7 +331,7 @@ def main(simulation_length, forced_start_time=0, run_simu=True, run_postprocessi
                                                                      update_shared_df=UPDATE_SHARED_DF)
 
     # -- GROWTHWHEAT --
-    # Initial states    
+    # Initial states
     growthwheat_hiddenzones_initial_state = inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME][
         growthwheat_facade.converter.HIDDENZONE_TOPOLOGY_COLUMNS +
         [i for i in growthwheat_facade.simulation.HIDDENZONE_INPUTS if i in inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME].columns]].copy()
@@ -369,7 +369,7 @@ def main(simulation_length, forced_start_time=0, run_simu=True, run_postprocessi
                                                                update_shared_df=UPDATE_SHARED_DF)
 
     # -- CNWHEAT --
-    # Initial states    
+    # Initial states
     cnwheat_organs_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME][
         [i for i in cnwheat_facade.cnwheat_converter.ORGANS_VARIABLES if i in inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].columns]].copy()
 

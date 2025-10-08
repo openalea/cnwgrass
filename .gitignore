@@ -87,3 +87,6 @@ out
 
 # Sphinx
 _static
+/example/Notebooks/inputs/Generate_inputs.xlsx
+/example/Notebooks/inputs/create_init_MTG_FSPMWHEAT_with_tillers.py
+/example/Notebooks/inputs/create_init_MTG_FSPMWHEAT.py
