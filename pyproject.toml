@@ -87,6 +87,7 @@ dependencies = [
     "openalea.adel",
     "openalea.astk",
     "matplotlib-base",
+    "openalea.widgets"
 ]
 
 [project.urls]
