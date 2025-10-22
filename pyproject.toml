@@ -71,7 +71,6 @@ doc = [
   "ipython_genutils",
   "nbsphinx",
   "ipywidgets",
-  "openalea.widgets",
 ]
 
 # section specific to conda-only distributed package (not used by pip yet)
@@ -88,6 +87,7 @@ dependencies = [
     "openalea.adel",
     "openalea.astk",
     "matplotlib-base",
+    "openalea.widgets"
 ]
 
 [project.urls]
