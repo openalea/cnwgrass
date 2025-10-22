@@ -11,9 +11,9 @@ from math import exp
 
 from openalea.fspmwheat import fspmwheat_postprocessing
 
-from example.example_fspmwheat.Scenarios_monoculms import main
-from example.example_fspmwheat.Scenarios_monoculms import tools
-from example.example_fspmwheat.Scenarios_monoculms import additional_graphs
+from example.Scenarios_monoculms import main
+from example.Scenarios_monoculms import tools
+from example.Scenarios_monoculms import additional_graphs
 
 
 def exponential_fertilization_rate(V0, K, t, dt, plant_density):
