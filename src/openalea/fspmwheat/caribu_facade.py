@@ -19,10 +19,6 @@ from openalea.fspmwheat import tools
     in a convenient and transparent way, wrapping all the internal complexity of the model, and dealing
     with all the tedious initialization and conversion processes.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: TODO, see LICENSE for details.
-
-    .. seealso:: Barillot et al. 2016.
 """
 
 #: the columns which define the topology in the elements scale dataframe shared between all models

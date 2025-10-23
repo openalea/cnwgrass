@@ -8,9 +8,6 @@ from __future__ import division  # use "//" to do integer division
 
     The module :mod:`growthwheat.parameters` defines the constant parameters.
 
-    :copyright: Copyright 2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 C_MOLAR_MASS = 12                     #: Carbon molar mass (g mol-1)

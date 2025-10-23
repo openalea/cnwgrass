@@ -29,9 +29,6 @@ from openalea.fspmwheat import senescwheat_facade
     A coupling of CN-Wheat, Farquhar-Wheat, Senesc-Wheat, Elong-Wheat, Growth-Wheat, Adel-Wheat and Caribu.
     This script was used to simulate a field experiment performed in 1998/99 in Grignon (France). 
     Results were published in Gauthier et al. 2020 (https://doi.org/10.1093/jxb/eraa276)
-    
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
 
 """
 

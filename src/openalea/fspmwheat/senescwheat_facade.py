@@ -13,8 +13,7 @@ from openalea.fspmwheat import tools
     This module permits to initialize and run the model SenescWheat from a :class:`MTG <openalea.mtg.mtg.MTG>`
     in a convenient and transparent way, wrapping all the internal complexity of the model, and dealing
     with all the tedious initialization and conversion processes.
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
+
 """
 
 #: the name of the photosynthetic organs modeled by SenescWheat

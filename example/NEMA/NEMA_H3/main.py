@@ -22,10 +22,6 @@ from openalea.fspmwheat import cnwheat_facade, farquharwheat_facade, senescwheat
     Script readatpted from example NEMA_H3 used in the paper Barillot et al. (2016).
     This example uses the format MTG to exchange data between the models.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: TODO, see LICENSE for details.
-
-    .. seealso:: Barillot et al. 2016.
 """
 
 random.seed(1234)

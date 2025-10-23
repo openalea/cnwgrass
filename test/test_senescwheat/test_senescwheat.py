@@ -15,9 +15,6 @@ from openalea.senescwheat import simulation, converter
     You must first install :mod:`senescwheat` (and add it to your PYTHONPATH)
     before running this script with the command `python`.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 # inputs directory path

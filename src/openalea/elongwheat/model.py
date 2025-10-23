@@ -11,8 +11,6 @@ from math import exp, log10
 
     The module :mod:`elongwheat.model` defines the equations of the kinetic of leaf and internode elongation according to C and N status.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
 """
 
 

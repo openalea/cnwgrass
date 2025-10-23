@@ -9,9 +9,6 @@ from openalea.senescwheat import parameters
 
     Model of senescence.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 

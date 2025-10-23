@@ -17,9 +17,6 @@ from openalea.fspmwheat import tools
     in a convenient and transparent way, wrapping all the internal complexity of the model, and dealing
     with all the tedious initialization and conversion processes.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    : see LICENSE for details.
-
 """
 
 #: the name of the organs modeled by FarquharWheat

@@ -17,14 +17,6 @@ from openalea.cnwheat import tools
     The module :mod:`cnwheat.simulation` is the front-end to run the model CN-Wheat.
     The public API consists of methods :meth:`initialize` and :meth:`run`.
 
-    :copyright: Copyright 2014-2017 INRA-ECOSYS, see AUTHORS.
-    :license: CeCILL-C, see LICENSE for details.
-
-    **Acknowledgments**: The research leading these results has received funding through the
-    Investment for the Future programme managed by the Research National Agency
-    (BreedWheat project ANR-10-BTBR-03).
-
-    .. seealso:: Barillot et al. 2016.
 """
 
 

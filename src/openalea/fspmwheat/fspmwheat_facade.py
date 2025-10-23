@@ -13,18 +13,6 @@ import pandas as pd
 
     The module :mod:`fspmwheat.fspmwheat_facade` is a facade of the model FSPMWeat.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
-"""
-
-"""
-    Information about this versioned file:
-        $LastChangedBy: mngauthier $
-        $LastChangedDate: 2020-03-03 16:00:54 +0100 (mar., 03 mars 2020) $
-        $LastChangedRevision: 238 $
-        $URL: https://subversion.renater.fr/authscm/mngauthier/svn/fspm-wheat/branches/multirun/fspmwheat/cnwheat_facade.py $
-        $Id: cnwheat_facade.py 238 2020-03-03 15:00:54Z mngauthier $
 """
 
 #: columns which define the topology in the input/output dataframe

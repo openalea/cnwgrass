@@ -6,9 +6,6 @@
 
     The module :mod:`farquharwheat.parameters` defines the constant parameters.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 # -- Version of the photosynthesis sub model
 SurfacicProteins = True      #: If True, surfacic proteins used to regulate photosynthesis ; if not total N

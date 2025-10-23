@@ -17,9 +17,6 @@ from openalea.elongwheat import parameters
 
     The module :mod:`elongwheat.simulation` is the front-end to run the Elong-Wheat model.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 #: the inputs needed by ElongWheat

@@ -16,9 +16,6 @@ from openalea.farquharwheat import simulation, converter
     You must first install :mod:`farquharwheat` and its dependencies
     before running this script with the command `python`.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 # the file names of the inputs

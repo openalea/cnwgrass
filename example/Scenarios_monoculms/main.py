@@ -27,9 +27,6 @@ from openalea.fspmwheat import senescwheat_facade
     This script was used to simulate monoculms of wheat in different planting densities, light intensities and soil N concentrations. 
     Results were published in Gauthier et al. 2021 (https://doi.org/10.1093/insilicoplants/diab034)
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 random.seed(1234)

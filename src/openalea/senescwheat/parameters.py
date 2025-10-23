@@ -6,9 +6,6 @@
 
     Parameters used in the model of senescence.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 CONVERSION_FACTOR_20_TO_12 = 0.45  # modified_Arrhenius_equation(12)/modified_Arrhenius_equation(20)
