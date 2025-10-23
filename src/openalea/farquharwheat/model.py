@@ -12,9 +12,6 @@ from openalea.farquharwheat import parameters
     The model includes the dependence of photosynthesis to organ temperature and nitrogen content.
     Internal CO2 and organ temperature are found numerically.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 

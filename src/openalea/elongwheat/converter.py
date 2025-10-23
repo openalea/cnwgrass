@@ -12,9 +12,6 @@ from openalea.elongwheat import simulation
     The module :mod:`elongwheat.converter` defines functions to convert
     :class:`dataframes <pandas.DataFrame>` to/from ElongWheat inputs or outputs format.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 #: the columns which define the topology in the input/output dataframe

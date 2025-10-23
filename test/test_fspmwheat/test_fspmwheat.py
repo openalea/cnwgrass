@@ -34,10 +34,6 @@ from openalea.cnwheat import simulation as cnwheat_simulation
 
     CSV files must contain only ASCII characters and ',' as separator.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: TODO, see LICENSE for details.
-
-    .. seealso:: Barillot et al. 2016.
 """
 
 random.seed(1234)

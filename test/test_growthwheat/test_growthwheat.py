@@ -18,11 +18,6 @@ from openalea.growthwheat import simulation, converter
     You must first install :mod:`growthwheat` and its dependencies
     before running this script with the command `python`.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: TODO, see LICENSE for details.
-
-    .. seealso:: Barillot et al. 2016.
-
 """
 
 # inputs directory path

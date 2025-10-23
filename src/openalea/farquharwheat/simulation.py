@@ -11,9 +11,6 @@ from openalea.farquharwheat import parameters
 
     The module :mod:`farquharwheat.simulation` is the front-end to run the Farquhar-Wheat :mod:`model <farquharwheat.model>`.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 

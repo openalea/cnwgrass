@@ -8,9 +8,6 @@ from __future__ import division  # use "//" to do integer division
 
     The module :mod:`elongwheat.parameters` defines the constant parameters.
 
-    :copyright: Copyright 2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 # -------------------------------------------------------------------------------------------------------------------

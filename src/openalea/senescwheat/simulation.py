@@ -11,9 +11,6 @@ from openalea.senescwheat import parameters
 
     The module :mod:`senescwheat.simulation` is the front-end to run the Senesc-Wheat :mod:`model <senescwheat.model>`.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 

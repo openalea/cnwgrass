@@ -18,9 +18,6 @@ from openalea.elongwheat import simulation, converter
     You must first install :mod:`elongwheat` and its dependencies
     before running this script with the command `python`.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 # inputs directory path

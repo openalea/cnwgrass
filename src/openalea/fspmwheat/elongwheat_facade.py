@@ -14,9 +14,6 @@ from openalea.fspmwheat import tools
     in a convenient and transparent way, wrapping all the internal complexity of the model, and dealing
     with all the tedious initialization and conversion processes.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 SHARED_AXES_INPUTS_OUTPUTS_INDEXES = ['plant', 'axis']

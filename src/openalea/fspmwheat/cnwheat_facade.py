@@ -20,9 +20,6 @@ import math
     in a convenient and transparent way, wrapping all the internal complexity of the model, and dealing
     with all the tedious initialization and conversion processes.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 #: the mapping of CNWheat organ classes to the attributes in axis and phytomer which represent an organ

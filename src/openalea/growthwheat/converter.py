@@ -11,9 +11,6 @@ from openalea.growthwheat import simulation
 
     The module :mod:`growthwheat.converter` defines functions to convert 
     :class:`dataframes <pandas.DataFrame>` to/from GrowthWheat inputs or outputs format.
-    
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
 
 """
 

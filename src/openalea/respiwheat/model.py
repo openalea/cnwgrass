@@ -11,14 +11,6 @@ from __future__ import division  # use '//' to do integer division
 
     R_total = sum(R_growth) + R_phloem + R_Namm_upt + R_Nnit_upt + R_Nnit_red(shoot + root) + R_N2fix + R_min_upt + sum(R_residual)
 
-    :copyright: Copyright 2014-2017 INRA-ECOSYS, see AUTHORS.
-    :license: CeCILL-C, see LICENSE for details.
-    
-    **Acknowledgments**: The research leading these results has received funding through the 
-    Investment for the Future programme managed by the Research National Agency 
-    (BreedWheat project ANR-10-BTBR-03).
-    
-    .. seealso:: Barillot et al. 2016.
 """
 
 

@@ -24,14 +24,6 @@ import matplotlib.pyplot as plt
         * quantitative comparison test,
         * and progress-bar to follow the evolution of long simulations.  
 
-    :copyright: Copyright 2014-2017 INRA-ECOSYS, see AUTHORS.
-    :license: CeCILL-C, see LICENSE for details.
-    
-    **Acknowledgments**: The research leading these results has received funding through the 
-    Investment for the Future programme managed by the Research National Agency 
-    (BreedWheat project ANR-10-BTBR-03).
-    
-    .. seealso:: Barillot et al. 2016.
 """
 
 OUTPUTS_INDEXES = ['t', 'plant', 'axis', 'metamer', 'organ', 'element']  #: All the possible indexes of CN-Wheat outputs

@@ -10,9 +10,6 @@ import pandas as pd
     The module :mod:`farquharwheat.converter` defines functions to convert
     :class:`dataframes <pandas.DataFrame>` to/from FarquharWheat inputs or outputs format.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 #: the inputs needed by FarquharWheat at element scale

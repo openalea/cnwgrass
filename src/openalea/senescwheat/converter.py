@@ -10,9 +10,6 @@ import pandas as pd
     The module :mod:`senescwheat.converter` defines functions to convert
     :class:`dataframes <pandas.DataFrame>` to/from SenescWheat inputs or outputs format.
 
-    :copyright: Copyright 2014-2016 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 #: the inputs needed by SenescWheat at roots scale

@@ -16,9 +16,6 @@ from openalea.plantgl.all import Viewer, Vector3
 
     This module provides convenient tools needed by the facades.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: see LICENSE for details.
-
 """
 
 
