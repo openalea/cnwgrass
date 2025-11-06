@@ -11,7 +11,7 @@ import pandas as pd
     fspmwheat.fspmwheat_facade
     ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    The module :mod:`fspmwheat.fspmwheat_facade` is a facade of the model FSPMWeat.
+    The module :mod:`fspmwheat.fspmwheat_facade` is a facade of the model FSPMWheat.
 
 """
 
