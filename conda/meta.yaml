@@ -44,20 +44,15 @@ test:
     - pytest
     - nbmake
     - scipy
-    - openalea.adel # will probably change to openalea.adel
-#  imports:
-#    - openalea.wheatfspm
+    - openalea.adel
+
   source_files:
     - test/**
   commands:
-    - cd test/test_elongwheat && pytest -v
-#    - cd ../test_cnwheat && pytest -v
-    - cd ../test_farquharwheat && pytest -v
-#    - cd ../test_fspmwheat && pytest -v
-    - cd ../test_growthwheat && pytest -v
-#    - cd ../test_respiwheat && pytest -v
-    - cd ../test_senescwheat && pytest -v
 
+  commands:
+    - cd test
+    - pytest -v
 
 about:
   home: {{ home }}

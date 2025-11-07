@@ -178,8 +178,11 @@ class SenescWheatFacade(object):
 
                 # update the axis property in the MTG
                 axis_id = (mtg_plant_index, mtg_axis_label)
-                mtg_axis_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)
-                mtg_axis_properties.update(senescwheat_axes_data_dict.get(axis_id, []))
+                if axis_id in senescwheat_axes_data_dict:
+                    senescwheat_axis_data_dict = senescwheat_axes_data_dict[axis_id]
+                    for axis_data_name, axis_data_value in senescwheat_axis_data_dict.items():
+                        self._shared_mtg.property(axis_data_name)[mtg_axis_vid] = axis_data_value
+
                 # update the roots in the MTG
                 if axis_id not in senescwheat_roots_data_dict:
                     continue

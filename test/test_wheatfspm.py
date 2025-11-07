@@ -196,6 +196,7 @@ def test_caribu():
 def test_farquharwheat():
     # adhoc modification for test
     g.property('diameter').update({19: 0.003, 34: 0.003})
+
     # Initial states
     farquharwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME][
         farquharwheat_facade.converter.ELEMENT_TOPOLOGY_COLUMNS +
@@ -254,11 +255,6 @@ def test_growthwheat():
     growthwheat_facade_.run()
 
 def test_senescwheat():
-    # adhoc modification for test
-    g.property('delta_teq').update({2: 3600})
-    g.property('delta_teq_roots').update({2: 3600})
-    g.property('sum_TT').update({2: 0})
-
     # Initial states
     senescwheat_roots_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].loc[
         inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME]['organ'] == 'roots'][
