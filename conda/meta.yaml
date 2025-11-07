@@ -39,16 +39,12 @@ requirements:
 
 test:
   requires:
-    - numpy
-    - pandas
-    - pytest
-    - nbmake
-    - scipy
-    - openalea.adel
+    {% for dep in test_deps %}
+    - {{ dep }}
+    {% endfor %}
 
   source_files:
     - test/**
-  commands:
 
   commands:
     - cd test
