@@ -7,6 +7,7 @@
 {% set build_deps = pyproject.get("build-system", {}).get("requires", []) %}
 {% set deps = pyproject.get('project', {}).get('dependencies', []) %}
 {% set conda_deps = pyproject.get('tool', {}).get('conda', {}).get('environment', {}).get('dependencies',[]) %}
+{% set test_deps = pyproject.get('project', {}).get('optional-dependencies', {}).get('test',[]) %}
 
 package:
   name: {{ name }}
@@ -39,25 +40,19 @@ requirements:
 
 test:
   requires:
-    - numpy
-    - pandas
-    - pytest
-    - nbmake
-    - scipy
-    - openalea.adel # will probably change to openalea.adel
-#  imports:
-#    - openalea.wheatfspm
+    {% for dep in test_deps %}
+    - {{ dep }}
+    {% endfor %}
+
+  imports:
+    - openalea.fspmwheat
+
   source_files:
     - test/**
-  commands:
-    - cd test/test_elongwheat && pytest -v
-#    - cd ../test_cnwheat && pytest -v
-    - cd ../test_farquharwheat && pytest -v
-#    - cd ../test_fspmwheat && pytest -v
-    - cd ../test_growthwheat && pytest -v
-#    - cd ../test_respiwheat && pytest -v
-    - cd ../test_senescwheat && pytest -v
 
+  commands:
+    - cd test
+    - pytest -v
 
 about:
   home: {{ home }}
