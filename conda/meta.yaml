@@ -45,7 +45,7 @@ test:
     {% endfor %}
 
   imports:
-    - openalea.wheatfspm
+    - openalea.fspmwheat
 
   source_files:
     - test/**
