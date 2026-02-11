@@ -1,32 +1,36 @@
 [submodule "senesc-wheat"]
 	path = senesc-wheat
-	url = https://github.com/MTreestanG/senesc-wheat.git
+	url = https://github.com/victoriaacker/senesc-wheat.git
 	branch = master
 [submodule "growth-wheat"]
 	path = growth-wheat
-	url = https://github.com/MTreestanG/growth-wheat.git
+	url = https://github.com/victoriaacker/growth-wheat.git
 	branch = master
 [submodule "fspm-wheat"]
 	path = fspm-wheat
-	url = https://github.com/MTreestanG/fspm-wheat.git
-	branch = main
+	url = https://github.com/victoriaacker/fspm-wheat.git
+	branch = water_status
 [submodule "farquhar-wheat"]
 	path = farquhar-wheat
-	url = https://github.com/openalea-incubator/farquhar-wheat.git
-	branch = master
+	url = https://github.com/victoriaacker/farquhar-wheat.git
+	branch = water_status
 [submodule "elong-wheat"]
 	path = elong-wheat
-	url = https://github.com/openalea-incubator/elong-wheat.git
-	branch = master
+	url = https://github.com/victoriaacker/elong-wheat.git
+	branch = Lockhart_Equation
 [submodule "cn-wheat"]
 	path = cn-wheat
-	url = https://github.com/MTreestanG/cn-wheat.git
-	branch = main
+	url = https://github.com/victoriaacker/cn-wheat.git
+	branch = water_status
+[submodule "turgor-growth"]
+	path = turgor-growth
+	url = https://github.com/victoriaacker/turgor-growth.git
+	branch = xylem
 [submodule "respi-wheat"]
 	path = respi-wheat
-	url = https://github.com/openalea-incubator/respi-wheat.git
-	branch = master
+	url = https://github.com/geraulttr/respi-wheat.git
+	branch = main
 [submodule "adel"]
     path = adel
-    url = https://github.com/openalea-incubator/adel.git
-    branch = master
+    url = https://github.com/geraulttr/adel.git
+    branch = python3
