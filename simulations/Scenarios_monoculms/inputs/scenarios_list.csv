@@ -1,0 +1,7 @@
+Scenario,Simulation_Length,Run_Simulation,Run_From_Outputs,Run_Postprocessing,Generate_Graphs,Scenario_label,Plant_Density,Inter_Row,constant_Conc_Nitrates,constant_Conc_Nitrates_U,PAR,METEO_FILENAME,Inputs_PlantSoil_Dirpath,growthwheat:VMAX_ROOTS_GROWTH_PREFLO,growthwheat:K_ROOTS_GROWTH,growthwheat:N_ROOTS_GROWTH,elongwheat:delta_TT_GA,elongwheat:max_nb_leaves,elongwheat:SL_ratio_a,elongwheat:SL_ratio_b,elongwheat:SL_ratio_c,elongwheat:SL_ratio_d,elongwheat:leaf_LSSW_a,
+1,3500,True,False,True,False,N5U_PAR100_D1,1,1,35714,5,100,meteo_PAR100.csv,,0.01539,6000,1.8,10000000000,50,0,0,0.01763,0.25,0.000005,
+2,3500,True,False,True,False,N50U_PAR100_D1,1,1,357143,50,100,meteo_PAR100.csv,,0.01539,6000,1.8,10000000000,50,0,0,0.01763,0.25,0.000005,
+3,3500,True,False,True,False,N5U_PAR500_D500,500,0.15,35714.28571,5,500,meteo_PAR500.csv,,0.01539,6000,1.8,10000000000,50,0,0,0.01763,0.25,0.000005,
+4,3500,True,False,True,False,N50U_PAR500_D500,500,0.15,357142.8571,50,500,meteo_PAR500.csv,,0.01539,6000,1.8,10000000000,50,0,0,0.01763,0.25,0.000005,
+5,3500,True,False,True,False,N5U_PAR1000_D500_inputs_Ljutovac_N2,500,0.15,35714.28571,5,1000,meteo_PAR1000.csv,inputs_Ljutovac_N2,0.01539,6000,1.8,10000000000,50,0,0,0.01763,0.25,0.000005,
+6,3500,True,False,True,False,N25U_PAR1000_D500_inputs_Ljutovac_N2,500,0.15,178571.4286,25,1000,meteo_PAR1000.csv,inputs_Ljutovac_N2,0.01539,6000,1.8,10000000000,50,0,0,0.01763,0.25,0.000005,

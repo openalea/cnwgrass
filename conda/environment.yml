@@ -1,0 +1,18 @@
+name: wheatfspm_dev
+channels:
+  - openalea3/label/dev
+  - openalea3/label/rc
+  - conda-forge
+dependencies:
+  - python
+  - openalea.mtg
+  - openalea.plantgl
+  - openalea.lpy
+  - openalea.Caribu
+  - openalea.adel
+  - openalea.astk
+  - openalea.widgets
+  - matplotlib-base
+  - pip
+  - pip:
+      - -e '..[test,dev,doc]'

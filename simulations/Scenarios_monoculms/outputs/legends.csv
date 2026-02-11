@@ -1,0 +1,260 @@
+Table,Variable,Description,Calculation,Unit
+axes_postprocessing.csv,C_exudated,C lost by exudation,,µmol C
+axes_postprocessing.csv,C_N_ratio,Ratio of C to N mass of the axis,,Dimensionless
+axes_postprocessing.csv,C_N_ratio_shoot,Ratio of C to N mass of the shoot,,Dimensionless
+axes_postprocessing.csv,C_respired_roots,C lost by respiration of the roots,,µmol C
+axes_postprocessing.csv,C_respired_shoot,C lost by respiration of the shoot,,µmol C
+axes_postprocessing.csv,Cont_WSC_DM,Fraction of Non-structural carbohydrate in the dry mass of the axis,,%
+axes_postprocessing.csv,Cont_WSC_DM_laminae,Fraction of Non-structural carbohydrate in the dry mass of the laminae,,%
+axes_postprocessing.csv,Cont_WSC_DM_roots,Fraction of Non-structural carbohydrate in the dry mass of the roots,,%
+axes_postprocessing.csv,Cont_WSC_DM_shoot,Fraction of Non-structural carbohydrate in the dry mass of the shoot,,%
+axes_postprocessing.csv,Cont_WSC_DM_stem,Fraction of Non-structural carbohydrate in the dry mass of the stem (sheaths+internodes),,%
+axes_postprocessing.csv,dry_mass_phloem,Dry mass of the metabolites of the phloem,,g
+axes_postprocessing.csv,mstruct,Structural mass of the axis,,g
+axes_postprocessing.csv,mstruct_laminae,Structural mass of the green part of the laminae of the axis,,g
+axes_postprocessing.csv,mstruct_shoot,Structural mass of the shoot,,g
+axes_postprocessing.csv,mstruct_stem,Structural mass of the stem (sheaths+internodes) of the axis,,g
+axes_postprocessing.csv,N_content,N fraction of the plant,,%
+axes_postprocessing.csv,N_content_mstruct,ratio of N mass in the plant to the plant structural mass,,%
+axes_postprocessing.csv,N_content_mstruct_roots,ratio of N mass in the root to the root structural mass,,%
+axes_postprocessing.csv,N_content_mstruct_shoot,ratio of N mass in the shoot to the shoot structural mass,,%
+axes_postprocessing.csv,N_content_roots,N fraction of the root dry mass,,%
+axes_postprocessing.csv,N_content_shoot,N fraction of the shoot dry mass,,%
+axes_postprocessing.csv,N_content_total_DM_shoot,N fraction of the shoot acounting for partly senesced leaves,,%
+axes_postprocessing.csv,NNI,Nitrogen Nutrition Index,N dilution curve from Justes 1994,Dimensioless
+axes_postprocessing.csv,NS,Ratio of plant Non-Structural Mass to plant dry mass,,%
+axes_postprocessing.csv,NS_laminae,Ratio of  Non-Structural Mass of the laminae to dry mass of the laminae,,%
+axes_postprocessing.csv,NS_roots,Ratio of Non-Structural Mass in the roots,,%
+axes_postprocessing.csv,NS_shoot,Ratio of Non-Structural Mass of the shoot to shoot dry mass,,%
+axes_postprocessing.csv,NS_stem,Ratio of Non-Structural Mass of the stem (sheaths+internodes) to stem dry mass,,%
+axes_postprocessing.csv,senesced_mstruct,Structural mass of the senesced tissues of the shoot,,g
+axes_postprocessing.csv,shoot_roots_mstruct_ratio,Ratio of structural mass of the shoot to structural mass of the roots,,Dimensioless
+axes_postprocessing.csv,shoot_roots_ratio,Shoot to root dry mass ratio,,Dimensioless
+axes_postprocessing.csv,sum_C_g,Mass of C in the axis,,g
+axes_postprocessing.csv,sum_dry_mass,Dry mass of the axis,,g
+axes_postprocessing.csv,sum_dry_mass_laminae,Dry mass of the laminae of the axis,,g
+axes_postprocessing.csv,sum_dry_mass_roots,Dry mass of the roots,,g
+axes_postprocessing.csv,sum_dry_mass_shoot,Dry mass of the shoot,,g
+axes_postprocessing.csv,sum_dry_mass_stem,Dry mass of the stem (sheaths+internodes) of the axis,,g
+axes_postprocessing.csv,sum_N_g,Mass of N in the axis,,g
+axes_postprocessing.csv,sum_N_g_shoot,Mass of N in the shoot,,g
+axes_postprocessing.csv,sum_NSC_g,Mass of Non-structural carbohydrate in the axis,,g
+axes_postprocessing.csv,sum_respi_roots,C lost by respiration of the roots,,µmol C
+axes_postprocessing.csv,sum_respi_shoot,C lost by respiration of the shoot,,µmol C
+axes_postprocessing.csv,Tillers_Photosynthesis,C fixed by the whole-plant by photosynthesis (Gross Photosynthesis Ag),,µmol C
+axes_postprocessing.csv,Tillers_Photosynthesis_An,C fixed by the whole-plant by photosynthesis (Net Photosynthesis An) - An is not used in the model,,µmol C
+axes_postprocessing.csv,Total_Photosynthesis,C fixed by the main stem by photosynthesis (Gross Photosynthesis Ag),,µmol C
+axes_postprocessing.csv,Total_Transpiration,Transpiration rate of the axis,,mmol H2O s-1
+C_usages.csv,C_budget,Ratio C_consumed / C_produced (control variable - must be close to 1),,Dimensionless
+C_usages.csv,C_produced,C fixed by the whole-plant by photosynthesis - cumulated since th beging of the simulation.,,µmol C
+C_usages.csv,exudation,C lost by respiration of the root exudation - cumulated since the beging of the simulation.,,µmol C
+C_usages.csv,NS_other,"Increment of C invested in the structural mass stored in the physical elements, as compared to the begining of the simulation",,µmol C
+C_usages.csv,NS_phloem,Increment of C invested in the structural mass stored in the phloem as compared to the begining of the simulation,,µmol C
+C_usages.csv,Respi_roots,C lost by respiration of the roots - cumulated since the beging of the simulation.,,µmol C
+C_usages.csv,Respi_shoot,C lost by respiration of the shoots - cumulated since the beging of the simulation.,,µmol C
+C_usages.csv,Structure_roots,C invested in the structural mass of the roots - cumulated since the beging of the simulation.,,µmol C
+C_usages.csv,Structure_shoot,C invested in the structural mass of the shoot(s) - cumulated since the beging of the simulation.,,µmol C
+canopy_dynamics_daily.csv,LAI,Leaf Area Index,green_area * plant_density,Dimensionless
+canopy_dynamics_daily.csv,PARa_mol_m2_d,Surfacic PAR absorbed by one plant,,mol m-2 day-1
+canopy_dynamics_daily.csv,ratio_PARa_PARi,Fraction of incident PAR that is absorbed by the canopy,,Dimensionless
+elements_postprocessing.csv,Ag,gross assimilation rate,Farquhar,µmol m-2 s-1
+elements_postprocessing.csv,amino_acids,Quantity of amino acids - Compartment of the model,,µmol N
+elements_postprocessing.csv,Amino_Acids_import,Amino acids imported from the roots through the transpiration flux,,µmol N h-1
+elements_postprocessing.csv,Conc_Amino_Acids,Concentration of Amino Acids,,µmol g-1 mstruct
+elements_postprocessing.csv,Conc_cytokinins,Concentration of cytokinins,,AU g mstruct -1
+elements_postprocessing.csv,Conc_Fructan,Concentration of fructans,,µmol hexose g-1 mstruct
+elements_postprocessing.csv,Conc_Nitrates,Concentration of nitrates,,µmol g-1 mstruct
+elements_postprocessing.csv,Conc_Proteins,Concentration of proteins,,g g-1 mstruct
+elements_postprocessing.csv,Conc_Starch,Concentration of starch,,µmol hexose g-1 mstruct
+elements_postprocessing.csv,Conc_Sucrose,Concentration of sucrose,,µmol g-1 mstruct
+elements_postprocessing.csv,Conc_TriosesP,Concentration of trioses phosphate,,µmol g-1 mstruct
+elements_postprocessing.csv,Cont_WSC_DM,Fraction of Non-structural carbohydrate in the dry mass of the element,,%
+elements_postprocessing.csv,cytokinins,Quantity of cytokinins - Compartment of the model,,AU
+elements_postprocessing.csv,cytokinins_import,Cytokinins imported from the roots through the transpiration flux,,AU h-1
+elements_postprocessing.csv,D_cytokinins,Rate of cytokinin degradation,,AU h-1
+elements_postprocessing.csv,D_Fructan,Rate of fructan degradation,,µmol C g-1 mstruct h-1
+elements_postprocessing.csv,D_Proteins,Rate of protein degradation,,µmol N g-1 mstruct h-1
+elements_postprocessing.csv,D_Starch,Rate of starch degradation,,µmol C g-1 mstruct h-1
+elements_postprocessing.csv,fructan,Quantity of fructans - Compartment of the model,,µmol C
+elements_postprocessing.csv,green_area,green area of the element,Calculated by ADEL,m2
+elements_postprocessing.csv,is_growing,True if the element is still growing,,bool
+elements_postprocessing.csv,length,Current length,,m
+elements_postprocessing.csv,Loading_Amino_Acids,Amino acids exported from the element to the phloem,,µmol N
+elements_postprocessing.csv,Loading_Sucrose,Sucrose exported from the element to the phloem,,µmol C
+elements_postprocessing.csv,mstruct,Structural mass - Compartment of the model,,g
+elements_postprocessing.csv,N_content,N fraction of the element dry mass,,%
+elements_postprocessing.csv,N_content_total_DM,N fraction of the element dry mass acounting for partly senesced leaves,,%
+elements_postprocessing.csv,N_tot,N mass,,g
+elements_postprocessing.csv,nb_replications,"Number of axes bearing an element similar to this one (main stem included, so nb_replications>=1)",,Dimensionless
+elements_postprocessing.csv,nitrates,Quantity of nitrates - Compartment of the model,,µmol N
+elements_postprocessing.csv,Nitrates_import,Nitrates imported from the roots through the transpiration flux,,AU h-1
+elements_postprocessing.csv,NS,Ratio of element Non-Structural Mass to element dry mass,,%
+elements_postprocessing.csv,Nstruct,Mass of non-structural nitrogen - Compartment of the model,,g
+elements_postprocessing.csv,PARa,absorbed PAR per area,,µmol m-2 s-1
+elements_postprocessing.csv,Photosynthesis,Rate of photosynthesis,Ag * green_area,µmol C h-1
+elements_postprocessing.csv,Photosynthetic_efficiency,Photosynthetic efficiency (ratio of assimilated C  to absorbed PAR) ,Ag/PARa,µmol C µmol-1
+elements_postprocessing.csv,proteins,Quantity of proteins - Compartment of the model,,µmol N
+elements_postprocessing.csv,R_Nnit_red,Nitrate reduction-linked respiration,,µmol C
+elements_postprocessing.csv,R_phloem_loading,Phloem loading respiration,,µmol C
+elements_postprocessing.csv,R_residual,"Residual respiration (cost from protein turn-over, cell ion gradients, futile cycles...)",,µmol C
+elements_postprocessing.csv,Regul_S_Fructan,Maximal rate of fructan synthesis,,µmol C g-1 mstruct h-1
+elements_postprocessing.csv,S_Amino_Acids,Rate of amino acids synthesis,,µmol N g-1 mstruct h-1
+elements_postprocessing.csv,S_Fructan,Rate of fructan synthesis,,µmol C g-1 mstruct h-1
+elements_postprocessing.csv,S_Proteins,Rate of protein synthesis,,µmol N g-1 mstruct h-1
+elements_postprocessing.csv,S_Starch,Rate of starch synthesis,,µmol C g-1 mstruct h-1
+elements_postprocessing.csv,S_Sucrose,Rate of sucrose synthesis,,µmol C g-1 mstruct h-1
+elements_postprocessing.csv,senesced_mstruct,Structural mass of the senesced tissues of the element,,g
+elements_postprocessing.csv,SLA,Specific Leaf Area ,,m2 kg-1
+elements_postprocessing.csv,SLN,Specific Nitrogen,,g m-2
+elements_postprocessing.csv,SLN_nonstruct,Specific Non-structural Nitrogen,,g m-2
+elements_postprocessing.csv,starch,Quantity of starch - Compartment of the model,,µmol C
+elements_postprocessing.csv,sucrose,Quantity of sucrose - Compartment of the model,,µmol C
+elements_postprocessing.csv,sum_dry_mass,Dry mass,mstruct + mass of all the metabolites,g
+elements_postprocessing.csv,sum_respi,Sum of C lost by respiration other than growth respiration,R_phloem_loading + R_Nnit_red + R_residual,µmol C
+elements_postprocessing.csv,Surfacic_NS,Specific non-structural mass,,g m-2
+elements_postprocessing.csv,Total_Organic_Nitrogen,Total amount of organic N,amino acids + proteins + Nstruct,µmol N
+elements_postprocessing.csv,Tr,Transpiration rate per area,Farquhar,mmol H2O m-2 s-1
+elements_postprocessing.csv,Transpiration,Transpiration rate of the element,,mmol H2O s-1
+elements_postprocessing.csv,triosesP,Quantity of trioses phosphate - Compartment of the model,,µmol C
+elements_postprocessing.csv,Ts,Temperature at the surface of the element,Farquhar,°C
+hiddenzones_postprocessing.csv,AA_consumption_mstruct,Amino acids consumed in the hz for hz structural growth,,µmol N
+hiddenzones_postprocessing.csv,amino_acids,Quantity of amino acids - Compartment of the model,,µmol N
+hiddenzones_postprocessing.csv,Conc_Amino_Acids,Concentration of Amino Acids,,µmol g-1 mstruct
+hiddenzones_postprocessing.csv,Conc_Fructan,Concentration of fructans,,µmol hexose g-1 mstruct
+hiddenzones_postprocessing.csv,Conc_Proteins,Concentration of proteins,,g g-1 mstruct
+hiddenzones_postprocessing.csv,Conc_Sucrose,Concentration of sucrose,,µmol g-1 mstruct
+hiddenzones_postprocessing.csv,Cont_Fructan_DM,Fraction of fructans in the dry mass of the hz,,%
+hiddenzones_postprocessing.csv,Cont_Proteins_DM,Fraction of proteins in the dry mass of the hz,,%
+hiddenzones_postprocessing.csv,Cont_WSC_DM,Fraction of Non-structural carbohydrate in the dry mass of the hz,,%
+hiddenzones_postprocessing.csv,D_Fructan,Rate of fructan degradation,,µmol C g-1 mstruct h-1
+hiddenzones_postprocessing.csv,D_Proteins,Rate of protein degradation,,µmol N g-1 mstruct h-1
+hiddenzones_postprocessing.csv,delta_leaf_L,Increment of leaf length during the time interval,,m
+hiddenzones_postprocessing.csv,fructan,Quantity of fructans - Compartment of the model,,µmol C
+hiddenzones_postprocessing.csv,internode_L,Current length of the internode,,
+hiddenzones_postprocessing.csv,leaf_is_emerged,True if the leaf has emerged out of the pseudostem,,bool
+hiddenzones_postprocessing.csv,leaf_L,Current leaf length,,m
+hiddenzones_postprocessing.csv,leaf_pseudostem_length,Current length of the pseudostem in which the leaf is growing,Distance from the higgest sheath to the bottom of the growing leaf,m
+hiddenzones_postprocessing.csv,mstruct,Structural mass - Compartment of the model,,g
+hiddenzones_postprocessing.csv,N_content,N fraction of the hz dry mass,,%
+hiddenzones_postprocessing.csv,nb_replications,"Number of axes bearing an hz similar to this one (main stem included, so nb_replications>=1)",,Dimensionless
+hiddenzones_postprocessing.csv,Nstruct,Mass of non-structural nitrogen - Compartment of the model,,g
+hiddenzones_postprocessing.csv,proteins,Quantity of proteins - Compartment of the model,,µmol N
+hiddenzones_postprocessing.csv,ratio_DZ,Ratio of the hz length which is made of division zone.,,Dimensionless
+hiddenzones_postprocessing.csv,RER,Leaf relative elongation rate during the exponentiel elongation phase (prior previous leaf emergence) at 12°C,,s-1
+hiddenzones_postprocessing.csv,Respi_growth,Local growth respiration,,µmol C
+hiddenzones_postprocessing.csv,S_Fructan,Rate of fructan synthesis,,µmol C g-1 mstruct h-1
+hiddenzones_postprocessing.csv,S_Proteins,Rate of protein synthesis,,µmol N g-1 mstruct h-1
+hiddenzones_postprocessing.csv,sucrose,Quantity of sucrose - Compartment of the model,,µmol C
+hiddenzones_postprocessing.csv,sucrose_consumption_mstruct,Sucrose consumed in the roots for root structural growth,,µmol C
+hiddenzones_postprocessing.csv,sum_dry_mass,Dry mass,mstruct + mass of all the metabolites,g
+hiddenzones_postprocessing.csv,Unloading_Amino_Acids,Unloading of amino_acids from phloem to hz,,µmol N g-1 root mstruct
+hiddenzones_postprocessing.csv,Unloading_Sucrose,Unloading of sucrose from phloem to hz,,µmol C g-1 root mstruct
+leaf_traits.csv,ageTT_init_em_prev,Time duration between leaf initiation and previous leaf emergence,,°Cd
+leaf_traits.csv,ageTT_lig,Time duration between leaf Emergence and leaf ligulation,,°Cd
+leaf_traits.csv,ageTT_senesc_end,Time duration between leaf emergence and the full senescence of the lamina,,°Cd
+leaf_traits.csv,ageTT_senesc_onset,Time duration between leaf emergence and the onset of lamina senescence,,°Cd
+leaf_traits.csv,green_area,Maximum green area of the lamina during the simulation,Calculated by ADEL,m2
+leaf_traits.csv,internode_Lmax,Final length of the internode,,m
+leaf_traits.csv,lamina_Lmax,Final lamina length,,m
+leaf_traits.csv,lamina_W_Lg,Ratio of Lamina maximum width to lamina final length ,,Dimensionless
+leaf_traits.csv,lamina_W_Lg_em,Ratio of Lamina maximum width to lamina potentiel final length as set at previous leaf emergence,,Dimensionless
+leaf_traits.csv,lamina_Wmax,Maximum lamina width,,m
+leaf_traits.csv,leaf_Lmax,Final leaf length (sheath+lamina),,m
+leaf_traits.csv,leaf_Lmax_em,Potential final leaf length as defined at previous leaf emergence,,m
+leaf_traits.csv,lifespanTT_lig,Time duration between leaf ligulation and full lamina senescence,,°Cd
+leaf_traits.csv,lifespanTT_lig_green,Time duration between leaf ligulation and the onset of lamina senescence,,°Cd
+leaf_traits.csv,LSSW,Lineic Sheath Structural Weight,,g mstruct m-1
+leaf_traits.csv,phyllo_TT,Time duration between the emergence of this leaf and the previous one ,,°Cd
+leaf_traits.csv,RER,Leaf relative elongation rate during the exponentiel elongation phase (prior previous leaf emergence) at 12°C,slope of the linear regression between log of leaf length and temperature compensated-time,s-1
+leaf_traits.csv,sheath_Lmax,Final sheath length,,m
+leaf_traits.csv,SLA,Specific Leaf Area - Avg from ligulation to onset of senescence,,m2 kg-1
+leaf_traits.csv,SLN,Specific Leaf Nitrogen - Avg from ligulation to onset of senescence,,g m-2
+leaf_traits.csv,SSLW,Specific Structural Lamina Weight,,g mstruct m-2
+leaf_traits.csv,sumTT_em,Time of leaf tip emergence - sum of thermal time since the beginning of the simulation,,°Cd
+leaf_traits.csv,sumTT_em_prev,Time of previous leaf emergence - sum of thermal time since the beginning of the simulation,,°Cd
+leaf_traits.csv,sumTT_init,Time of leaf initialisation - sum of thermal time since the beginning of the simulation,,°Cd
+leaf_traits.csv,sumTT_lig,Time of leaf ligulation - sum of thermal time since the beginning of the simulation,,°Cd
+leaf_traits.csv,sumTT_senesc_end,Time of full lamina senescence - sum of thermal time since the beginning of the simulation,,°Cd
+leaf_traits.csv,sumTT_senesc_onset,Time of onset of lamina senescence - sum of thermal time since the beginning of the simulation,,°Cd
+leaf_traits.csv,t_em,Time of leaf tip emergence - hour since the beginning of the simulation,,h
+leaf_traits.csv,t_lig,Time of leaf ligulation - hour since the beginning of the simulation,,h
+leaf_traits.csv,t_senesc_end,Time of full lamina senescence - hours since the beginning of the simulation,,h
+leaf_traits.csv,t_senesc_onset,Time of onset of lamina senescence - hours since the beginning of the simulation,,h
+organs_postprocessing.csv,AA_consumption_mstruct,Amino acids consumed in the roots for root structural growth,,µmol N
+organs_postprocessing.csv,age_from_flowering,"Age since flowering, equivalent to time at 20°C",,s-1
+organs_postprocessing.csv,amino_acids,Quantity of amino acids - Compartment of the model,,µmol N
+organs_postprocessing.csv,C_exudation,Rates of C exudation,,µmol C g-1 mstruct h-1
+organs_postprocessing.csv,Conc_Amino_Acids,Concentration of Amino Acids,,µmol g-1 mstruct
+organs_postprocessing.csv,Conc_cytokinins,Concentration of cytokinins,,AU g mstruct -1
+organs_postprocessing.csv,Conc_Nitrates,Concentration of nitrates,,µmol g-1 mstruct
+organs_postprocessing.csv,Conc_Sucrose,Concentration of sucrose,,µmol g-1 mstruct
+organs_postprocessing.csv,cytokinins,Quantity of cytokinins - Compartment of the model,,AU
+organs_postprocessing.csv,Dry_Mass,Grain total dry mass,,g
+organs_postprocessing.csv,Export_Amino_Acids,Amino acids exported from the roots through the transpiration flux,,µmol N h-1
+organs_postprocessing.csv,Export_cytokinins,Cytokinis exported from the roots through the transpiration flux,,AU h-1
+organs_postprocessing.csv,Export_Nitrates,Nitrates exported from the roots through the transpiration flux,,µmol N h-1
+organs_postprocessing.csv,HATS_LATS,nitrate influxe rate by HATS and LATS,,µmol N h-1
+organs_postprocessing.csv,mstruct,Structural mass - Compartment of the model,,g
+organs_postprocessing.csv,N_exudation,Rates of N exudation,,µmol N g-1 mstruct h-1
+organs_postprocessing.csv,N_tot,N mass,,g
+organs_postprocessing.csv,nitrates,Quantity of nitrates - Compartment of the model,,µmol N
+organs_postprocessing.csv,Nstruct,Mass of non-structural nitrogen - Compartment of the model,,g
+organs_postprocessing.csv,proteins,Quantity of proteins - Compartment of the model,,µmol N
+organs_postprocessing.csv,Proteins_N_Mass,Grain total protein mass,,g
+organs_postprocessing.csv,R_grain_growth_starch,Respiration related to grain starch loading,,µmol C
+organs_postprocessing.csv,R_grain_growth_struct,Respiration related to grain structural growth,,µmol C
+organs_postprocessing.csv,R_Nnit_red,Nitrate reduction-linked respiration,,µmol C
+organs_postprocessing.csv,R_Nnit_upt,Nitrate uptake respiration,,µmol C
+organs_postprocessing.csv,R_residual,"Residual respiration (cost from protein turn-over, cell ion gradients, futile cycles...)",,µmol C
+organs_postprocessing.csv,regul_transpiration,A function to regulate metabolite exports from roots by shoot transpiration,,Dimensionless
+organs_postprocessing.csv,Respi_growth,Local growth respiration,,µmol C
+organs_postprocessing.csv,RGR_Structure,Relative Growth Rate of grain structure at 20°C,,s-1
+organs_postprocessing.csv,S_Amino_Acids,Rate of amino acids synthesis,,µmol N g-1 mstruct h-1
+organs_postprocessing.csv,S_cytokinins,Rate of Cytokinin synthesis,,AU g-1 mstruct h-1
+organs_postprocessing.csv,S_grain_starch,Rate of Synthesis of grain starch ,,µmol C h-1
+organs_postprocessing.csv,S_grain_structure,Rate of Synthesis of grain structure,,µmol C h-1
+organs_postprocessing.csv,S_Proteins,Rate of protein synthesis,,µmol N g-1 mstruct h-1
+organs_postprocessing.csv,senesced_mstruct,Structural mass of the senesced tissues of the organ,,g
+organs_postprocessing.csv,starch,Quantity of starch - Compartment of the model,,µmol C
+organs_postprocessing.csv,structure,Quantity of grain structure - Compartment of the model,,µmol C
+organs_postprocessing.csv,sucrose,Quantity of sucrose - Compartment of the model,,µmol C
+organs_postprocessing.csv,sucrose_consumption_mstruct,Sucrose consumed in the roots for root structural growth,,µmol C
+organs_postprocessing.csv,sum_respi,Sum of C lost by respiration other than growth respiration,R_phloem_loading + R_Nnit_red + R_residual,µmol C
+organs_postprocessing.csv,Total_Organic_Nitrogen,Total amount of organic N,amino acids + proteins + Nstruct,µmol N
+organs_postprocessing.csv,Unloading_Amino_Acids,Unloading of amino_acids from phloem to roots,,µmol N g-1 root mstruct
+organs_postprocessing.csv,Unloading_Sucrose,Unloading of sucrose from phloem to roots,,µmol C g-1 root mstruct
+organs_postprocessing.csv,Uptake_Nitrates,Quantity of Nitrate uptake by the roots,,µmol N
+organs_postprocessing.csv,WSC_g,Mass of Non-structural carbohydrates,,g
+performance_indices.csv,avg_LAR,Average leaf area ratio,green area of the laminae : plant dry mass,m2 g-1
+performance_indices.csv,avg_LMR,Average leaf mass ratio,dry mass of the laminae : plant dry mass,Dimensionless
+performance_indices.csv,avg_NAR_TT,Average Net Assimilation Rate,Increment of plant dry mass per lamina area per TT,g m-2 °Cd-1
+performance_indices.csv,avg_phyllochron,Average phyllochron,1/slope of the linear regression between the number of emerged leaves and temperature-compensated time,°Cd
+performance_indices.csv,avg_RGR_roots_TT,Average Relative Growth Rate of the roots,delta dry mass : dry mass,°Cd-1
+performance_indices.csv,avg_RGR_shoot_TT,Average Relative Growth Rate of the shoot,delta dry mass : dry mass,°Cd-1
+performance_indices.csv,avg_RGR_TT,Average Relative Growth Rate of the plant,delta dry mass : dry mass,°Cd-1
+performance_indices.csv,avg_SLA,Average Specific Leaf Area - Mean over the simulation,Mean of hourly ratio of green area of the laminae : lamina dry mass,m2 kg-1
+performance_indices.csv,C_usages_exudation,C lost by respiration of the root exudation - cumulated since the beging of the simulation.,,µmol C
+performance_indices.csv,C_usages_Respi,C lost by respiration of the shoots + roots - cumulated since the beging of the simulation.,,µmol C
+performance_indices.csv,C_usages_Respi_roots,C lost by respiration of the roots - cumulated since the beging of the simulation.,,µmol C
+performance_indices.csv,C_usages_Respi_shoot,C lost by respiration of the shoots - cumulated since the beging of the simulation.,,µmol C
+performance_indices.csv,final_avg_SLA,Average Specific Leaf Area - at the end of the simulation,green area of the laminae : lamina dry mass,m2 kg-1
+performance_indices.csv,final_LAR,leaf area ratio - at the end of the simulation,green area of the laminae : plant dry mass,m2 g-1
+performance_indices.csv,final_LMR,leaf mass ratio - at the end of the simulation,dry mass of the laminae : plant dry mass,Dimensionless
+performance_indices.csv,LAI,Leaf Area Index - at the end of the simulation,,Dimensionless
+performance_indices.csv,LAI_senesced,Leaf Area Index including the area of the senescence tissues - at the end of the simulation,,Dimensionless
+performance_indices.csv,nb_final_em,Number of emerged leaf - at the end of the simulation,considered both senesced and green leaves,Dimensionless
+performance_indices.csv,nb_final_lig,Number of ligulated leaf - at the end of the simulation,considered both senesced and green leaves,Dimensionless
+performance_indices.csv,Photosynthetic_efficiency,Average photosynthetic efficiency (ratio of assimilated C  to absorbed PAR) ,cumulative C_assimilated:cumulative PARa,µmol C MJ-1
+performance_indices.csv,RUE_plant_MJ_PAR,Radiation Use Efficiency of the plant,slope of the linear regression between the biomass of the plant across time and the cumulative absorbed PAR,g MJ-1
+performance_indices.csv,RUE_plant_MJ_RGint,Radiation Use Efficiency of the plant,slope of the linear regression between the biomass of the plant across time and the cumulative absorbed global radiation,g MJ-1
+performance_indices.csv,RUE_plant_total_MJ_PAR, Radiation Use Efficiency of the plant including the structural mass of the senesced tissues,slope of the linear regression between the biomass of the plant across time (dry mass and structural mass of the senesced tissues) and the cumulative absorbed PAR,g MJ-1
+performance_indices.csv,RUE_shoot_MJ_PAR,Radiation Use Efficiency of the shoot,slope of the linear regression between the biomass of the shoot across time and the cumulative absorbed PAR,g MJ-1
+performance_indices.csv,RUE_shoot_MJ_RGint,Radiation Use Efficiency of the shoot,slope of the linear regression between the biomass of the shoot across time and the cumulative absorbed global radiation,g MJ-1
+performance_indices.csv,RUE_shoot_total_MJ_PAR,Radiation Use Efficiency of the shoot including the structural mass of the senesced tissues,slope of the linear regression between the biomass of the shoot across time (dry mass and structural mass of the senesced tissues) and the cumulative absorbed PAR,g MJ-1
+performance_indices.csv,t_final,Time of end of simulation (control variable if plant death),,h
+performance_indices.csv,tot_PARa_MJ,Total PAR absorbed during the simulation,,MJ
+soils_postprocessing.csv,Conc_Nitrates_Soil,Concentration of nitrates in the soil,,µmol m-3
+soils_postprocessing.csv,mineralisation,Rate of Mineralisation of organic N into nitrates in the soil,,µmol h-1
+soils_postprocessing.csv,nitrates,Quantity of nitrates - Compartment of the model,,µmol N
+soils_postprocessing.csv,Tsoil,Soil temperature,,°C
+soils_postprocessing.csv,volume,Soil volume explored by the roots,,m-3

@@ -1,0 +1,17 @@
+plant,axis,metamer,organ,element,Eabs
+1,MS,9,blade,LeafElement1,0.0114
+1,MS,9,internode,HiddenElement,0
+1,MS,9,sheath,StemElement,0.0049
+1,MS,10,blade,LeafElement1,0.0216
+1,MS,10,internode,HiddenElement,0.0005
+1,MS,10,sheath,StemElement,0.0057
+1,MS,11,blade,LeafElement1,0.0727
+1,MS,11,internode,HiddenElement,0.0006
+1,MS,11,sheath,StemElement,0.0126
+1,MS,12,blade,LeafElement1,0.2956
+1,MS,12,internode,HiddenElement,0.0014
+1,MS,12,internode,StemElement,0.0259
+1,MS,12,sheath,StemElement,0.0685
+1,MS,13,peduncle,HiddenElement,0.0076
+1,MS,13,peduncle,StemElement,0.1433
+1,MS,14,ear,StemElement,0.4121

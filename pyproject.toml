@@ -1,0 +1,101 @@
+[build-system]
+requires = [
+    "setuptools",
+    "setuptools_scm",
+]
+build-backend = "setuptools.build_meta"
+
+# where your source lies if you followed src layout
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+include-package-data = false # force explicit declaration of data (disable automatic inclusion)
+
+# enable dynamic version based on git tags
+[tool.setuptools_scm]
+# Format version to ease alignment with conda/meta.yaml tag-based versioning
+fallback_version = "2.0.0.dev0"
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+
+[project]
+name = "openalea.wheatfspm"
+authors = [
+  { name = "Romain Barillot, Camille Chambon, Marion Gauthier, Bruno Andrieu" },
+]
+description = "WheatFspm is a Functional Structural Plant Model (FSPM) of wheat ."
+readme = "README.md"
+license = "CECILL-C"
+license-files = ["LICEN[CS]E*"]
+requires-python = ">=3.10"
+dynamic = ["version"]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+
+# you can list here all dependencies that are pip-instalable, and that have a name identical to the one used by conda (to allow reuse of this list in meta.yaml)
+# If conda name is different, please do not declare the pip name, and declare conda name in the next section
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "nbmake",
+]
+dev = [
+  "pytest >=6",
+  "pytest-cov >=3",
+]
+doc = [
+  "sphinx-autobuild",
+  "pydata-sphinx-theme",
+  "myst-parser",
+  "sphinx-favicon",
+  "ipykernel",
+  "sphinx-copybutton",
+  "ipython_genutils",
+  "nbsphinx",
+  "ipywidgets",
+]
+
+# section specific to conda-only distributed package (not used by pip yet)
+[tool.conda.environment]
+channels = [
+  "openalea3",
+  "conda-forge"
+]
+dependencies = [
+    "openalea.mtg",
+    "openalea.plantgl",
+    "openalea.lpy",
+    "openalea.caribu",
+    "openalea.adel",
+    "openalea.astk",
+    "matplotlib-base",
+    "openalea.widgets"
+]
+
+[project.urls]
+Repository = "https://github.com/openalea/WheatFspm"
+Homepage = "https://openalea.rtfd.io"
+"Bug Tracker" = "https://github.com/openalea/WheatFspm/issues"
+Discussions = "https://github.com/openalea/WheatFspm/discussions"
+Changelog = "https://github.com/openalea/WheatFspm/releases"
+
+[tool.setuptools.package-data]
+"*" = ['*']

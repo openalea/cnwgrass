@@ -1,0 +1,7 @@
+plant,axis,metamer,organ,element,age,length,Wmax,is_growing,mstruct,senesced_mstruct,Nstruct,amino_acids,proteins,fructan,sucrose,green_area,cytokinins,max_proteins,starch,nitrates,senesced_length_element,Nresidual,max_mstruct,is_over,Ag,Tr,Ts,triosesP
+1,MS,1,blade,LeafElement1,240,0.082,0.003,False,0.004106768,0,2.05E-05,1.69E+00,16.93543686,0,24.15745785,0.00019556,0.349075266,4.40E+03,0,0,0,0,0.004106768,False,0,0,20,0
+1,MS,1,sheath,StemElement,240,0.0285,,False,0.00171,0,0.00000855,0.202319701,2.023197008,0,10.05882353,0.000269,0.04104,1.13E+03,0,0,0,0,0.00171,False,0,0,20,0
+1,MS,2,blade,LeafElement1,160,0.092,0.0033,False,0.004837643,0,2.42E-05,2.36E+00,23.63639357,0,28.4567234,0.000230364,0.488601941,4.40E+03,0,0,0,0,0.004837643,False,0,0,20,0
+1,MS,2,sheath,HiddenElement,160,0.0285,,False,0.00228,0,0.0000114,0.382633557,3.826335573,6.705882353,13.41176471,0.000248,0.0798,1.60E+03,0,0,0,0,0.00228,False,0,0,20,0
+1,MS,2,sheath,StemElement,160,0.0005,,False,0.00004,0,0.0000002,0.006712869,0.067128694,0,0.235294118,0.000005,0.0014,1.60E+03,0,0,0,0,0.00004,False,0,0,20,0
+1,MS,3,blade,LeafElement1,80,0.060421565,0.004,True,0.00417081,0,2.09E-05,2.24E+00,22.44062573,0,24.53417647,0.00019861,0.46295991,0,0,0,0,0,0.00417081,False,0,0,20,0

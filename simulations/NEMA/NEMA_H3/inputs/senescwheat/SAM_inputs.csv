@@ -1,0 +1,2 @@
+plant,axis,status,nb_leaves,GA,height,SAM_temperature,delta_teq,delta_teq_roots,teq_since_primordium,sum_TT,cohort
+1,MS,reproductive,12,True,120,20,3600,3600,0,0,1

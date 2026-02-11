@@ -1,0 +1,6 @@
+plant,axis,status,nb_leaves,GA,SAM_height,SAM_temperature,delta_teq,delta_teq_roots,teq_since_primordium,sum_TT,cohort,mstruct,senesced_mstruct,minerals_plant
+1,MS,vegetative,10,False,0,20,3600,3600,0,0,1,0.05468138,0,0.002734069
+1,T1,vegetative,7,False,0,20,3600,3600,0,0,4,NA,0,NA
+1,T2,vegetative,6,False,0,20,3600,3600,0,0,5,NA,0,NA
+1,T3,vegetative,5,False,0,20,3600,3600,0,0,6,NA,0,NA
+1,T4,vegetative,4,False,0,20,3600,3600,0,0,7,NA,0,NA
