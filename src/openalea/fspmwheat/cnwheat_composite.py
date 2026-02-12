@@ -10,8 +10,8 @@ from dataclasses import dataclass, fields
 from openalea.metafspm.component import Model, declare
 
 
-from alinea.adel.adel_dynamic import AdelDyn
-from alinea.adel.echap_leaf import echap_leaves
+from openalea.adel.adel_dynamic import AdelDyn
+from openalea.adel.echap_leaf import echap_leaves
 from openalea.fspmwheat import caribu_facade
 from openalea.fspmwheat import cnwheat_facade
 from openalea.fspmwheat import elongwheat_facade
