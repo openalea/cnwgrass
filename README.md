@@ -64,9 +64,9 @@ WheatFspm consists in a set of sub-models (named submodules in git) which share 
     * [Openalea.MTG](https://github.com/openalea/mtg)
     * [Openalea.Plantgl](https://github.com/openalea/plantgl)
     * [Openalea.Lpy](https://github.com/openalea/lpy)
-    * [Alinea.Caribu](https://github.com/openalea-incubator/caribu) 
-    * [Alinea.Adel](https://github.com/openalea-incubator/adel)
-    * [Alinea.Astk](https://github.com/openalea-incubator/astk)
+    * [Openalea.Caribu](https://github.com/openalea-incubator/caribu) 
+    * [Openalea.Adel](https://github.com/openalea-incubator/adel)
+    * [Openalea.Astk](https://github.com/openalea-incubator/astk)
     
 * To run the tools: [Matplotlib](http://matplotlib.org/) >= 1.3.1 
 * To build the documentation: [Sphinx](http://sphinx-doc.org/) >= 1.1.3
