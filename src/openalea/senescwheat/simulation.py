@@ -2,8 +2,8 @@
 
 from __future__ import division  # use "//" to do integer division
 
-from senescwheat import model
-from senescwheat import parameters
+from openalea.senescwheat import model
+from openalea.senescwheat import parameters
 
 """
     senescwheat.simulation

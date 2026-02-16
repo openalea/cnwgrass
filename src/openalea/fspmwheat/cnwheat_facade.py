@@ -1,18 +1,18 @@
 # -*- coding: latin-1 -*-
 
-from respiwheat import model as respiwheat_model
+from openalea.respiwheat import model as respiwheat_model
 
-from cnwheat import model as cnwheat_model, simulation as cnwheat_simulation, \
+from openalea.cnwheat import model as cnwheat_model, simulation as cnwheat_simulation, \
     converter as cnwheat_converter, postprocessing as cnwheat_postprocessing, parameters as cnwheat_parameters
 
-from fspmwheat import tools
+from openalea.fspmwheat import tools
 
 import numpy as np
 import math
 from scipy.sparse import lil_matrix
 
 """
-    fspmwheat.cnwheat_facade
+    openalea.fspmwheat.cnwheat_facade
     ~~~~~~~~~~~~~~~~~~~~~~~~
 
     The module :mod:`fspmwheat.cnwheat_facade` is a facade of the model CNWheat.

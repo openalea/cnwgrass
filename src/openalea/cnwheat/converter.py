@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from cnwheat import model, simulation
+from openalea.cnwheat import model, simulation
 
 """
     cnwheat.converter

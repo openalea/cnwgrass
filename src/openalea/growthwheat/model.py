@@ -4,7 +4,7 @@ from __future__ import division  # use "//" to do integer division
 
 import numpy as np
 
-from growthwheat import parameters
+from openalea.growthwheat import parameters
 
 """
     growthwheat.model

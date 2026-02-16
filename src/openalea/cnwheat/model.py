@@ -4,7 +4,7 @@ from __future__ import division  # use "//" to do integer division
 import numpy as np
 from math import exp
 
-from cnwheat import parameters
+from openalea.cnwheat import parameters
 
 """
     cnwheat.model

@@ -1,7 +1,7 @@
 # -*- coding: latin-1 -*-
 
 from __future__ import division  # use '//' to do integer division
-from senescwheat import parameters
+from openalea.senescwheat import parameters
 
 """
     senescwheat.model

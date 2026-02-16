@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-from cnwheat import model as cnwheat_model
+from openalea.cnwheat import model as cnwheat_model
 
 
 def leaf_traits(scenario_outputs_dirpath, scenario_postprocessing_dirpath):
@@ -421,7 +421,7 @@ def calculate_performance_indices(scenario_outputs_dirpath, scenario_postprocess
     df_RGR['RGR_shoot_TT'] = df_RGR.RGR_shoot / df_RGR.delta_sum_TT
     df_RGR['RGR_roots_TT'] = df_RGR.RGR_roots / df_RGR.delta_sum_TT
 
-    # --- mean NAR: Net Assimilation Rate : delta g DM m-2 °Cd-1
+    # --- mean NAR: Net Assimilation Rate : delta g DM m-2 ï¿½Cd-1
     df_lamina_tot = df_lamina.groupby(['t'], as_index=False).agg({'green_area': 'sum',
                                                                   'sum_dry_mass': 'sum'})
     df_lamina_tot['day'] = df_lamina_tot.t // 24 + 1

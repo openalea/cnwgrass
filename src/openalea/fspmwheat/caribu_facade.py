@@ -4,13 +4,13 @@ import pandas as pd
 import numpy as np
 import warnings
 
-from alinea.caribu.CaribuScene import CaribuScene
-from alinea.caribu.sky_tools import GenSky, GetLight, Gensun, GetLightsSun, spitters_horaire
+from openalea.caribu.CaribuScene import CaribuScene
+from openalea.caribu.sky_tools import GenSky, GetLight, Gensun, GetLightsSun, spitters_horaire
 
-from fspmwheat import tools
+from openalea.fspmwheat import tools
 
 """
-    fspmwheat.caribu_facade
+    openalea.fspmwheat.caribu_facade
     ~~~~~~~~~~~~~~~~~~~~~~~
 
     The module :mod:`fspmwheat.caribu_facade` is a facade of the model Caribu.
@@ -49,7 +49,7 @@ class CaribuFacade(object):
         """
         :param openalea.mtg.MTG shared_mtg: The MTG shared between all models.
         :param pandas.DataFrame shared_elements_inputs_outputs_df: The dataframe of inputs and outputs at elements scale shared between all models.
-        :param alinea.adel.adel_dynamic.AdelWheatDyn geometrical_model: The model which deals with geometry. This model must have an attribute "domain".
+        :param openalea.adel.adel_dynamic.AdelWheatDyn geometrical_model: The model which deals with geometry. This model must have an attribute "domain".
         :param bool update_shared_df: If `True`  update the shared dataframes at init and at each run (unless stated otherwise)
         """
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
@@ -65,10 +65,10 @@ class CaribuFacade(object):
 
         :param bool run_caribu: If 'True', run the CARIBU model to calculate light distribution inside the 3D canopy.
         :param str sun_sky_option: The irradiance model, should be one of 'mix' or 'sun' or 'sky'
-        :param float energy: The incident PAR above the canopy (µmol m-2 s-1)
+        :param float energy: The incident PAR above the canopy (ï¿½mol m-2 s-1)
         :param int DOY: Day Of the Year to be used for solar sources
         :param int hourTU: Hour to be used for solar sources (Universal Time)
-        :param float latitude: latitude to be used for solar sources (°)
+        :param float latitude: latitude to be used for solar sources (ï¿½)
         :param string diffuse_model: The kind of diffuse model, either 'soc' or 'uoc'.
         :param int azimuts: The number of azimutal positions.
         :param int zenits: The number of zenital positions.
@@ -166,13 +166,13 @@ class CaribuFacade(object):
         Initialize the inputs of the model from the MTG shared
 
         :param bool run_caribu: If 'True', run the CARIBU model to calculate light distribution inside the 3D canopy.
-        :param float energy: The incident PAR above the canopy (µmol m-2 s-1)
+        :param float energy: The incident PAR above the canopy (ï¿½mol m-2 s-1)
         :param string diffuse_model: The kind of diffuse model, either 'soc' or 'uoc'.
         :param int azimuts: The number of azimutal positions.
         :param int zenits: The number of zenital positions.
         :param int DOY: Day Of the Year to be used for solar sources
         :param int hourTU: Hour to be used for solar sources (Universal Time)
-        :param float latitude: latitude to be used for solar sources (°)
+        :param float latitude: latitude to be used for solar sources (ï¿½)
         :param bool heterogeneous_canopy: Whether to create a duplicated heterogeneous canopy from the initial mtg.
 
         :return: A tuple of Caribu scenes instantiated for sky and sun sources, respectively, and two dictionaries with Erel value per vertex id and per primitive.
@@ -240,7 +240,7 @@ class CaribuFacade(object):
         :return: duplicated heterogenous scene and its domain
         :rtype: openalea.plantgl.all.Scene, (float)
         """
-        from alinea.adel.Stand import AgronomicStand
+        from openalea.adel.Stand import AgronomicStand
         import openalea.plantgl.all as plantgl
         import random
 

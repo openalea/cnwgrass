@@ -2,7 +2,7 @@
 
 from __future__ import division  # use "//" to do integer division
 import pandas as pd
-from elongwheat import parameters
+from openalea.elongwheat import parameters
 from math import exp, log10
 
 """
@@ -87,7 +87,7 @@ def calculate_cumulated_thermal_time(sum_TT, temperature, delta_teq):
     :rtype: float
     """
     if temperature > 0:
-        return sum_TT + delta_teq * parameters.Temp_Tref / 24.0 / 3600  # Conversion to days at 12°C
+        return sum_TT + delta_teq * parameters.Temp_Tref / 24.0 / 3600  # Conversion to days at 12ï¿½C
     else:
         return sum_TT
 
@@ -181,9 +181,9 @@ def calculate_leaf_pseudostem_length(ligule_heights, bottom_hiddenzone_height, p
 def calculate_deltaL_preE(sucrose, leaf_L, amino_acids, mstruct, delta_teq, leaf_rank, optimal_growth_option):
     """ Delta of leaf length over delta_t as a function of sucrose and amino acids, from initiation to the emergence of the previous leaf.
 
-    :param float sucrose: Amount of sucrose (µmol C)
+    :param float sucrose: Amount of sucrose (ï¿½mol C)
     :param float leaf_L: Total leaf length (m)
-    :param float amino_acids: Amount of amino acids (µmol N)
+    :param float amino_acids: Amount of amino acids (ï¿½mol N)
     :param float mstruct: Structural mass (g)
     :param float delta_teq: Temperature-consensated time = time duration at a reference temperature (s)
     :param int leaf_rank: leaf phytomer number
@@ -242,8 +242,8 @@ def calculate_deltaL_postE(prev_leaf_pseudo_age, leaf_pseudo_age, prev_leaf_L, l
     :param float leaf_pseudo_age: Pseudo age of the leaf since beginning of automate elongation (s)
     :param float prev_leaf_L: Leaf length at previous time step (m)
     :param float leaf_Lmax: Final leaf length (m)
-    :param float sucrose: Amount of sucrose (µmol C)
-    :param float amino_acids: Amount of amino acids (µmol N)
+    :param float sucrose: Amount of sucrose (ï¿½mol C)
+    :param float amino_acids: Amount of amino acids (ï¿½mol N)
     :param float mstruct: Structural mass (g)
     :param bool optimal_growth_option: if True the function will calculate leaf elongation assuming optimal growth conditions (except if sucrose and amino acids are zero)
 
@@ -400,13 +400,13 @@ def calculate_mean_conc_sucrose(prev_mean_conc_sucrose, time_prev_leaf2_emergenc
     """ Update the mean sucrose concentration of the hiddenzone since leaf n-2 emergence.
     Calculation starts at leaf n-2 emergence, the updated mean accounts for the [sucrose] of current time step weighted by a function of temperature.
 
-    :param float prev_mean_conc_sucrose: Mean sucrose concentration of the hiddenzone at the end of previous simulation time step (µmol C g-1).
+    :param float prev_mean_conc_sucrose: Mean sucrose concentration of the hiddenzone at the end of previous simulation time step (ï¿½mol C g-1).
     :param float time_prev_leaf2_emergence: Time elapsed since leaf n-2 emergence (s at Tref).
     :param float delta_teq: Duration of the current simulation time step (s at Tref).
-    :param float sucrose: Sucrose in the hidden zone (µmol C).
+    :param float sucrose: Sucrose in the hidden zone (ï¿½mol C).
     :param float mstruct: Mstruct of the hidden zone (g).
 
-    :return: Updated mean sucrose concentration of the hiddenzone since leaf n-2 emergence (µmol C g-1)
+    :return: Updated mean sucrose concentration of the hiddenzone since leaf n-2 emergence (ï¿½mol C g-1)
     :rtype: float
     """
     conc_sucrose = sucrose / mstruct
@@ -573,7 +573,7 @@ def calculate_LSIW(LSSW, phytomer_rank, optimal_growth_option=False):
     if optimal_growth_option:
         LSIW = parameters.internode_LSIW_dict.get(phytomer_rank, parameters.internode_LSIW_dict[max(parameters.internode_LSIW_dict.keys())])
     else:
-        LSIW = LSSW * parameters.ratio_LSIW_LSSW  # TODO : changer mode de calcul car rapport non stable suivant numéro de phytomère
+        LSIW = LSSW * parameters.ratio_LSIW_LSSW  # TODO : changer mode de calcul car rapport non stable suivant numï¿½ro de phytomï¿½re
     return LSIW
 
 
@@ -600,9 +600,9 @@ def calculate_delta_internode_L_preL(phytomer_rank, sucrose, internode_L, amino_
     """ delta of internode length over delta_t as a function of sucrose and amino acids, from initiation to the ligulation of the previous leaf.
 
     :param int phytomer_rank: phytomer rank
-    :param float sucrose: Amount of sucrose (µmol C)
+    :param float sucrose: Amount of sucrose (ï¿½mol C)
     :param float internode_L: Total internode length (m)
-    :param float amino_acids: Amount of amino acids (µmol N)
+    :param float amino_acids: Amount of amino acids (ï¿½mol N)
     :param float mstruct: Structural mass of the hidden zone(g)
     :param float delta_teq: Temperature-consensated time = time duration at a reference temperature (s)
     :param bool optimal_growth_option: if True the function will calculate delta of internode length assuming optimal growth conditions
@@ -676,9 +676,9 @@ def calculate_delta_internode_L_postL(prev_internode_pseudo_age, internode_pseud
     :param float internode_pseudo_age: Pseudo age of the internode since beginning of automate elongation (s)
     :param float prev_internode_L: Internode length before elongation (m)
     :param float internode_Lmax_lig: Estimate of final internode length at previous leaf ligulation (m)
-    :param float sucrose: Amount of sucrose (µmol C)
-    :param float amino_acids: Amount of amino acids (µmol N)
-    :param float mstruct: Structural mass (µmol N)
+    :param float sucrose: Amount of sucrose (ï¿½mol C)
+    :param float amino_acids: Amount of amino acids (ï¿½mol N)
+    :param float mstruct: Structural mass (ï¿½mol N)
     :param bool optimal_growth_option: if True the function will calculate delta of internode length assuming optimal growth conditions
 
     :return: internode_L (m)

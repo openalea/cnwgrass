@@ -4,10 +4,10 @@ from __future__ import division  # use "//" to do integer division
 
 import copy
 
-from growthwheat import model
-from growthwheat import parameters
+from openalea.growthwheat import model
+from openalea.growthwheat import parameters
 
-from respiwheat.model import RespirationModel
+from openalea.respiwheat.model import RespirationModel
 
 """
     growthwheat.simulation
@@ -263,13 +263,13 @@ class Simulation(object):
                 curr_hiddenzone_outputs['AA_consumption_mstruct'] = model.calculate_s_Nstruct_amino_acids((delta_leaf_enclosed_Nstruct + delta_internode_enclosed_Nstruct),
                                                                                                           delta_lamina_Nstruct,
                                                                                                           delta_sheath_Nstruct,
-                                                                                                          delta_internode_Nstruct)  #: Consumption of amino acids due to mstruct growth (µmol N)
+                                                                                                          delta_internode_Nstruct)  #: Consumption of amino acids due to mstruct growth (ï¿½mol N)
                 curr_hiddenzone_outputs['sucrose_consumption_mstruct'] = model.calculate_s_mstruct_sucrose((delta_leaf_enclosed_mstruct + delta_internode_enclosed_mstruct),
                                                                                                            delta_lamina_mstruct,
                                                                                                            delta_sheath_mstruct,
                                                                                                            curr_hiddenzone_outputs[
-                                                                                                               'AA_consumption_mstruct'])  #: Consumption of sucrose due to mstruct growth (µmol C)
-                curr_hiddenzone_outputs['Respi_growth'] = RespirationModel.R_growth(curr_hiddenzone_outputs['sucrose_consumption_mstruct'])  #: Respiration growth (µµmol C)
+                                                                                                               'AA_consumption_mstruct'])  #: Consumption of sucrose due to mstruct growth (ï¿½mol C)
+                curr_hiddenzone_outputs['Respi_growth'] = RespirationModel.R_growth(curr_hiddenzone_outputs['sucrose_consumption_mstruct'])  #: Respiration growth (ï¿½ï¿½mol C)
 
                 # -- Update of hiddenzone outputs
                 curr_hiddenzone_outputs['leaf_enclosed_mstruct'] += delta_leaf_enclosed_mstruct

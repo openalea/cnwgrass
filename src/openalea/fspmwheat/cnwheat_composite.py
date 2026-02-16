@@ -142,7 +142,7 @@ class WheatFSPM(Model):
 
         # read adelwheat inputs at t0
         self.adel_wheat = AdelDyn(seed=1, scene_unit='m', leaves=echap_leaves(xy_model='Soissons_byleafclass'))
-        self.g = self.adel_wheat.load(dir=INPUTS_DIRPATH)
+        self.g = self.adel_wheat.load(directory=INPUTS_DIRPATH)
         
         # Section specific to coupling with Root-BRIDGES
         self.shoot_props = self.g.properties()

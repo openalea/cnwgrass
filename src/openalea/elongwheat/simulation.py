@@ -9,8 +9,8 @@ import copy
 import numpy as np
 import pandas as pd
 
-from elongwheat import model
-from elongwheat import parameters
+from openalea.elongwheat import model
+from openalea.elongwheat import parameters
 
 """
     elongwheat.simulation

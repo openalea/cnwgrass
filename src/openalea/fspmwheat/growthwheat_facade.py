@@ -1,7 +1,7 @@
 # -*- coding: latin-1 -*-
 
-from growthwheat import converter, simulation, parameters
-from fspmwheat import tools
+from openalea.growthwheat import converter, simulation, parameters
+from openalea.fspmwheat import tools
 
 """
     fspmwheat.growthwheat_facade

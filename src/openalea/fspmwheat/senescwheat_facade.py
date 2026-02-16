@@ -2,9 +2,9 @@
 
 import numpy as np
 
-from senescwheat import converter, simulation
+from openalea.senescwheat import converter, simulation
 
-from fspmwheat import tools
+from openalea.fspmwheat import tools
 
 """
     fspmwheat.senescwheat_facade

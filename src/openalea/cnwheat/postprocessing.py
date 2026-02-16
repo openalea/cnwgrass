@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from cnwheat import simulation as cnwheat_simulation, model as cnwheat_model, parameters as cnwheat_parameters, tools as cnwheat_tools
-from respiwheat import model as respiwheat_model
+from openalea.cnwheat import simulation as cnwheat_simulation, model as cnwheat_model, parameters as cnwheat_parameters, tools as cnwheat_tools
+from openalea.respiwheat import model as respiwheat_model
 
 """
     cnwheat.postprocessing

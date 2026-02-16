@@ -7,7 +7,7 @@ import pandas as pd
 from scipy import stats
 import matplotlib.pyplot as plt
 
-from alinea.adel.mtg import to_plantgl
+from openalea.adel.mtg import to_plantgl
 from openalea.plantgl.all import Viewer, Vector3
 
 """
@@ -98,8 +98,8 @@ def plot_linear_regression(x_array, y_array, x_label='x', y_label='y', plot_file
     :Examples:
 
     >>> import pandas as pd
-    >>> modelmaker_output_df = pd.read_csv('modelmaker_output.csv') # 'modelmaker_output.csv' must contain at least the column 'Sucrose_Phloem'
-    >>> cnwheat_output_df = pd.read_csv('cnwheat_output.csv') # 'cnwheat_output.csv' must contain at least the column 'Sucrose_Phloem'
+    >>> modelmaker_output_df = pd.read_csv('modelmaker_output.csv') #ï¿½'modelmaker_output.csv' must contain at least the column 'Sucrose_Phloem'
+    >>> cnwheat_output_df = pd.read_csv('cnwheat_output.csv') #ï¿½'cnwheat_output.csv' must contain at least the column 'Sucrose_Phloem'
     >>> plot_linear_regression(modelmaker_output_df.Sucrose_Phloem,
                                cnwheat_output_df.Sucrose_Phloem,
                                x_label='modelmaker_{}'.format('Sucrose_Phloem'),
@@ -154,8 +154,8 @@ def color_MTG_Nitrogen(g, df, t, SCREENSHOT_DIRPATH):
     def calculate_Total_Organic_Nitrogen(amino_acids, proteins, Nstruct):
         """Total amount of organic N (amino acids + proteins + Nstruct).
 
-        :param float amino_acids: Amount of amino acids (µmol N)
-        :param float proteins: Amount of proteins (µmol N)
+        :param float amino_acids: Amount of amino acids (ï¿½mol N)
+        :param float proteins: Amount of proteins (ï¿½mol N)
         :param float Nstruct: Structural N mass (g)
 
         :return: Total amount of organic N (mg)

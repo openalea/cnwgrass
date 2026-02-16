@@ -1,9 +1,9 @@
 # -*- coding: latin-1 -*-
-from cnwheat import simulation as cnwheat_simulation
-from elongwheat import simulation as elongwheat_simulation
-from farquharwheat import converter as farquharwheat_converter
-from growthwheat import simulation as growthwheat_simulation
-from senescwheat import converter as senescwheat_converter
+from openalea.cnwheat import simulation as cnwheat_simulation
+from openalea.elongwheat import simulation as elongwheat_simulation
+from openalea.farquharwheat import converter as farquharwheat_converter
+from openalea.growthwheat import simulation as growthwheat_simulation
+from openalea.senescwheat import converter as senescwheat_converter
 import numpy as np
 import pandas as pd
 

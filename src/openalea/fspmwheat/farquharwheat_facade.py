@@ -2,10 +2,10 @@
 
 import numpy as np
 
-from alinea.astk.plantgl_utils import get_height  # for height calculation
+from openalea.astk.plantgl_utils import get_height  # for height calculation
 
-from farquharwheat import converter, simulation, parameters
-from fspmwheat import tools
+from openalea.farquharwheat import converter, simulation, parameters
+from openalea.fspmwheat import tools
 
 """
     fspmwheat.farquharwheat_facade

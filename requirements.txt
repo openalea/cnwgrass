@@ -8,8 +8,8 @@ scipy
 openalea.mtg
 openalea.deploy
 openalea.lpy
-# alinea.caribu
-alinea.astk
+# openalea.caribu
+openalea.astk
 openalea.sconsx 
 m2w64-toolchain
 

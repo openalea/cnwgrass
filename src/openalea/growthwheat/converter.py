@@ -3,7 +3,7 @@
 from __future__ import division  # use "//" to do integer division
 import pandas as pd
 
-from growthwheat import simulation
+from openalea.growthwheat import simulation
 
 """
     growthwheat.converter
