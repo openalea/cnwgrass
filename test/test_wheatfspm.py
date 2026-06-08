@@ -11,18 +11,6 @@ from openalea.fspmwheat import fspmwheat_facade
 from openalea.fspmwheat import growthwheat_facade
 from openalea.fspmwheat import senescwheat_facade
 
-"""
-    test_cnwheat
-    ~~~~~~~~~~~~
-
-    Test:
-
-        * the run of a simulation with/without interpolation of the forcings,
-        * the logging,
-        * the postprocessing,
-        * and the graphs generation.
-
-"""
 
 # -- SIMULATION PARAMETERS --
 # Length of the simulation (in hours)
