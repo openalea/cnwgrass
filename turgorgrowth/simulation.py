@@ -80,13 +80,13 @@ class Simulation(object):
 
     # ---------- PLANT scale ----------
 
-    #: the index to locate the plants in the modeled system
+    #: the index to locate the plants in the modelled system
     PLANTS_INDEXES = ['plant']
     #: concatenation of :attr:`T_INDEX` and :attr:`PLANTS_INDEXES`
     PLANTS_T_INDEXES = T_INDEX + PLANTS_INDEXES
-    #: the parameters which define the state of the modeled system at plant scale
+    #: the parameters which define the state of the modelled system at plant scale
     PLANTS_STATE_PARAMETERS = []
-    #: the variables which define the state of the modeled system at plant scale,
+    #: the variables which define the state of the modelled system at plant scale,
     #: formed be the concatenation of :attr:`PLANTS_STATE_PARAMETERS` and the names
     #: of the compartments associated to each plant (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     PLANTS_STATE = PLANTS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Plant, [])
@@ -101,13 +101,13 @@ class Simulation(object):
 
     # ---------- AXIS scale ----------
 
-    #: the indexes to locate the axes in the modeled system
+    #: the indexes to locate the axes in the modelled system
     AXES_INDEXES = ['plant', 'axis']
     #: concatenation of :attr:`T_INDEX` and :attr:`AXES_INDEXES`
     AXES_T_INDEXES = T_INDEX + AXES_INDEXES
-    #: the parameters which define the state of the modeled system at axis scale
-    AXES_STATE_PARAMETERS = ['Tr', 'green_area', 'mstruct']
-    #: the variables which define the state of the modeled system at axis scale,
+    #: the parameters which define the state of the modelled system at axis scale
+    AXES_STATE_PARAMETERS = ['SAM_temperature']
+    #: the variables which define the state of the modelled system at axis scale,
     #: formed be the concatenation of :attr:`AXES_STATE_PARAMETERS` and the names
     #: of the compartments associated to each axis (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     AXES_STATE = AXES_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Axis, [])
@@ -116,19 +116,19 @@ class Simulation(object):
     #: the fluxes exchanged between the compartments at axis scale
     AXES_FLUXES = []
     #: the variables computed by integrating values of axis components parameters/variables recursively
-    AXES_INTEGRATIVE_VARIABLES = ['Total_Transpiration_turgor', 'Growth', 'total_water_influx', 'xylem_water_potential', 'delta_plant_water_content', 'plant_water_content', 'plant_WC_DM']
+    AXES_INTEGRATIVE_VARIABLES = ['Total_Transpiration_turgor', 'Growth', 'water_influx', 'plant_water_content']
     #: all the variables computed during a run step of the simulation at axis scale
     AXES_RUN_VARIABLES = AXES_STATE + AXES_INTERMEDIATE_VARIABLES + AXES_FLUXES + AXES_INTEGRATIVE_VARIABLES
 
     # ---------- PHYTOMER scale ----------
 
-    #: the indexes to locate the phytomers in the modeled system
+    #: the indexes to locate the phytomers in the modelled system
     PHYTOMERS_INDEXES = ['plant', 'axis', 'metamer']
     #: concatenation of :attr:`T_INDEX` and :attr:`PHYTOMERS_INDEXES`
     PHYTOMERS_T_INDEXES = T_INDEX + PHYTOMERS_INDEXES
-    #: the parameters which define the state of the modeled system at phytomer scale
-    PHYTOMERS_STATE_PARAMETERS = ['Tr', 'green_area']
-    #: the variables which define the state of the modeled system at phytomer scale,
+    #: the parameters which define the state of the modelled system at phytomer scale
+    PHYTOMERS_STATE_PARAMETERS = []
+    #: the variables which define the state of the modelled system at phytomer scale,
     #: formed be the concatenation of :attr:`PHYTOMERS_STATE_PARAMETERS` and the names
     #: of the compartments associated to each phytomer (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     PHYTOMERS_STATE = PHYTOMERS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Phytomer, [])
@@ -143,39 +143,39 @@ class Simulation(object):
 
     # ---------- ORGAN scale ----------
 
-    #: the indexes to locate the organ in the modeled system
+    #: the indexes to locate the organ in the modelled system
     ORGANS_INDEXES = ['plant', 'axis', 'organ']
     #: concatenation of :attr:`T_INDEX` and :attr:`ORGAN_INDEXES`
     ORGANS_T_INDEXES = T_INDEX + ORGANS_INDEXES
-    #: the parameters which define the state of the modeled system at organ scale
+    #: the parameters which define the state of the modelled system at organ scale
     ORGANS_STATE_PARAMETERS = ['age', 'amino_acids', 'proteins', 'sucrose', 'mstruct', 'Tr', 'green_area', 'SRWC', 'Tsoil']
-    #: the variables which define the state of the modeled system at organ scale,
+    #: the variables which define the state of the modelled system at organ scale,
     #: formed be the concatenation of :attr:`ORGAN_STATE_PARAMETERS` and the names
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ORGANS_STATE = ORGANS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Organ, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ORGANS_INTERMEDIATE_VARIABLES = ['soil_water_potential', 'total_water_potential', 'Ksoil']
+    ORGANS_INTERMEDIATE_VARIABLES = ['water_potential']
     #: the fluxes exchanged between the compartments at organ scale
     ORGANS_FLUXES = []
     #: the variables computed by integrating values of xylem components parameters/variables recursively
-    ORGANS_INTEGRATIVE_VARIABLES = ['xylem_water_potential']
+    ORGANS_INTEGRATIVE_VARIABLES = []
     #: all the variables computed during a run step of the simulation at organ scale
     ORGANS_RUN_VARIABLES = ORGANS_STATE + ORGANS_INTERMEDIATE_VARIABLES + ORGANS_FLUXES + ORGANS_INTEGRATIVE_VARIABLES
 
     # ---------- HIDDENZONE scale ----------
 
-    #: the indexes to locate the hidden zones in the modeled system
+    #: the indexes to locate the hidden zones in the modelled system
     HIDDENZONE_INDEXES = ['plant', 'axis', 'metamer']
     #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
     HIDDENZONE_T_INDEXES = T_INDEX + HIDDENZONE_INDEXES
-    #: the parameters which define the state of the modeled system at hidden zone scale
-    HIDDENZONE_STATE_PARAMETERS = ['delta_teq', 'leaf_pseudo_age', 'leaf_pseudostem_length', 'fructan', 'amino_acids', 'proteins', 'sucrose', 'temperature', 'mstruct', 'hiddenzone_age', 'leaf_enclosed_mstruct', 'leaf_Wmax', 'init_leaf_L', 'length_hz_En']
-    #: the variables which define the state of the modeled system at hidden zone scale,
+    #: the parameters which define the state of the modelled system at hidden zone scale
+    HIDDENZONE_STATE_PARAMETERS = ['leaf_pseudo_age', 'leaf_pseudostem_length', 'fructan', 'amino_acids', 'proteins', 'sucrose', 'mstruct', 'hiddenzone_age', 'leaf_enclosed_mstruct', 'leaf_Wmax', 'length_hz_En']
+    #: the variables which define the state of the modelled system at hidden zone scale,
     #: formed be the concatenation of :attr:`HIDDENZONE_STATE_PARAMETERS` and the names
     #: of the compartments associated to each hidden zone (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     HIDDENZONE_STATE = HIDDENZONE_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.HiddenZone, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at hidden zone scale
-    HIDDENZONE_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'total_water_potential', 'volume', 'length', 'phi_width', 'phi_thickness', 'phi_length', 'phi_volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct', 'omega', 'leaf_Lmax', 'delta_hiddenzone_dimensions_plastic', 'delta_weq']
+    HIDDENZONE_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'water_potential', 'volume', 'length', 'phi_width', 'phi_thickness', 'phi_length', 'phi_volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct', 'omega', 'leaf_Lmax', 'delta_hiddenzone_dimensions_plastic', 'delta_weq', 'delta_leaf_L']
     #: the fluxes exchanged between the compartments at hidden zone scale
     HIDDENZONE_FLUXES = ['water_influx', 'water_outflow', 'Growth']
     #: the variables computed by integrating values of hidden zone components parameters/variables recursively
@@ -186,18 +186,18 @@ class Simulation(object):
 
     # ---------- ELEMENT scale ----------
 
-    #: the indexes to locate the ELEMENTS in the modeled system
+    #: the indexes to locate the ELEMENTS in the modelled system
     ELEMENTS_INDEXES = ['plant', 'axis', 'metamer', 'organ', 'element']
     #: concatenation of :attr:`T_INDEX` and :attr:`ELEMENTS_INDEXES`
     ELEMENTS_T_INDEXES = T_INDEX + ELEMENTS_INDEXES
-    #: the parameters which define the state of the modeled system at organ scale
+    #: the parameters which define the state of the modelled system at organ scale
     ELEMENTS_STATE_PARAMETERS = ['amino_acids', 'green_area', 'mstruct', 'proteins', 'sucrose', 'fructan', 'Ts', 'Tr', 'age', 'is_growing', 'Wmax']
-    #: the variables which define the state of the modeled system at organ scale,
+    #: the variables which define the state of the modelled system at organ scale,
     #: formed be the concatenation of :attr:`ELEMENTS_STATE_PARAMETERS` and the names
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ELEMENTS_STATE = ELEMENTS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.PhotosyntheticOrganElement, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ELEMENTS_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'total_water_potential', 'volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct']
+    ELEMENTS_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'water_potential', 'volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct']
     #: the fluxes exchanged between the compartments at organ scale
     ELEMENTS_FLUXES = ['water_influx']
     #: the variables computed by integrating values of organ components parameters/variables recursively
@@ -208,13 +208,13 @@ class Simulation(object):
 
     # ---------- SOIL scale ----------
 
-    #: the indexes to locate the soils in the modeled system
+    #: the indexes to locate the soils in the modelled system
     SOILS_INDEXES = ['plant', 'axis']
     #: concatenation of :attr:`T_INDEX` and :attr:`SOILS_INDEXES`
     SOILS_T_INDEXES = T_INDEX + SOILS_INDEXES
-    #: the parameters which define the state of the modeled system at soil scale
+    #: the parameters which define the state of the modelled system at soil scale
     SOILS_STATE_PARAMETERS = []
-    #: the variables which define the state of the modeled system at soil scale,
+    #: the variables which define the state of the modelled system at soil scale,
     #: formed be the concatenation of :attr:`SOILS_STATE_PARAMETERS` and the names
     #: of the compartments associated to each soil (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     SOILS_STATE = SOILS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Soil, [])
@@ -227,7 +227,7 @@ class Simulation(object):
     #: all the variables computed during a run step of the simulation at soil scale
     SOILS_RUN_VARIABLES = SOILS_STATE + SOILS_INTERMEDIATE_VARIABLES + SOILS_FLUXES + SOILS_INTEGRATIVE_VARIABLES
 
-    #: a dictionary of all the variables which define the state of the modeled system, for each scale
+    #: a dictionary of all the variables which define the state of the modelled system, for each scale
     ALL_STATE_PARAMETERS = {model.Plant: PLANTS_STATE_PARAMETERS,
                             model.Axis: AXES_STATE_PARAMETERS,
                             model.Organ: ORGANS_STATE_PARAMETERS,
@@ -236,8 +236,8 @@ class Simulation(object):
                             model.PhotosyntheticOrganElement: ELEMENTS_STATE_PARAMETERS,
                             model.Soil: SOILS_STATE_PARAMETERS}
 
-    #: the names of the elements forcings
-    ELEMENTS_FORCINGS = ('green_area', 'Tr')
+    #: the names of the elements forcing
+    ELEMENTS_FORCING = ('green_area', 'Tr')
 
     #: the name of the loggers for compartments and derivatives
     LOGGERS_NAMES = {'compartments': {model.Plant: 'turgorgrowth.compartments.plants',
@@ -253,7 +253,7 @@ class Simulation(object):
                                      model.HiddenZone: 'turgorgrowth.derivatives.hiddenzones',
                                      model.PhotosyntheticOrganElement: 'turgorgrowth.derivatives.elements'}}
 
-    def __init__(self, delta_t=1, interpolate_forcings=False, elements_forcings_delta_t=None, hiddenzone_forcings_delta_t=None):
+    def __init__(self, delta_t=1, interpolate_forcing=False, elements_forcing_delta_t=None, hiddenzone_forcing_delta_t=None):
 
         self.population = model.Population()  #: the population to simulate on
         #: The inputs of the soils.
@@ -271,7 +271,7 @@ class Simulation(object):
 
         self.time_grid = np.array([0.0, self.time_step])  #: the time grid of the simulation (in hours)
 
-        self.interpolate_forcings = interpolate_forcings  #: a boolean flag which indicates if we want to interpolate or not the forcings (True: interpolate, False: do not interpolate)
+        self.interpolate_forcing = interpolate_forcing  #: a boolean flag which indicates if we want to interpolate or not the forcing (True: interpolate, False: do not interpolate)
 
         # set the loggers for compartments and derivatives
         compartments_logger = logging.getLogger('turgorgrowth.compartments')
@@ -317,32 +317,32 @@ class Simulation(object):
         if logger.isEnabledFor(logging.DEBUG):
             self.t_offset = 0.0  #: the absolute time offset elapsed from the beginning of the simulation
 
-        if interpolate_forcings:
-            if (elements_forcings_delta_t is not None and hiddenzone_forcings_delta_t is not None):
-                self.elements_forcings_delta_t_ratio = elements_forcings_delta_t / delta_t  #: the ratio between the delta t of the elements forcings and the delta t of the simulation
-                self.hiddenzone_forcings_delta_t_ratio = hiddenzone_forcings_delta_t / delta_t  #: the ratio between the delta t of the hiddenzone forcings and the delta t of the simulation
-            elif elements_forcings_delta_t is None:
-                message = """The value of `interpolate_forcings` passed to the Simulation constructor is `True`, but `elements_forcings_delta_t` is `None`. 
-        Please set `elements_forcings_delta_t` (through the Simulation constructor) to a not `None` value."""
+        if interpolate_forcing:
+            if (elements_forcing_delta_t is not None and hiddenzone_forcing_delta_t is not None):
+                self.elements_forcing_delta_t_ratio = elements_forcing_delta_t / delta_t  #: the ratio between the delta t of the elements forcing and the delta t of the simulation
+                self.hiddenzone_forcing_delta_t_ratio = hiddenzone_forcing_delta_t / delta_t  #: the ratio between the delta t of the hiddenzone forcing and the delta t of the simulation
+            elif elements_forcing_delta_t is None:
+                message = """The value of `interpolate_forcing` passed to the Simulation constructor is `True`, but `elements_forcing_delta_t` is `None`. 
+        Please set `elements_forcing_delta_t` (through the Simulation constructor) to a not `None` value."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
-            elif hiddenzone_forcings_delta_t is None:
-                message = """The value of `interpolate_forcings` passed to the Simulation constructor is `True`, but `hiddenzone_forcings_delta_t` is `None`. 
-                Please set `hiddenzone_forcings_delta_t` (through the Simulation constructor) to a not `None` value."""
+            elif hiddenzone_forcing_delta_t is None:
+                message = """The value of `interpolate_forcing` passed to the Simulation constructor is `True`, but `hiddenzone_forcing_delta_t` is `None`. 
+                Please set `hiddenzone_forcing_delta_t` (through the Simulation constructor) to a not `None` value."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
-            elif elements_forcings_delta_t < delta_t:
-                message = """The value of `elements_forcings_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `elements_forcings_delta_t` that is at least equal to `delta_t`."""
+            elif elements_forcing_delta_t < delta_t:
+                message = """The value of `elements_forcing_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `elements_forcing_delta_t` that is at least equal to `delta_t`."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
-            elif hiddenzone_forcings_delta_t < delta_t:
-                message = """The value of `hiddenzone_forcings_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `hiddenzone_forcings_delta_t` that is at least equal to `delta_t`."""
+            elif hiddenzone_forcing_delta_t < delta_t:
+                message = """The value of `hiddenzone_forcing_delta_t` passed to the Simulation constructor is lesser than the one of `delta_t`. Please set a `hiddenzone_forcing_delta_t` that is at least equal to `delta_t`."""
                 logger.exception(message)
                 raise SimulationConstructionError(message)
 
-            self.previous_forcings_values = {}  #: previous values of the forcings
-            self.new_forcings_values = {}  #: new values of the forcings
-            self.interpolation_functions = {}  #: functions to interpolate the forcings
+            self.previous_forcing_values = {}  #: previous values of the forcing
+            self.new_forcing_values = {}  #: new values of the forcing
+            self.interpolation_functions = {}  #: functions to interpolate the forcing
 
         self.nfev_total = 0  #: cumulative number of RHS function evaluations
 
@@ -441,18 +441,18 @@ class Simulation(object):
             logger.exception(message)
             raise SimulationInitializationError(message)
 
-        if self.interpolate_forcings:
+        if self.interpolate_forcing:
             # Save the new value of each forcing and set the state parameters to the previous forcing values.
-            self.new_forcings_values.clear()
+            self.new_forcing_values.clear()
             for plant in self.population.plants:
                 for axis in plant.axes:
                     for organ in (axis.xylem, axis.roots):
                         xylem_id = (plant.index, axis.label, organ.label)
-                        self.new_forcings_values[xylem_id] = {}
+                        self.new_forcing_values[xylem_id] = {}
                         forcing_labels = {}
-                        self.new_forcings_values[xylem_id][forcing_labels] = getattr(axis.xylem, forcing_labels)
-                        if axis.xylem in self.previous_forcings_values:
-                            setattr(axis.xylem, forcing_labels, self.previous_forcings_values[xylem_id][forcing_labels])
+                        self.new_forcing_values[xylem_id][forcing_labels] = getattr(axis.xylem, forcing_labels)
+                        if axis.xylem in self.previous_forcing_values:
+                            setattr(axis.xylem, forcing_labels, self.previous_forcing_values[xylem_id][forcing_labels])
                     for phytomer in axis.phytomers:
                         for organ in (phytomer.lamina, phytomer.sheath):
                             if organ is None:
@@ -460,11 +460,11 @@ class Simulation(object):
                             for element in (organ.exposed_element, organ.enclosed_element):
                                 if element is not None:
                                     element_id = (plant.index, axis.label, phytomer.index, organ.label, element.label)
-                                    self.new_forcings_values[element_id] = {}
-                                    for forcing_label in Simulation.ELEMENTS_FORCINGS:
-                                        self.new_forcings_values[element_id][forcing_label] = getattr(element, forcing_label)
-                                        if element_id in self.previous_forcings_values:
-                                            setattr(element, forcing_label, self.previous_forcings_values[element_id][forcing_label])
+                                    self.new_forcing_values[element_id] = {}
+                                    for forcing_label in Simulation.ELEMENTS_FORCING:
+                                        self.new_forcing_values[element_id][forcing_label] = getattr(element, forcing_label)
+                                        if element_id in self.previous_forcing_values:
+                                            setattr(element, forcing_label, self.previous_forcing_values[element_id][forcing_label])
 
         # initialize initial conditions
         def _init_initial_conditions(model_object, i):
@@ -519,9 +519,9 @@ class Simulation(object):
         logger = logging.getLogger(__name__)
         logger.info('Run of Turgor-Growth...')
 
-        if self.interpolate_forcings:
-            # interpolate the forcings
-            self._interpolate_forcings()
+        if self.interpolate_forcing:
+            # interpolate the forcing
+            self._interpolate_forcing()
 
         self._update_initial_conditions()
 
@@ -558,15 +558,15 @@ class Simulation(object):
             for compartment_name, compartment_index in compartments.items():
                 self.initial_conditions[compartment_index] = getattr(model_object, compartment_name)
 
-    def _interpolate_forcings(self):
-        """Create functions to interpolate the forcings of the model to any time inside the time grid (see `self.time_grid`).
+    def _interpolate_forcing(self):
+        """Create functions to interpolate the forcing of the model to any time inside the time grid (see `self.time_grid`).
 
-        If this is the first run of the model, then we consider that the forcings are constant.
+        If this is the first run of the model, then we consider that the forcing are constant.
         The interpolation functions are stored in :attr:`interpolation_functions`, and will be used later on and as needed by the SciPy solver.
         """
 
         self.interpolation_functions.clear()
-        next_forcings_values = {}
+        next_forcing_values = {}
         for plant in self.population.plants:
             for axis in plant.axes:
                 for phytomer in axis.phytomers:
@@ -577,22 +577,22 @@ class Simulation(object):
                             if element is not None:
                                 element_id = (plant.index, axis.label, phytomer.index, organ.label, element.label)
                                 self.interpolation_functions[element_id] = {}
-                                next_forcings_values[element_id] = {}
-                                forcing_labels = Simulation.ELEMENTS_FORCINGS
-                                forcings_delta_t_ratio = self.elements_forcings_delta_t_ratio
+                                next_forcing_values[element_id] = {}
+                                forcing_labels = Simulation.ELEMENTS_FORCING
+                                forcing_delta_t_ratio = self.elements_forcing_delta_t_ratio
                                 for forcing_label in forcing_labels:
-                                    if element_id in self.previous_forcings_values and \
-                                                self.previous_forcings_values[element_id][forcing_label] != self.new_forcings_values[element_id][forcing_label]:
-                                        prev_forcing_value = self.previous_forcings_values[element_id][forcing_label]
-                                        next_forcing_value = prev_forcing_value + (self.new_forcings_values[element_id][forcing_label] - prev_forcing_value) / forcings_delta_t_ratio
+                                    if element_id in self.previous_forcing_values and \
+                                                self.previous_forcing_values[element_id][forcing_label] != self.new_forcing_values[element_id][forcing_label]:
+                                        prev_forcing_value = self.previous_forcing_values[element_id][forcing_label]
+                                        next_forcing_value = prev_forcing_value + (self.new_forcing_values[element_id][forcing_label] - prev_forcing_value) / forcing_delta_t_ratio
                                     else:
-                                        next_forcing_value = self.new_forcings_values[element_id][forcing_label]
+                                        next_forcing_value = self.new_forcing_values[element_id][forcing_label]
                                         prev_forcing_value = next_forcing_value
                                     self.interpolation_functions[element_id][forcing_label] = interpolate.interp1d(self.time_grid, [prev_forcing_value, next_forcing_value], assume_sorted=True)
-                                    next_forcings_values[element_id][forcing_label] = next_forcing_value
+                                    next_forcing_values[element_id][forcing_label] = next_forcing_value
 
-        self.previous_forcings_values.clear()
-        self.previous_forcings_values.update(next_forcings_values)
+        self.previous_forcing_values.clear()
+        self.previous_forcing_values.update(next_forcing_values)
 
     def _log_compartments(self, t, y, loggers_names):
         """Log the values in `y` to the loggers in `loggers_names`.
@@ -697,7 +697,7 @@ class Simulation(object):
             t_abs = t + self.t_offset
             logger.debug('t = {}'.format(t_abs))
 
-        if self.interpolate_forcings:
+        if self.interpolate_forcing:
             # Update state parameters using interpolation functions
             for plant in self.population.plants:
                 for axis in plant.axes:
@@ -708,7 +708,7 @@ class Simulation(object):
                             for element in (organ.exposed_element, organ.enclosed_element):
                                 if element is not None:
                                     element_id = (plant.index, axis.label, phytomer.index, organ.label, element.label)
-                                    for forcing_label in Simulation.ELEMENTS_FORCINGS:
+                                    for forcing_label in Simulation.ELEMENTS_FORCING:
                                         setattr(element, forcing_label, float(self.interpolation_functions[element_id][forcing_label](t)))
 
             # Compute integrative variables
@@ -740,7 +740,7 @@ class Simulation(object):
             for axis in plant.axes:
                 # Xylem
                 #: Total water potential
-                axis.xylem.total_water_potential = axis.xylem.calculate_xylem_water_potential(soil.water_potential, axis.total_water_influx, axis.Growth, self.delta_t)
+                axis.xylem.water_potential = axis.xylem.calculate_xylem_water_potential(soil.water_potential, axis.water_influx, axis.Growth, self.delta_t)
 
                 for phytomer in axis.phytomers:
                     # Hidden zone
@@ -756,8 +756,6 @@ class Simulation(object):
                             #: Width and thickness
                             thickness_ratio = parameters.HIDDEN_ZONE_PARAMETERS.TL_ratio
                             width_ratio = parameters.HIDDEN_ZONE_PARAMETERS.WL_ratio
-                            # width_ratio = -0.02 * phytomer.index + 0.8
-                            # thickness_ratio = 0.005 * phytomer.index + 0.095
 
                             hiddenzone.width = hiddenzone.leaf_L * width_ratio
                             hiddenzone.thickness = hiddenzone.leaf_L * thickness_ratio
@@ -767,11 +765,11 @@ class Simulation(object):
                             hiddenzone.volume = hiddenzone.length * hiddenzone.width * hiddenzone.thickness
                             hiddenzone.water_content = hiddenzone.volume * parameters.RHO_WATER
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, hiddenzone.temperature)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
                             #: Total water potential
-                            hiddenzone.total_water_potential = axis.xylem.total_water_potential
+                            hiddenzone.water_potential = axis.xylem.water_potential
                             #: Turgor water potential
-                            hiddenzone.turgor_water_potential = hiddenzone.total_water_potential - hiddenzone.osmotic_water_potential
+                            hiddenzone.turgor_water_potential = hiddenzone.water_potential - hiddenzone.osmotic_water_potential
                             #: Length
                             hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
                         elif hiddenzone.leaf_pseudo_age > 0:    #: After previous leaf emergence
@@ -781,19 +779,19 @@ class Simulation(object):
                             hiddenzone.water_content = y[self.initial_conditions_mapping[hiddenzone]['water_content']]
                             hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, hiddenzone.temperature)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
                             #: Total water potential
-                            hiddenzone.total_water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
+                            hiddenzone.water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
                             #: Length
                             hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
-                        else:   #: Before previous leaf emergence (calculation in elong-wheat)
+                        else:   #: Before previous leaf emergence (calculation in elongwheat)
                             continue
 
                         #: Resistance to water flow
                         hiddenzone_dimensions = {'length': hiddenzone.length, 'thickness': hiddenzone.thickness, 'width': hiddenzone.width}
                         hiddenzone.resistance = hiddenzone.calculate_resistance(hiddenzone_dimensions)
                         #: Flows with xylem
-                        hiddenzone.water_influx = hiddenzone.calculate_water_flux(hiddenzone.total_water_potential, axis.xylem.total_water_potential, hiddenzone.resistance, self.delta_t)
+                        hiddenzone.water_influx = hiddenzone.calculate_water_flux(hiddenzone.water_potential, axis.xylem.water_potential, hiddenzone.resistance, self.delta_t)
                         hiddenzone.water_outflow = 0    #: No water flow between hiddenzone and element
 
 
@@ -822,9 +820,9 @@ class Simulation(object):
                                 # : Osmotic water potential
                                 element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.fructan)
                                 #: Total water potential
-                                element.total_water_potential = axis.xylem.total_water_potential
+                                element.water_potential = axis.xylem.water_potential
                                 # : Turgor water potential
-                                element.turgor_water_potential = element.total_water_potential - element.osmotic_water_potential
+                                element.turgor_water_potential = element.water_potential - element.osmotic_water_potential
 
                                 # Length of the HZ
                                 if hiddenzone is not None:
@@ -841,17 +839,17 @@ class Simulation(object):
                                 #: Osmotic water potential
                                 element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.fructan)
                                 #: Total water potential
-                                element.total_water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
+                                element.water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
 
-                                # Length of the HZ
-                                if hiddenzone is not None:
-                                    if organ.label == "blade":
-                                        hiddenzone.length = hiddenzone.length_hz_En
+                                # # Length of the HZ  #todo voir avec VA
+                                # if hiddenzone is not None:
+                                #     if organ.label == "blade":
+                                #         hiddenzone.length = hiddenzone.length_hz_En
 
                             #: Resistance to water flow
                             element.resistance = element.calculate_resistance(element.organ_dimensions)
                             #: Water fluxes with xylem
-                            element.water_influx = element.calculate_water_flux(element.total_water_potential, axis.xylem.total_water_potential, element.resistance, self.delta_t)
+                            element.water_influx = element.calculate_water_flux(element.water_potential, axis.xylem.water_potential, element.resistance, self.delta_t)
 
 
         #: compute the derivative of each compartment of element
@@ -864,8 +862,8 @@ class Simulation(object):
                         #: Delta water content
                         delta_water_content_hz = hiddenzone.calculate_delta_water_content(hiddenzone.water_influx, hiddenzone.water_outflow)
                         #: Extensibility
-                        hiddenzone.delta_teq = hiddenzone.calculate_time_equivalent_Tref(hiddenzone.temperature, self.delta_t)
-                        phi = hiddenzone.calculate_extensibility_temperature(hiddenzone.leaf_pseudo_age, hiddenzone.delta_teq, self.delta_t)
+                        hiddenzone_delta_teq = hiddenzone.calculate_time_equivalent_Tref(axis.SAM_temperature, self.delta_t)
+                        phi = hiddenzone.calculate_extensibility_temperature(hiddenzone.leaf_pseudo_age, hiddenzone_delta_teq, self.delta_t)
                         hiddenzone.phi_length = phi['z']  # extensibility for length
                         hiddenzone.phi_width = phi['x']  # extensibility for length
                         hiddenzone.phi_thickness = phi['y']  # extensibility for length
@@ -877,7 +875,7 @@ class Simulation(object):
                         if hiddenzone.leaf_pseudo_age > 0:  #: After previous leaf emergence
                             #: Derivatives
                             #: Delta turgor pressure
-                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz, hiddenzone.length, hiddenzone.thickness, hiddenzone.width)
+                            delta_turgor_water_potential = hiddenzone.calculate_delta_turgor_water_potential(phi, hiddenzone.turgor_water_potential, hiddenzone.volume, delta_water_content_hz)
                             #: Dimensions with plastic and elastic deformation
                             hiddenzone_dimensions = {'length': hiddenzone.length, 'width': hiddenzone.width, 'thickness': hiddenzone.thickness}
                             delta_hiddenzone_dimensions_plastic = hiddenzone.calculate_delta_organ_dimensions_plastic(hiddenzone.turgor_water_potential, phi, hiddenzone_dimensions)
@@ -902,6 +900,7 @@ class Simulation(object):
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['thickness']] = delta_hiddenzone_dimensions_elastic['thickness'] + delta_hiddenzone_dimensions_plastic['thickness']
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']] = delta_hiddenzone_dimensions_elastic['length'] + delta_hiddenzone_dimensions_plastic['length']
                                 y_derivatives[self.initial_conditions_mapping[hiddenzone]['width']] = delta_hiddenzone_dimensions_elastic['width'] + delta_hiddenzone_dimensions_plastic['width']
+                                hiddenzone.delta_leaf_L = y_derivatives[self.initial_conditions_mapping[hiddenzone]['leaf_L']]
 
                             hiddenzone.leaf_Wmax += delta_hiddenzone_dimensions_plastic['width']
                             hiddenzone.organ_volume = hiddenzone.calculate_organ_volume(hiddenzone_dimensions)
@@ -968,7 +967,7 @@ class Simulation(object):
                             element.WC_mstruct = element.water_content / (element.water_content + element.mstruct) * 100
 
                 # Store water used from soil for eahc axis
-                soil_water_outputs += (axis.total_water_influx + axis.Growth)
+                soil_water_outputs += (axis.water_influx + axis.Growth)
 
         # compute the derivative of each compartment of soil
         y_derivatives[self.initial_conditions_mapping[soil]['water_content']] = soil.calculate_water_content_derivative(soil_water_outputs, soil.constant_water_content)

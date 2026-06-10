@@ -5,7 +5,7 @@
 
     The module :mod:`turgorgrowth.parameters` defines the parameters of the model.
 
-    :license: CeCILL-C, see LICENSE for details.
+    :license: CeCILL-C, see LICENCE for details.
 """
 
 from math import exp
@@ -29,39 +29,6 @@ VANT_HOFF_AMINO_ACIDS = 1.25  #: Van't Hoff coefficient estimated for amino acid
 RATIO_MSTRUCT_DM = 0.8  #: Ratio mstruct/dry matter (dimensionless). From growthwheat model.
 SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
 OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
-
-
-def from_dataframe(object_, dataframe_):
-    """Set attributes of *object_* from data in *dataframe_*.
-
-    :Parameters:
-        - `object_` (:class:`object`) - The object to set.
-        - `dataframe_` (:class:`pandas.DataFrame`) - The dataframe used to set the attribute(s)
-          of *object_*.
-          *dataframe_* must have only 2 rows:
-
-              * one row is for the header and contains the name of each attribute,
-              * and one row contains the value of each attribute.
-    """
-    object_.__dict__.update(dataframe_.to_dict(orient='index')[dataframe_.first_valid_index()])
-
-
-def to_dataframe(object_):
-    """Create and return a dataframe from attributes of *object_*.
-
-    :Parameters:
-        - `object_` (:class:`object`) - The object used to create the dataframe.
-
-    :Returns:
-        A dataframe which contains the attributes of *object_*, with only 2 rows:
-
-          * one row is for the header and contains the name of each attribute,
-          * and one row contains the value of each attribute.
-
-    :Returns Type:
-        :class:`pandas.DataFrame`
-    """
-    return pd.DataFrame(object_.__dict__, index=[0]).sort_index(axis=1)
 
 
 class PopulationParameters(object):
@@ -107,7 +74,7 @@ class AxisInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        self.mstruct = 0.05468138         #: g      #: Structural mass. Value from inputs file
+        self.SAM_temperature = 12  #: initial temperature of shoot apical meristem (°C)
 
 #: The instance of class :class:`turgorgrowth.parameters.PhytomerInitCompartments` for current process
 AXIS_INIT_COMPARTMENTS = AxisInitCompartments()
@@ -218,7 +185,6 @@ class HiddenZoneInitCompartments(object):
 
         self.leaf_pseudostem_length = 4E-5   #: m
         self.leaf_L = 5E-5                   #: m
-        self.init_leaf_L = 5E-5                   #: m
         self.length_hz_En = None                #: m
         self.lamina_Lmax = None                 #: m
         self.leaf_Wmax = None                 #: m
@@ -232,8 +198,8 @@ class HiddenZoneInitCompartments(object):
         self.water_outflow = 0                 #: g H2O
         self.SRWC = 80  #: %
         self.osmotic_water_potential = -0.8 #: Mpa
-        self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
-        self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential  #: MPa
+        self.water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
+        self.turgor_water_potential = self.water_potential - self.osmotic_water_potential  #: MPa
 
 
 #: The instance of class :class:`turgorgrowth.parameters.HiddenZoneInitCompartments` for current process
@@ -284,7 +250,7 @@ class XylemInitCompartments(object):
         # intermediate variables
         self.SRWC = 80  #: %
         self.soil_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
-        self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
+        self.water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
 
 
 #: The instance of class :class:`cnwheat.parameters.XylemInitCompartments` for current process
@@ -336,8 +302,8 @@ class PhotosyntheticOrganElementInitCompartments(object):
         self.water_outflow = 0   #: g H2O
         self.SRWC = 80  #: %
         self.osmotic_water_potential = -0.8   #: MPa
-        self.total_water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
-        self.turgor_water_potential = self.total_water_potential - self.osmotic_water_potential   #: MPa
+        self.water_potential = - exp((-self.SRWC + 39.765) / 18.902)  #: MPa
+        self.turgor_water_potential = self.water_potential - self.osmotic_water_potential   #: MPa
 
 
 

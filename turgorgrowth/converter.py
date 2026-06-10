@@ -11,7 +11,7 @@
 import numpy as np
 import pandas as pd
 
-from turgorgrowth import model, simulation
+from openalea.turgorgrowth import model, simulation
 
 #: the columns of the outputs dataframe at PLANT scale
 PLANTS_VARIABLES = simulation.Simulation.PLANTS_INDEXES + simulation.Simulation.PLANTS_RUN_VARIABLES
