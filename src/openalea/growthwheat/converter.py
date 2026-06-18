@@ -3,8 +3,6 @@
 from __future__ import division  # use "//" to do integer division
 import pandas as pd
 
-from openalea.growthwheat import simulation
-
 """
     growthwheat.converter
     ~~~~~~~~~~~~~~~~~~~~~
@@ -33,7 +31,7 @@ def from_dataframes(hiddenzone_inputs, element_inputs, root_inputs, axis_inputs)
     :return: The inputs in a dictionary.
     :rtype: dict [str, dict]
 
-    .. seealso:: see :attr:`simulation.Simulation.inputs` for the structure of Growth-Wheat inputs.
+    see also:: see :attr:`simulation.Simulation.inputs` for the structure of Growth-Wheat inputs.
     """
     all_hiddenzone_dict = {}
     all_element_dict = {}
@@ -72,22 +70,25 @@ def from_dataframes(hiddenzone_inputs, element_inputs, root_inputs, axis_inputs)
     return {'hiddenzone': all_hiddenzone_dict, 'elements': all_element_dict, 'roots': all_root_dict, 'axes': all_axes_dict}
 
 
-def to_dataframes(data_dict):
+def to_dataframes(data_dict, axis_outputs, hiddenzone_outputs, element_outputs, root_outputs):
     """
     Convert outputs from Growth-Wheat format to Pandas dataframe.
 
-    :param dict data_dict: The outputs in Growth-Wheat format.
+    :param dict data_dict: The outputs in Elong-Wheat format.
+    :param list axis_outputs: The list of output names for axes
+    :param list hiddenzone_outputs: The list of output names for hiddenzones
+    :param list element_outputs: The list of output names for elements
+    :param list root_outputs: The list of output names for roots
 
     :return: Four dataframes : for hiddenzone outputs, element outputs, roots outputs and axes outputs
     :rtype: pandas.DataFrame
 
-    .. seealso:: see :attr:`simulation.Simulation.outputs` for the structure of Growth-Wheat outputs.
     """
     dataframes_dict = {}
-    for (current_key, current_topology_columns, current_outputs_names) in (('hiddenzone', HIDDENZONE_TOPOLOGY_COLUMNS, simulation.HIDDENZONE_OUTPUTS),
-                                                                           ('elements', ELEMENT_TOPOLOGY_COLUMNS, simulation.ELEMENT_OUTPUTS),
-                                                                           ('roots', ROOT_TOPOLOGY_COLUMNS, simulation.ROOT_OUTPUTS),
-                                                                           ('axes', AXIS_TOPOLOGY_COLUMNS, simulation.AXIS_OUTPUTS)):
+    for (current_key, current_topology_columns, current_outputs_names) in (('hiddenzone', HIDDENZONE_TOPOLOGY_COLUMNS, hiddenzone_outputs),
+                                                                           ('elements', ELEMENT_TOPOLOGY_COLUMNS, element_outputs),
+                                                                           ('roots', ROOT_TOPOLOGY_COLUMNS, root_outputs),
+                                                                           ('axes', AXIS_TOPOLOGY_COLUMNS, axis_outputs)):
         current_data_dict = data_dict[current_key]
         current_ids_df = pd.DataFrame(current_data_dict.keys(), columns=current_topology_columns)
         current_data_df = pd.DataFrame(current_data_dict.values())

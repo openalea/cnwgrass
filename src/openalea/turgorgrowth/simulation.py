@@ -5,8 +5,6 @@
     The module :mod:`turgorgrowth.simulation` is the front-end to run the model Turgor-Growth.
     The public API consists of methods :meth:`initialize` and :meth:`run`.
 
-    :license: CeCILL-C, see LICENSE for details.
-
 """
 
 from __future__ import division  # use "//" to do integer division
@@ -17,8 +15,8 @@ from scipy.integrate import solve_ivp
 from scipy import interpolate
 
 
-from turgorgrowth import model
-from turgorgrowth import parameters
+from openalea.turgorgrowth import model
+from openalea.turgorgrowth import parameters
 
 
 class SimulationError(Exception):
@@ -169,7 +167,7 @@ class Simulation(object):
     #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
     HIDDENZONE_T_INDEXES = T_INDEX + HIDDENZONE_INDEXES
     #: the parameters which define the state of the modelled system at hidden zone scale
-    HIDDENZONE_STATE_PARAMETERS = ['leaf_pseudo_age', 'leaf_pseudostem_length', 'fructan', 'amino_acids', 'proteins', 'sucrose', 'mstruct', 'hiddenzone_age', 'leaf_enclosed_mstruct', 'leaf_Wmax', 'length_hz_En']
+    HIDDENZONE_STATE_PARAMETERS = ['leaf_pseudo_age', 'leaf_pseudostem_length', 'fructan', 'amino_acids', 'proteins', 'sucrose', 'mstruct', 'hiddenzone_age', 'leaf_enclosed_mstruct', 'leaf_Wmax', 'length_hz_En', 'lamina_Lmax']
     #: the variables which define the state of the modelled system at hidden zone scale,
     #: formed be the concatenation of :attr:`HIDDENZONE_STATE_PARAMETERS` and the names
     #: of the compartments associated to each hidden zone (see :attr:`MODEL_COMPARTMENTS_NAMES`)
@@ -841,10 +839,10 @@ class Simulation(object):
                                 #: Total water potential
                                 element.water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
 
-                                # # Length of the HZ  #todo voir avec VA
-                                # if hiddenzone is not None:
-                                #     if organ.label == "blade":
-                                #         hiddenzone.length = hiddenzone.length_hz_En
+                                # # Length of the HZ
+                                if hiddenzone is not None:
+                                    if organ.label == "blade":
+                                        hiddenzone.length = hiddenzone.length_hz_En
 
                             #: Resistance to water flow
                             element.resistance = element.calculate_resistance(element.organ_dimensions)

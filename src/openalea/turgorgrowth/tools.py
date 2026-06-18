@@ -8,8 +8,6 @@
 
         * set up of loggers,
 
-    :license: CeCILL-C, see LICENCE for details.
-
 """
 
 import os

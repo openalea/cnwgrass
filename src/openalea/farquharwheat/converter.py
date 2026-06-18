@@ -12,18 +12,6 @@ import pandas as pd
 
 """
 
-#: the inputs needed by FarquharWheat at element scale
-FARQUHARWHEAT_ELEMENTS_INPUTS = ['width', 'height', 'PARa', 'nitrates', 'amino_acids', 'proteins', 'Nstruct', 'green_area',
-                                 'sucrose', 'starch', 'fructan', 'PARa_prim', 'area_prim']
-#: the inputs needed by FarquharWheat at axis scale
-FARQUHARWHEAT_AXES_INPUTS = ['SAM_temperature', 'height_canopy']
-
-#: the outputs computed by FarquharWheat
-FARQUHARWHEAT_ELEMENTS_OUTPUTS = ['Ag', 'An', 'Rd', 'Tr', 'Ts', 'gs', 'width', 'height']
-
-#: the inputs and outputs of FarquharWheat.
-FARQUHARWHEAT_ELEMENTS_INPUTS_OUTPUTS = set(FARQUHARWHEAT_ELEMENTS_INPUTS + FARQUHARWHEAT_ELEMENTS_OUTPUTS)
-
 #: the columns which define the topology in the input/output elements dataframe
 ELEMENT_TOPOLOGY_COLUMNS = ['plant', 'axis', 'metamer', 'organ', 'element']
 #: the columns which define the topology in the input/output elements dataframe
@@ -40,7 +28,7 @@ def from_dataframe(element_inputs, axes_inputs):
     :return: The inputs/outputs in a dictionary.
     :rtype: dict [dict]
 
-    seealso:: see :attr:`simulation.Simulation.inputs` and :attr:`simulation.Simulation.outputs`
+    see also:: see :attr:`simulation.Simulation.inputs` and :attr:`simulation.Simulation.outputs`
        for the structure of Farquhar-Wheat inputs/outputs.
     """
     all_elements_dict = {}
@@ -60,23 +48,25 @@ def from_dataframe(element_inputs, axes_inputs):
     return {'elements': all_elements_dict, 'axes': all_axes_dict}
 
 
-def to_dataframe(data_dict):
+def to_dataframe(data_dict, element_outputs):
     """
     Convert inputs/outputs from Farquhar-Wheat format to Pandas dataframe.
 
     :param dict data_dict: The inputs/outputs in Farquhar-Wheat format.
+    :param list element_outputs: The list of output names for elements
 
     :return: one dataframe for element outputs
     :rtype: pandas.DataFrame
 
-    seealso:: see :attr:`simulation.Simulation.inputs` and :attr:`simulation.Simulation.outputs`
+    see also:: see :attr:`simulation.Simulation.inputs` and :attr:`simulation.Simulation.outputs`
        for the structure of Farquhar-Wheat inputs/outputs.
     """
     ids_df = pd.DataFrame(data_dict.keys(), columns=ELEMENT_TOPOLOGY_COLUMNS)
     data_df = pd.DataFrame(data_dict.values())
     df = pd.concat([ids_df, data_df], axis=1)
     df.sort_values(by=ELEMENT_TOPOLOGY_COLUMNS, inplace=True)
-    columns_sorted = ELEMENT_TOPOLOGY_COLUMNS + [column_name for column_name in sorted(FARQUHARWHEAT_ELEMENTS_INPUTS_OUTPUTS) if column_name in df.columns]
+    columns_sorted = ELEMENT_TOPOLOGY_COLUMNS + element_outputs
     df = df.reindex(columns_sorted, axis=1, copy=False)
     df.reset_index(drop=True, inplace=True)
+
     return df

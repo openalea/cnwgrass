@@ -33,6 +33,7 @@ If you want to make your own development of the model, please fork the repositor
       respi/index.rst
       senesc/index.rst
       fspm/index.rst
+      turgorgrowth/index.rst
 
 Indices and tables
 ==================

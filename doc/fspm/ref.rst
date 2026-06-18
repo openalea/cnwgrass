@@ -81,6 +81,15 @@ describing what they are and what they do.
     :show-inheritance:
     :synopsis:
 
+:mod:`openalea.fspmwheat.fspmwheat_runner` module
+*********************************************************
+
+.. automodule:: openalea.fspmwheat.fspmwheat_runner
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :synopsis:
+
 :mod:`openalea.fspmwheat.growthwheat_facade` module
 *********************************************************
 
@@ -103,6 +112,15 @@ describing what they are and what they do.
 *********************************************************
 
 .. automodule:: openalea.fspmwheat.tools
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :synopsis:
+
+:mod:`openalea.fspmwheat.turgorgrowth_facade` module
+*********************************************************
+
+.. automodule:: openalea.fspmwheat.turgorgrowth_facade
     :members:
     :undoc-members:
     :show-inheritance:

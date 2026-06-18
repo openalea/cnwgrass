@@ -1,9 +1,7 @@
 # -*- coding: latin-1 -*-
 from openalea.cnwheat import simulation as cnwheat_simulation
-from openalea.elongwheat import simulation as elongwheat_simulation
-from openalea.farquharwheat import converter as farquharwheat_converter
-from openalea.growthwheat import simulation as growthwheat_simulation
 from openalea.senescwheat import converter as senescwheat_converter
+
 import numpy as np
 import pandas as pd
 
@@ -24,23 +22,15 @@ SOILS_TOPOLOGY_COLUMNS = ['plant', 'axis']
 
 #: variables in each input/output dataframe
 AXES_VARIABLES = set(cnwheat_simulation.Simulation.AXES_RUN_VARIABLES +
-                     elongwheat_simulation.AXIS_INPUTS_OUTPUTS +
-                     list(growthwheat_simulation.AXIS_INPUTS_OUTPUTS) +
                      senescwheat_converter.SENESCWHEAT_AXES_INPUTS_OUTPUTS)
 ELEMENTS_VARIABLES = set(cnwheat_simulation.Simulation.ELEMENTS_RUN_VARIABLES +
-                         elongwheat_simulation.ELEMENT_INPUTS_OUTPUTS +
-                         list(farquharwheat_converter.FARQUHARWHEAT_ELEMENTS_INPUTS_OUTPUTS) +
-                         list(growthwheat_simulation.ELEMENT_INPUTS_OUTPUTS) +
                          senescwheat_converter.SENESCWHEAT_ELEMENTS_INPUTS_OUTPUTS)
-HIDDENZONES_VARIABLES = set(cnwheat_simulation.Simulation.HIDDENZONE_RUN_VARIABLES +
-                            elongwheat_simulation.HIDDENZONE_INPUTS_OUTPUTS +
-                            list(growthwheat_simulation.HIDDENZONE_INPUTS_OUTPUTS))
+HIDDENZONES_VARIABLES = set(cnwheat_simulation.Simulation.HIDDENZONE_RUN_VARIABLES)
 ORGANS_VARIABLES = set(cnwheat_simulation.Simulation.ORGANS_RUN_VARIABLES +
-                       list(growthwheat_simulation.ROOT_INPUTS_OUTPUTS) +
                        senescwheat_converter.SENESCWHEAT_ROOTS_INPUTS_OUTPUTS)
 SOILS_VARIABLES = set(cnwheat_simulation.Simulation.SOILS_RUN_VARIABLES)
 
-BOTANICAL_ORGANS_AT_AXIS_SCALE = ['roots', 'phloem', 'grains']
+BOTANICAL_ORGANS_AT_AXIS_SCALE = ['roots', 'phloem', 'grains', 'endosperm', 'xylem']
 BOTANICAL_COMPARTMENTS_AT_AXIS_SCALE = BOTANICAL_ORGANS_AT_AXIS_SCALE + ['soil']
 
 
@@ -52,36 +42,30 @@ class FSPMWheatFacade(object):
 
     """
 
-    def __init__(self, shared_mtg):
-        # shared_axes_inputs_outputs_df,
-        # shared_organs_inputs_outputs_df,
-        # shared_hiddenzones_inputs_outputs_df,
-        # shared_elements_inputs_outputs_df,
-        # shared_soils_inputs_outputs_df,
-        # update_shared_df = True):
+    def __init__(self, shared_mtg, elongwheat_facade, growthwheat_facade, farquharwheat_facade, turgorgrowth_facade=None):
         """
         :param openalea.mtg.mtg.MTG shared_mtg: The MTG shared between all models.
-        :param pandas.DataFrame shared_axes_inputs_outputs_df: the dataframe of inputs and outputs at axes scale shared between all models.
-        :param pandas.DataFrame shared_organs_inputs_outputs_df: the dataframe of inputs and outputs at organs scale shared between all models.
-        :param pandas.DataFrame shared_hiddenzones_inputs_outputs_df: the dataframe of inputs and outputs at hiddenzones scale shared between all models.
-        :param pandas.DataFrame shared_elements_inputs_outputs_df: the dataframe of inputs and outputs at elements scale shared between all models.
-        :param pandas.DataFrame shared_soils_inputs_outputs_df: the dataframe of inputs and outputs at soils scale shared between all models.
-        :param bool update_shared_df: If `True`  update the shared dataframes at init and at each run (unless stated otherwise)
+        :param fspmwheat.elongwheat_facade.ElongWheatFacade elongwheat_facade: the facade of Elongwheat
+        :param fspmwheat.elongwheat_facade.GrowthWheatFacade growthwheat_facade: the facade of Growthwheat
+        :param fspmwheat.farquharwheat_facade.FarquharWheatFacade farquharwheat_facade: the facade of Farquharwheat
+        :param None or fspmwheat.turgorgrowth_facade.TurgorGrowthFacade turgorgrowth_facade: the facade of Turgorgrowth
         """
 
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
 
-        # self._shared_axes_inputs_outputs_df = shared_axes_inputs_outputs_df  #: the dataframe at axes scale shared between all models
-        # self._shared_organs_inputs_outputs_df = shared_organs_inputs_outputs_df  #: the dataframe at organs scale shared between all models
-        # self._shared_hiddenzones_inputs_outputs_df = shared_hiddenzones_inputs_outputs_df  #: the dataframe at hiddenzones scale shared between all models
-        # self._shared_elements_inputs_outputs_df = shared_elements_inputs_outputs_df  #: the dataframe at elements scale shared between all models
-        # self._shared_soils_inputs_outputs_df = shared_soils_inputs_outputs_df  #: the dataframe at soils scale shared between all models
-        # self._update_shared_df = update_shared_df
-        # if self._update_shared_df:
-        #     self._update_shared_dataframes(cnwheat_organs_data_df=model_organs_inputs_df,
-        #                                    cnwheat_hiddenzones_data_df=model_hiddenzones_inputs_df,
-        #                                    cnwheat_elements_data_df=model_elements_inputs_df,
-        #                                    cnwheat_soils_data_df=model_soils_inputs_df)
+        global AXES_VARIABLES, ELEMENTS_VARIABLES, HIDDENZONES_VARIABLES, ORGANS_VARIABLES, SOILS_VARIABLES
+        AXES_VARIABLES.update(elongwheat_facade._simulation.axis_inputs_outputs, growthwheat_facade._simulation.axis_inputs_outputs)
+        ELEMENTS_VARIABLES.update(elongwheat_facade._simulation.element_inputs_outputs, farquharwheat_facade._simulation.elements_inputs_outputs, growthwheat_facade._simulation.element_inputs_outputs)
+        HIDDENZONES_VARIABLES.update(elongwheat_facade._simulation.hiddenzone_inputs_outputs, growthwheat_facade._simulation.hiddenzone_inputs_outputs)
+        ORGANS_VARIABLES.update(growthwheat_facade._simulation.root_inputs_outputs)
+
+        if turgorgrowth_facade is not None:
+            AXES_VARIABLES.update(turgorgrowth_facade._simulation.AXES_RUN_VARIABLES)
+            ELEMENTS_VARIABLES.update(turgorgrowth_facade._simulation.ELEMENTS_RUN_VARIABLES)
+            HIDDENZONES_VARIABLES.update(turgorgrowth_facade._simulation.HIDDENZONE_RUN_VARIABLES)
+            ORGANS_VARIABLES.update(turgorgrowth_facade._simulation.ORGANS_RUN_VARIABLES)
+            SOILS_VARIABLES.update(turgorgrowth_facade._simulation.SOILS_RUN_VARIABLES)
+
 
     def _read_outputs_on_MTG(self):
         """
@@ -117,8 +101,6 @@ class FSPMWheatFacade(object):
                     if botanical_organ_name in mtg_axis_properties:
                         organ_id = (mtg_plant_index, mtg_axis_label, botanical_organ_name)
                         mtg_organ_properties = mtg_axis_properties[botanical_organ_name]
-                        if mtg_organ_properties.get('sucrose') is None:
-                            continue
                         organ_dict = {}
                         for organ_run_variable in ORGANS_VARIABLES:
                             if organ_run_variable in mtg_organ_properties:

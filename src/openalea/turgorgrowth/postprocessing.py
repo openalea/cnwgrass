@@ -8,7 +8,6 @@
 
     Please use front-ends :func:`postprocessing` and :func:`generate_graphs`.
 
-    :license: CeCILL-C, see LICENSE for details.
 """
 
 from __future__ import division  # use "//" to do integer division

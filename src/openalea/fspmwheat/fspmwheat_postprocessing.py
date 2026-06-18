@@ -13,7 +13,7 @@ def leaf_traits(scenario_outputs_dirpath, scenario_postprocessing_dirpath):
     Average RUE and photosynthetic yield for the whole cycle.
 
     :param str scenario_outputs_dirpath: the path to the CSV outputs file of the scenario
-    :param str scenario_postprocessing_dirpath: the path to the CSV postprocessing file of the scenari
+    :param str scenario_postprocessing_dirpath: the path to the CSV postprocessing file of the scenario
     """
 
     # --- Import simulations outputs/prostprocessings
@@ -224,7 +224,7 @@ def table_C_usages(scenario_postprocessing_dirpath):
     C_usages['Respi_shoot'] = np.cumsum(df_axe.C_respired_shoot)
 
     # Exudation
-    C_usages['exudation'] = np.cumsum(df_axe.C_exudated.fillna(0))
+    C_usages['exudation'] = np.cumsum(df_axe.C_exuded.fillna(0))
 
     # Structural growth
     C_consumption_mstruct_roots = df_roots.sucrose_consumption_mstruct.fillna(0) + df_roots.AA_consumption_mstruct.fillna(0) * AMINO_ACIDS_C_RATIO / AMINO_ACIDS_N_RATIO

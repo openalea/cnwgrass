@@ -5,7 +5,6 @@
 
     The module :mod:`turgorgrowth.parameters` defines the parameters of the model.
 
-    :license: CeCILL-C, see LICENCE for details.
 """
 
 from math import exp

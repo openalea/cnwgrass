@@ -5,8 +5,6 @@
 
     The module :mod:`turgorgrowth.model` defines the equations of water flow, turgor pressure and growth.
 
-    :license: CeCILL-C, see LICENSE for details.
-
 """
 
 from __future__ import division  # use "//" to do integer division
@@ -278,7 +276,7 @@ class HiddenZone(Organ):
     PARAMETERS = parameters.HIDDEN_ZONE_PARAMETERS                #: the internal parameters of the hidden zone
     INIT_COMPARTMENTS = parameters.HIDDEN_ZONE_INIT_COMPARTMENTS  #: the initial values of compartments and state parameters
     def __init__(self, label='hiddenzone', fructan=INIT_COMPARTMENTS.fructan, leaf_enclosed_mstruct=INIT_COMPARTMENTS.leaf_enclosed_mstruct, leaf_pseudo_age=INIT_COMPARTMENTS.leaf_pseudo_age, hiddenzone_age=INIT_COMPARTMENTS.hiddenzone_age, amino_acids=INIT_COMPARTMENTS.amino_acids, proteins=INIT_COMPARTMENTS.proteins, sucrose=INIT_COMPARTMENTS.sucrose,
-                 length_hz_En=INIT_COMPARTMENTS.length_hz_En,
+                 length_hz_En=INIT_COMPARTMENTS.length_hz_En, lamina_Lmax=INIT_COMPARTMENTS.lamina_Lmax,
                  mstruct=INIT_COMPARTMENTS.mstruct, osmotic_water_potential=INIT_COMPARTMENTS.osmotic_water_potential,
                  water_potential=INIT_COMPARTMENTS.water_potential, leaf_pseudostem_length=INIT_COMPARTMENTS.leaf_pseudostem_length,
                  leaf_L=INIT_COMPARTMENTS.leaf_L, thickness=INIT_COMPARTMENTS.thickness, width=INIT_COMPARTMENTS.width,
@@ -308,6 +306,7 @@ class HiddenZone(Organ):
         self.hiddenzone_age = hiddenzone_age                          #: °Cd
         self.length = min(leaf_L, leaf_pseudostem_length)       #: m
         self.leaf_pseudostem_length = leaf_pseudostem_length    #: m
+        self.lamina_Lmax = lamina_Lmax  #: m
         self.width = width                                      #: m
         self.thickness = thickness                              #: m
         self.length_hz_En = length_hz_En   #: m

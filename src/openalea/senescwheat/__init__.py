@@ -6,5 +6,3 @@
     The model Senesc-Wheat
 
 """
-
-__version__ = '2.0'

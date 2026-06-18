@@ -1,22 +1,22 @@
 # -*- coding: latin-1 -*-
 
 """
-    farquharwheat.paramters
+    farquharwheat.parameters
     ~~~~~~~~~~~~~~~~~~~
 
     The module :mod:`farquharwheat.parameters` defines the constant parameters.
 
 """
 # -- Version of the photosynthesis sub model
-SurfacicProteins = True      #: If True, surfacic proteins used to regulate photosynthesis ; if not total N
-NSC_Retroinhibition = True   #: If True, NSC (Non-Structural Carbohydrates) downregulate photosynthesis
-prim_scale = False           #: If True, photosynthesis calculated at primitive scale, if not at organ scale
+SurfacicProteins = True       #: If True, surfacic proteins used to regulate photosynthesis ; if not total N
+NSC_Retroinhibition = True    #: If True, NSC (Non-Structural Carbohydrates) downregulate photosynthesis
+prim_scale = False            #: If True, photosynthesis calculated at primitive scale, if not at organ scale
 
 if not SurfacicProteins:
     # Used in Barillot et al. (2016) and Gauthier et al. (2020)
     # Dependence to surfacic_nitrogen including structural nitrogen
 
-    # -- Nitrogen dependance of photosynthetic parameters (derived from Braune et al. (2009) and Evers et al. (2010):
+    # -- Nitrogen dependence of photosynthetic parameters (derived from Braune et al. (2009) and Evers et al. (2010):
     #     * S_surfacic_nitrogen: slope of the relation between surfacic_nitrogen and the parameter
     #         * alpha: mol e- m2 mol-1 photon g-1 N
     #         * Vc_max25: µmol CO2 g-1 N s-1
@@ -25,7 +25,7 @@ if not SurfacicProteins:
     #         * Rdark25: µmol CO2 g-1 N s-1
     #     * surfacic_nitrogen_min: minimum amount of nitrogen below which photosynthesis rate is zero (g (N) m-2)
     #     * beta: intercept parameter of the relation between alpha and surfacic_nitrogen (mol e- mol-1 photons)
-    #     * delta1 and delta2: parameters of m (scaling factor of gs) dependance to surfacic_nitrogen (m2 g-1 and dimensionless, respectively)
+    #     * delta1 and delta2: parameters of m (scaling factor of gs) dependence to surfacic_nitrogen (m2 g-1 and dimensionless, respectively)
     PARAM_N = {'S_surfacic_nitrogen': {'Vc_max25': 84.965, 'Jmax25': 117.6, 'alpha': 0.0413, 'TPU25': 9.25, 'Rdark25': 0.493},
                'surfacic_nitrogen_min': {'Vc_max25': 0.17, 'Jmax25': 0.17, 'TPU25': 0.229, 'Rdark25': 0.118}, 'beta': 0.2101, 'delta1': 14.7, 'delta2': -0.548}
     NA_0 = 2  # Initial value of surfacic_nitrogen (g m-2), used if no surfacic_nitrogen is provided by user
@@ -35,7 +35,7 @@ else:
     # Used in Gauthier et al. (2021)
     # Dependence to surfacic_nitrogen without structural nitrogen
 
-    # -- Nitrogen dependance of photosynthetic parameters (derived from Braune et al. (2009) and Evers et al. (2010):
+    # -- Nitrogen dependence of photosynthetic parameters (derived from Braune et al. (2009) and Evers et al. (2010):
     #     * S_surfacic_nitrogen: slope of the relation between surfacic_nitrogen and the parameter
     #         * alpha: mol e- m2 mol-1 photon g-1 N
     #         * Vc_max25: µmol CO2 g-1 N s-1
@@ -44,7 +44,7 @@ else:
     #         * Rdark25: µmol CO2 g-1 N s-1
     #     * surfacic_nitrogen_min: minimum amount of nitrogen below which photosynthesis rate is zero (g (N) m-2)
     #     * beta: intercept parameter of the relation between alpha and surfacic_nitrogen (mol e- mol-1 photons)
-    #     * delta1 and delta2: parameters of m (scaling factor of gs) dependance to surfacic_nitrogen (m2 g-1 and dimensionless, respectively)
+    #     * delta1 and delta2: parameters of m (scaling factor of gs) dependence to surfacic_nitrogen (m2 g-1 and dimensionless, respectively)
     PARAM_N = {'S_surfacic_nitrogen': {'Vc_max25': 84.965, 'Jmax25': 117.6, 'alpha': 0.0413, 'TPU25': 9.25, 'Rdark25': 0.493},
                'surfacic_nitrogen_min': {'Vc_max25': 0., 'Jmax25': 0., 'TPU25': 0., 'Rdark25': 0.}, 'beta': 0.2101 + 0.0083, 'delta1': 14.7, 'delta2': -0.548}
     NA_0 = 2  # Initial value of surfacic_nitrogen (g m-2), used if no surfacic_nitrogen is provided by user
@@ -61,7 +61,7 @@ I0 = 1370  # Extraterrestrial solar radiation (W m-2)
 K = 0.40  # Von Kármán's constant (dimensionless)
 LAMBDA = 2260E3  # Latent heat for vaporisation of water (J kg-1)
 RHOCP = 1256  # Volumetric heat capacity of air (J m-3 K-1)
-SIGMA = 5.6704E-8  # Stefan-Bolzmann constant (W-2 K-4)
+SIGMA = 5.6704E-8  # Stefan-Bolzmann constant (W m-2 K-4)
 ZR = 2  # Height above canopy at which reference wind (Ur) is measured (m)
 
 s_A = 239  # Factor in the calculation of the Saturation vapour pressure
@@ -74,15 +74,15 @@ KELVIN_DEGREE = 273.15  #: Conversion factor from degree C to Kelvin
 PATM = 1.01325E5  # Atmospheric pressure (Pa)
 
 Ur_min = 0.1  # Minimum wind speed (m s-1) TODO: Temporary patch to avoid div 0 error
-Zh_d = 0.7  # estimation factor canopy heigh into Zero plane displacement height
-Zh_Zo = 0.1  # estimation factor canopy heigh into roughness length
+Zh_d = 0.7  # estimation factor canopy height into Zero plane displacement height
+Zh_Zo = 0.1  # estimation factor canopy height into roughness length
 rhb_blade_A = 154  # factor in Boundary layer resistance to heat calculation for blade
 rhb_other_A = 1.2E-5  # factor A in Boundary layer resistance to heat calculation for other organs than blades
 rhb_other_B = 1.5E-5  # factor B in Boundary layer resistance to heat calculation for other organs than blades
 rhb_other_C = 0.47  # factor C in Boundary layer resistance to heat calculation for other organs than blades
 ra_expo = 2  # exponent in calculation of Turbulence resistance to heat
 
-PARa_to_RGa = 1.53  # Used to convert PAR absorbed into RG absorbed (see details in notice entitiled "Notes sur le calcul du rayonnement net à partir du PAR absorbé")
+PARa_to_RGa = 1.48  # Used to convert PAR absorbed into RG absorbed (see details in notice entitled "Notes sur le calcul du rayonnement net à partir du PAR absorbé")
 Watt_to_PPFD = 4.55  # It is assumed that 1 W m-2 of PAR is equivalent to 4.55 µmol m-2 s-1 of PAR (Goudriaan and Laar, 1994)
 rbh_rbw = 0.96  # estimation factor Boundary layer resistance for water from Boundary layer resistance to heat
 
@@ -112,8 +112,19 @@ K_Cs = 1.37  # factor in CO2 concentration at organ surface. From Prieto et al. 
 gsw_gs_CO2 = 1.6  # conversion factor from gsw into gs_CO2
 Ci_A = 1.37  # factor in Ci calculation. Comes from (1.6)^(2/3)
 
-# -- Temperature dependance of photosynthetic parameters (parameter values derived from Braune et al. (2009) except for Kc, Ko, and Rdark (Bernacchi et al., 2001))
-#     * deltaHa, deltaHd: enthalpie of activation and deactivation respectively (kJ mol-1)
+GAMMA0 = 28E-6 # Empirical parameter (mol mol-1). Tuzet et al. (2003).
+GAMMA1 = 0.0509 # Empirical parameter (-). Tuzet et al. (2003).
+GAMMA2 = 0.0010 # Empirical parameter (-). Tuzet et al. (2003).
+T_ref = 293.2 # Reference temperature (K). Tuzet et al. (2003).
+
+m = 5.7 # Shape parameter (-). Alabasha et al. (2019)
+water_potential_ref = -0.65 # Leaf water potential at which gs_CO2 is reduced by 50% of its unstressed level (Mpa) Alabasha et al. (2019)
+D0 = 30 # Scaling parameter (kPa). Alabasha et al. (2019)
+n = 4 # Shape parameter (-). Alabasha et al. (2019)
+
+
+# -- Temperature dependence of photosynthetic parameters (parameter values derived from Braune et al. (2009) except for Kc, Ko, and Rdark (Bernacchi et al., 2001))
+#     * deltaHa, deltaHd: enthalpy of activation and deactivation respectively (kJ mol-1)
 #     * deltaS: entropy term (kJ mol-1 K-1)
 #     * Tref: reference temperature (K)
 
@@ -124,7 +135,7 @@ PARAM_TEMP = {'deltaHa': {'Vc_max': 89.7, 'Jmax': 48.9, 'TPU': 47., 'Kc': 79.43,
 DELTA_CONVERGENCE = 0.01  #: The relative delta for Ci and Ts convergence.
 
 # -- Inhibition of the photosynthesis by carbohydrates (from Azcon-Bieto 1983)
-WSC_min = 100000  # Surfacic WSC content above which inhibition of the photosynthesis by WSC occures (µmol C m-2)
+WSC_min = 100000  # Surfacic WSC content above which inhibition of the photosynthesis by WSC occurs (µmol C m-2)
 Inhibition_max = 1  # Maximum inhibition ratio
 K_Inhibition = 938000  # 'Affinity' coefficient for the inhibition of the photosynthesis by WSC (µmol C m-2)
 
@@ -144,11 +155,5 @@ class ElementDefaultProperties(object):
         self.fructan = 0
         self.starch = 0
         self.green_area = 0
-
-
-class AxisDefaultProperties(object):
-    """
-    Properties by default for the axis. Used in FarquharWheat facade.
-    """
-    def __init__(self):
-        self.height_canopy = 0.78
+        self.water_potential = -0.1
+        self.Ci = 400

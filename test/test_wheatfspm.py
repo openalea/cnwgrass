@@ -10,7 +10,6 @@ from openalea.fspmwheat import farquharwheat_facade
 from openalea.fspmwheat import growthwheat_facade
 from openalea.fspmwheat import senescwheat_facade
 from openalea.fspmwheat import turgorgrowth_facade
-from openalea.fspmwheat.fspmwheat_runner import run as fspmwheat_runner
 
 # -- SIMULATION PARAMETERS --
 # Length of the simulation (in hours)

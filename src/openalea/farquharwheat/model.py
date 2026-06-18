@@ -2,6 +2,7 @@
 
 from __future__ import division  # use '//' to do integer division
 from math import sqrt, log, exp
+
 from openalea.farquharwheat import parameters
 
 """
@@ -17,7 +18,7 @@ from openalea.farquharwheat import parameters
 
 # TODO: extract all parameters and put them in farqhuar.parameters
 
-def _organ_temperature(w, z, Zh, Ur, PAR, gsw, Ta, Ts, RH, organ_name):
+def organ_temperature(w, z, Zh, Ur, PAR, gsw, Ta, Ts, RH, organ_name):
     """
     Energy balance for the estimation of organ temperature
 
@@ -61,12 +62,12 @@ def _organ_temperature(w, z, Zh, Ur, PAR, gsw, Ta, Ts, RH, organ_name):
     RGa = (PAR * parameters.PARa_to_RGa) / parameters.Watt_to_PPFD  #: Global absorbed radiation by organ (J m-2 s-1).
     es_Ta = parameters.s_C * exp((parameters.s_B * Ta) / (parameters.s_A + Ta))  #: Saturated vapour pressure of the air (kPa), Ta in degree Celsius
     V = RH * es_Ta  #: Vapour pressure of the air (kPa)
+
     # fvap = 0.56 - 0.079*sqrt(10*V)                      #: Fraction of vapour pressure
-    #
     # tau = RGa/parameters.I0                                    #: Atmospheric transmissivity (dimensionless)
     # fclear = 0.1 + 0.9*max(0, min(1, (tau-0.2)/0.5))    #: Fraction sky clearness
 
-    Rn = RGa  # NB: this only accounts for the visible radiations.
+    Rn = RGa # # NB: this only accounts for the visible radiations. More general equation would be RGa + 0.95 * parameters.SIGMA * ((Ta + parameters.KELVIN_DEGREE)**4 + 0.97 * (Tsoil + parameters.KELVIN_DEGREE)**4 - 2*(Ts + parameters.KELVIN_DEGREE)**4)
     # General equation is Rn = RGa + epsilon*Ra + epsilon*sigma*(Ts_feuilles_voisines + parameters.KELVIN_DEGREE)**4 - epsilon*sigma*(Ts + parameters.KELVIN_DEGREE)**4
     # if Ra unavailable, use Ra = sigma*(Tair + parameters.KELVIN_DEGREE)**4*fvap*fclear
 
@@ -91,7 +92,7 @@ def _organ_temperature(w, z, Zh, Ur, PAR, gsw, Ta, Ts, RH, organ_name):
     return Ts, Tr
 
 
-def _stomatal_conductance(Ag, An, surfacic_nitrogen, ambient_CO2, RH):
+def stomatal_conductance_BWB(Ag, An, surfacic_nitrogen, ambient_CO2, RH):
     """
     Ball, Woodrow, and Berry model of stomatal conductance (1987)
 
@@ -106,14 +107,96 @@ def _stomatal_conductance(Ag, An, surfacic_nitrogen, ambient_CO2, RH):
     """
 
     Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
-    m = parameters.PARAM_N['delta1'] * surfacic_nitrogen ** parameters.PARAM_N['delta2']  #: Scaling factor dependance to surfacic_nitrogen (dimensionless). This focntion is maintained
-    # although I'm not conviced that it should be taken into account
+    m = parameters.PARAM_N['delta1'] * surfacic_nitrogen ** parameters.PARAM_N['delta2']  #: Scaling factor dependence to surfacic_nitrogen (dimensionless). This function is maintained
+    # although I'm not convinced that it should be taken into account
     gsw = (parameters.GSMIN + m * ((Ag * RH) / Cs))  #: Stomatal conductance to water vapour (mol m-2 s-1), from Braune et al. (2009), Muller et al. (2005): using Ag rather than An.
-    # Would be better with a function of VPD and with (Ci-GAMMA) instead of Cs.
     return gsw
 
 
-def _calculate_Ci(ambient_CO2, An, gsw):
+def stomatal_conductance_Leuning(Ag, An, Ta, ambient_CO2, RH):
+    """
+    Leuning model of stomatal conductance to water (1995)
+
+    :param float Ag: gross assimilation rate (µmol m-2 s-1)
+    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ta: air temperature (degree C)
+    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float RH: Relative humidity (decimal fraction)
+
+    :return: gsw (mol m-2 s-1)
+    :rtype: float
+    """
+
+    es_Ta = parameters.s_C * exp((parameters.s_B * Ta) / (parameters.s_A + Ta))  #: Saturated vapour pressure of the air (kPa), Ta in degree Celsius
+    V = RH * es_Ta  #: Vapour pressure of the air (kPa)
+    VPDa = es_Ta - V
+    fw = 1 / (1 + VPDa / parameters.D0)
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    gamma = parameters.GAMMA0 * (1 + parameters.GAMMA1 * (Ta - parameters.T_ref) + parameters.GAMMA2 * ((Ta - parameters.T_ref) * (Ta - parameters.T_ref)))
+    gsw = parameters.GSMIN + (1.6 * parameters.m * Ag * fw)/(Cs - gamma)
+
+    return gsw
+
+
+def stomatal_conductance_Tuzet(Ag, An, Ta, ambient_CO2, water_potential):
+    """
+    Tuzet model of stomatal conductance to water (2003)
+
+    :param float Ag: gross assimilation rate (µmol m-2 s-1)
+    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ta: air temperature (degree C)
+    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float water_potential: water potential of the organ (Mpa)
+
+    :return: gsw (mol m-2 s-1)
+    :rtype: float
+    """
+
+    fw = 1 / (1 + (water_potential/parameters.water_potential_ref)**parameters.n)
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    gamma = parameters.GAMMA0 * (1 + parameters.GAMMA1 * (Ta - parameters.T_ref) + parameters.GAMMA2 * ((Ta - parameters.T_ref) * (Ta - parameters.T_ref)))
+    gsw = parameters.GSMIN + (1.6 * parameters.m * Ag * fw)/(Cs - gamma)
+
+    return gsw
+
+
+def stomatal_conductance_hydraulics(Ag, An, Ta, ambient_CO2, RH, water_potential):
+    """
+    Model of stomatal conductance to water coupling Tuzet and Leuning
+
+    :param float Ag: gross assimilation rate (µmol m-2 s-1)
+    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ta: air temperature (degree C)
+    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float RH: Relative humidity (decimal fraction)
+    :param float water_potential: water potential of the organ (Mpa)
+
+    :return: gsw (mol m-2 s-1)
+    :rtype: float
+    """
+
+    fpsi = 1 / (1 + (water_potential / parameters.water_potential_ref) ** parameters.n)
+    es_Ta = parameters.s_C * exp((parameters.s_B * Ta) / (parameters.s_A + Ta))  #: Saturated vapour pressure of the air (kPa), Ta in degree Celsius
+    V = RH * es_Ta  #: Vapour pressure of the air (kPa)
+    VPDa = es_Ta - V
+    fvpd = 1 / (1 + VPDa / parameters.D0)
+
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    gamma = parameters.GAMMA0 * (1 + parameters.GAMMA1 * (Ta - parameters.T_ref) + parameters.GAMMA2 * ((Ta - parameters.T_ref) * (Ta - parameters.T_ref)))
+
+    gsw = parameters.GSMIN + (1.6 * parameters.m * Ag * fvpd * fpsi)/(Cs - gamma)
+
+    return gsw
+
+
+STOMATAL_MODELS_MAPPING = {
+    'BWB': stomatal_conductance_BWB,
+    'Leuning': stomatal_conductance_Leuning,
+    'Tuzet': stomatal_conductance_Tuzet,
+    'hydraulics': stomatal_conductance_hydraulics
+}
+
+def calculate_Ci(ambient_CO2, An, gsw):
     """
     Calculates the internal CO2 concentration (Ci)
 
@@ -142,14 +225,14 @@ def _f_temperature(pname, p25, T):
     :rtype: float
     """
     Tk = T + parameters.KELVIN_DEGREE
-    deltaHa = parameters.PARAM_TEMP['deltaHa'][pname]  #: Enthalpie of activation of parameter pname (kJ mol-1)
+    deltaHa = parameters.PARAM_TEMP['deltaHa'][pname]  #: Enthalpy of activation of parameter pname (kJ mol-1)
     Tref = parameters.PARAM_TEMP['Tref']
 
     f_activation = exp((deltaHa * (Tk - Tref)) / (parameters.R * 1E-3 * Tref * Tk))  #: Energy of activation (normalized to unity)
 
     if pname in ('Vc_max', 'Jmax', 'TPU'):
         deltaS = parameters.PARAM_TEMP['deltaS'][pname]  #: entropy term of parameter pname (kJ mol-1 K-1)
-        deltaHd = parameters.PARAM_TEMP['deltaHd'][pname]  #: Enthalpie of deactivation of parameter pname (kJ mol-1)
+        deltaHd = parameters.PARAM_TEMP['deltaHd'][pname]  #: Enthalpy of deactivation of parameter pname (kJ mol-1)
         f_deactivation = (1 + exp((Tref * deltaS - deltaHd) / (Tref * parameters.R * 1E-3))) / (
                 1 + exp((Tk * deltaS - deltaHd) / (Tk * parameters.R * 1E-3)))  #: Energy of deactivation (normalized to unity)
     else:
@@ -191,7 +274,7 @@ def calculate_photosynthesis(PAR, surfacic_nitrogen, NSC_Retroinhibition, surfac
     :rtype: (float, float, float)
     """
 
-    #: RuBisCO parameters dependance to temperature
+    #: RuBisCO parameters dependence to temperature
     Kc = _f_temperature('Kc', parameters.KC25, Ts)
     Ko = _f_temperature('Ko', parameters.KO25, Ts)
     Gamma = _f_temperature('Gamma', parameters.GAMMA25, Ts)
@@ -303,7 +386,7 @@ def calculate_surfacic_nonstructural_nitrogen_Farquhar(surfacic_photosynthetic_p
 
 
 def calculate_surfacic_WSC(sucrose, starch, fructan, green_area):
-    """Surfacic content of water soluble carbohydrates  # TODO: rename by non structural carbohydrates because starch is not water-soluble.
+    """Surfacic content of water soluble carbohydrates  # TODO: rename because starch is not water-soluble.
 
     :param float sucrose: amount of sucrose (µmol C)
     :param float starch: amount of starch (µmol C)
@@ -314,68 +397,3 @@ def calculate_surfacic_WSC(sucrose, starch, fructan, green_area):
     :rtype: float
     """
     return (sucrose + starch + fructan) / green_area
-
-
-def run(surfacic_nitrogen, NSC_Retroinhibition, surfacic_NSC, width, height, PAR, Ta, ambient_CO2, RH, Ur, organ_name, height_canopy):
-    """
-    Computes the photosynthesis of a photosynthetic element. The photosynthesis is computed by using the biochemical FCB model (Farquhar et al., 1980) coupled to the semiempirical
-    BWB model of stomatal conductance (Ball, 1987).
-
-    :param float surfacic_nitrogen: surfacic nitrogen content of organs (g m-2), could include total N or proteic N only depending on parameter.SurfacicProteins
-           Properly speaking, photosynthesis should be related to proteins (RubisCO), but parameters of most Farquhar models are calibrated on total N measurements (DUMAS method).
-           We use only non-structural nitrogen to overcome issues in the case of extrem scenarios (high SLN for thick leaves under low nitrogen conditions).
-           If None, surfacic_nitrogen = :attr:`NA_0`
-    :param bool NSC_Retroinhibition: if True, Ag is inhibited by surfacic NSC (Non-Structural Carbohydrates).
-    :param float surfacic_NSC: surfacic content of NSC (Non-Structural Carbohydrates) (µmol C m-2).
-    :param float width: width of the organ (or diameter for stem organ) (m),
-           characteristic dimension to be considered for heat transfer through forced convection (by wind).
-    :param float height: height of the organ from soil (m)
-    :param float PAR: absorbed PAR (µmol m-2 s-1)
-    :param float Ta: air temperature (°C)
-    :param float ambient_CO2: air CO2 (µmol mol-1)
-    :param float RH: relative humidity (decimal fraction)
-    :param float Ur: wind at the reference height (zr) (m s-1), e.g. top of the canopy + 2m
-           (in the case of wheat, Ur can be approximated as the wind speed at 2m from soil)
-    :param str organ_name: name of the organ to which belongs the element (used to distinguish lamina from cylindric organs)
-    :param float height_canopy: total canopy height (m)
-
-    :return: Ag (µmol m-2 s-1), An (µmol m-2 s-1), Rd (µmol m-2 s-1),
-        Tr (mmol m-2 s-1), Ts (°C) and  gsw (mol m-2 s-1)
-    :rtype: (float, float, float, float, float, float)
-    """
-
-    if surfacic_nitrogen is None:
-        surfacic_nitrogen = parameters.NA_0
-
-    # Iterations to find organ temperature and Ci #
-    Ci, Ts = parameters.Ci_init_ratio * ambient_CO2, Ta  # Initial values
-    count = 0
-
-    while True:
-        prec_Ci, prec_Ts = Ci, Ts
-        Ag, An, Rd = calculate_photosynthesis(PAR, surfacic_nitrogen, NSC_Retroinhibition, surfacic_NSC, Ts, Ci)
-        # Stomatal conductance to water
-        gsw = _stomatal_conductance(Ag, An, surfacic_nitrogen, ambient_CO2, RH)
-
-        # New value of Ci
-        Ci = _calculate_Ci(ambient_CO2, An, gsw)
-
-        # New value of Ts
-        Ts, Tr = _organ_temperature(width, height, height_canopy, Ur, PAR, gsw, Ta, Ts, RH, organ_name)
-        count += 1
-
-        if count >= 30:  # TODO: test a faire? Semble prendre du tps de calcul
-            if abs((Ci - prec_Ci) / prec_Ci) >= parameters.DELTA_CONVERGENCE:
-                print('{}, Ci cannot converge, prec_Ci= {}, Ci= {}'.format(organ_name, prec_Ci, Ci))
-            if prec_Ts != 0 and abs((Ts - prec_Ts) / prec_Ts) >= parameters.DELTA_CONVERGENCE:
-                print('{}, Ts cannot converge, prec_Ts= {}, Ts= {}'.format(organ_name, prec_Ts, Ts))
-            break
-        if abs((Ci - prec_Ci) / prec_Ci) < parameters.DELTA_CONVERGENCE and ((prec_Ts == 0 and (Ts - prec_Ts) == 0) or abs((Ts - prec_Ts) / prec_Ts) < parameters.DELTA_CONVERGENCE):
-            break
-
-    #: Conversion of Tr from mm s-1 to mmol m-2 s-1 (more suitable for further use of Tr)
-    Tr = (Tr * 1E6) / parameters.MM_WATER  # Using 1 mm = 1kg m-2
-    #: Decrease efficency of non-lamina organs
-    if organ_name != 'blade':
-        Ag = Ag * parameters.EFFICENCY_STEM
-    return Ag, An, Rd, Tr, Ts, gsw

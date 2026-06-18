@@ -18,6 +18,7 @@ Introduction
     and the local environment (mainly light, temperature, CO2, soil N). CN-Wheat represents these flows as a set
     of differential equations which are solved at each time step (hourly) assuming a constant plant architecture.
     CN fluxes related to organ growth are therefore accounted for in a supplementary models (elongwheat, growthwheat).
+    Soil N dynamics and root N uptake can be either calculated by CN-Wheat or forced by an external model (using external_soil_model=True)
 
 
 Implementation and architecture
@@ -129,7 +130,7 @@ The derivatives needed by :func:`odeint <scipy.integrate.odeint>` are computed b
 method :meth:`_calculate_all_derivatives <cnwheat.simulation.Simulation._calculate_all_derivatives>`. 
 If no error occurs and :func:`odeint <scipy.integrate.odeint>` manages to integrate the 
 system successfully, then we update the state of the model setting the attributes of :attr:`population` 
-and :attr:`soils` to the compartment values returned by :func:`odeint <scipy.integrate.odeint>`, and 
+and :attr:`soils` (if any) to the compartment values returned by :func:`odeint <scipy.integrate.odeint>`, and
 we compute the :meth:`integrative variables of the population <cnwheat.model.Population>`.     
 
 .. figure:: ./image/run.png
@@ -139,24 +140,19 @@ we compute the :meth:`integrative variables of the population <cnwheat.model.Pop
    A run of the model
 
 Module :mod:`simulation <cnwheat.simulation>` also implements :class:`exception handling <cnwheat.simulation.SimulationError>`  
-:mod:`logging <logging>`, and a :attr:`progress-bar <cnwheat.simulation.Simulation.progressbar>`.  
+:mod:`logging <logging>`.
 
-Postprocessing, graphs and tools
+Postprocessing and tools
 --------------------------------
 
 After running the simulation over 1 or several time steps, the user can apply :mod:`postprocessing <cnwheat.postprocessing>` on 
 the outputs of the model. These post-processing are defined in module :mod:`postprocessing <cnwheat.postprocessing>`, and can be computed 
 using function :func:`postprocessing.postprocessing <cnwheat.postprocessing.postprocessing>`.
 
-Module :mod:`postprocessing <cnwheat.postprocessing>` also provides a front-end to automate the generation of graphs. 
-These graphs are useful for the validation of the model.
 
 Finally, module :mod:`tools <cnwheat.tools>` defines functions to:
 
-* plot multiple variables on the same graph, 
 * set up loggers,
-* check the outputs of the model quantitatively,
-* and display a progress-bar.
 
 Module :mod:`converter <cnwheat.converter>` implements functions to convert
 CN-Wheat internal :attr:`population <cnwheat.simulation.Simulation.population>` and 
@@ -199,7 +195,7 @@ must the following topological rules:
   An element must belong to an organ of the same type (e.g. a :class:`lamina element <cnwheat.model.LaminaElement>` 
   must belong to a :class:`lamina <cnwheat.model.Lamina>`).
 
-Likewise, the input :attr:`soils <cnwheat.simulation.Simulation.soils>` given by the user must 
+If no external soil model is defined, the input :attr:`soils <cnwheat.simulation.Simulation.soils>` given by the user must
 supply a :class:`soil <cnwheat.model.Soil>` for each :class:`axis <cnwheat.model.Axis>`.  
 
 These rules prevent from inconsistency in the modeled system. There are checked 

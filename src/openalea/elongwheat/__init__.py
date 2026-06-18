@@ -12,5 +12,3 @@
         * :mod:`elongwheat.parameters` for the parameters of the model.
 
 """
-
-__version__ = '2.0'

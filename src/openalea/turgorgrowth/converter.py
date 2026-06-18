@@ -5,7 +5,6 @@
     The module :mod:`turgorgrowth.converter` defines functions to convert
     :class:`dataframes <pandas.DataFrame>` to/from Turgor-Growth inputs or outputs format.
 
-    :license: CeCILL-C, see LICENSE for details.
 """
 
 import numpy as np

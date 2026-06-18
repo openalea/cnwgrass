@@ -41,21 +41,23 @@ SOILS_VARIABLES = simulation.Simulation.SOILS_INDEXES + simulation.Simulation.SO
 #: the mapping of the CN-Wheat organ classes to organ names in MTG
 CNWHEAT_CLASSES_TO_DATAFRAME_ORGANS_MAPPING = {model.Internode: 'internode', model.Lamina: 'blade',
                                                model.Sheath: 'sheath', model.Peduncle: 'peduncle', model.Chaff: 'ear',
-                                               model.Roots: 'roots', model.Grains: 'grains', model.Phloem: 'phloem', model.HiddenZone: 'hiddenzone'}
+                                               model.Roots: 'roots', model.Grains: 'grains', model.Phloem: 'phloem',
+                                               model.HiddenZone: 'hiddenzone', model.Endosperm: 'endosperm'}
 
 #: the mapping of the name of each element, from Dataframe to CN-Wheat
 DATAFRAME_TO_CNWHEAT_ELEMENTS_NAMES_MAPPING = {'HiddenElement': 'enclosed_element', 'StemElement': 'exposed_element', 'LeafElement1': 'exposed_element'}
 
 
-def from_dataframes(organs_inputs=None, hiddenzones_inputs=None, elements_inputs=None, soils_inputs=None, update_parameters=None):
+def from_dataframes(axes_inputs=None, organs_inputs=None, hiddenzones_inputs=None, elements_inputs=None, soils_inputs=None, update_parameters=None):
     """ If `organs_inputs`, `hiddenzones_inputs` and `elements_inputs` are not `None`,
     convert `organs_inputs`, `hiddenzones_inputs` and  `elements_inputs` to a :class:`population <model.Population>`.
     If `soils_inputs` is not `None`, convert `soils_inputs` to a dictionary of :class:`soils <model.Soil>`.
 
+    :param pandas.DataFrame axes_inputs: Organs inputs, with one line by axis.
     :param pandas.DataFrame organs_inputs: Organs inputs, with one line by organ.
     :param pandas.DataFrame hiddenzones_inputs: Hidden zones inputs, with one line by hidden zone.
     :param pandas.DataFrame elements_inputs: Elements inputs, with one line by element.
-    :param pandas.DataFrame soils_inputs: Soils inputs, with one line by soil.
+    :param pandas.DataFrame or None soils_inputs: Soils inputs, with one line by soil.
     :param dict update_parameters: A dictionary with the parameters to update, should have the form {'Organ_label1': {'param1': value1, 'param2': value2}, ...}.
 
 
@@ -82,12 +84,17 @@ def from_dataframes(organs_inputs=None, hiddenzones_inputs=None, elements_inputs
             # create a new plant
             plant = model.Plant(plant_index)
             population.plants.append(plant)
-            curr_axes_labels = organs_inputs[organs_inputs['plant'] == plant_index].axis.unique()
+            curr_axes_labels = organs_inputs[organs_inputs['plant'] == plant_index]['axis'].unique()
             for axis_label in curr_axes_labels:
                 # create a new axis
                 axis = model.Axis(axis_label)
+                axis_attributes_names = [state_var_name for state_var_name in simulation.Simulation.AXES_STATE if hasattr(axis, state_var_name)]
+                axis_row = axes_inputs.loc[axes_inputs.first_valid_index()]
+                axis_attributes_values = axis_row[axis_attributes_names].tolist()
+                axis_attributes = dict(zip(axis_attributes_names, axis_attributes_values))
+                axis.__dict__.update(axis_attributes)
                 curr_organs_inputs = organs_inputs[(organs_inputs['plant'] == plant_index) & (organs_inputs['axis'] == axis_label)]
-                for axis_attribute_name, axis_attribute_class in (('roots', model.Roots), ('phloem', model.Phloem), ('grains', model.Grains)):
+                for axis_attribute_name, axis_attribute_class in (('roots', model.Roots), ('phloem', model.Phloem), ('grains', model.Grains), ('endosperm', model.Endosperm)):
                     organ_label = CNWHEAT_CLASSES_TO_DATAFRAME_ORGANS_MAPPING[axis_attribute_class]
                     organ_inputs = curr_organs_inputs[curr_organs_inputs['organ'] == organ_label]
                     if not organ_inputs.empty:
@@ -105,8 +112,8 @@ def from_dataframes(organs_inputs=None, hiddenzones_inputs=None, elements_inputs
                         organ.initialize()
                         setattr(axis, axis_attribute_name, organ)
 
-                curr_metamers_indexes_for_hiddenzones = hiddenzones_inputs[(hiddenzones_inputs['plant'] == plant_index) & (hiddenzones_inputs['axis'] == axis_label)].metamer.unique()
-                curr_metamers_indexes_for_elements = elements_inputs[(elements_inputs['plant'] == plant_index) & (elements_inputs['axis'] == axis_label)].metamer.unique()
+                curr_metamers_indexes_for_hiddenzones = hiddenzones_inputs[(hiddenzones_inputs['plant'] == plant_index) & (hiddenzones_inputs['axis'] == axis_label)]['metamer'].unique()
+                curr_metamers_indexes_for_elements = elements_inputs[(elements_inputs['plant'] == plant_index) & (elements_inputs['axis'] == axis_label)]['metamer'].unique()
                 curr_metamers_indexes = np.unique(np.concatenate((curr_metamers_indexes_for_hiddenzones, curr_metamers_indexes_for_elements)))
                 for metamer_index in curr_metamers_indexes:
                     # create a new phytomer
@@ -125,7 +132,7 @@ def from_dataframes(organs_inputs=None, hiddenzones_inputs=None, elements_inputs
                         if metamer_index in curr_metamers_indexes_for_elements:
                             curr_elements_inputs = elements_inputs[(elements_inputs['plant'] == plant_index) & (elements_inputs['axis'] == axis_label) & (elements_inputs['metamer'] == metamer_index) &
                                                                    (elements_inputs['organ'] == organ_label)]
-                            if organ_label not in curr_elements_inputs.organ.values:
+                            if organ_label not in curr_elements_inputs['organ'].values:
                                 continue
                             # create a new organ
                             organ = phytomer_attribute_class(organ_label)
@@ -181,9 +188,9 @@ def from_dataframes(organs_inputs=None, hiddenzones_inputs=None, elements_inputs
     if convert_dataframes_to_population and convert_dataframe_to_soils_dict:
         return population, soils
     elif convert_dataframes_to_population:
-        return population
+        return population, None
     else:
-        return soils
+        return None, soils
 
 
 def to_dataframes(population=None, soils=None):
@@ -243,7 +250,7 @@ def to_dataframes(population=None, soils=None):
             append_row(plant, [plant.index], simulation.Simulation.PLANTS_RUN_VARIABLES, all_plants_df)
             for axis in plant.axes:
                 append_row(axis, [plant.index, axis.label], simulation.Simulation.AXES_RUN_VARIABLES, all_axes_df)
-                for organ in (axis.roots, axis.phloem, axis.grains):
+                for organ in (axis.roots, axis.phloem, axis.grains, axis.endosperm):
                     if organ is not None:
                         append_row(organ, [plant.index, axis.label, organ.label], simulation.Simulation.ORGANS_RUN_VARIABLES, all_organs_df)
                 for phytomer in axis.phytomers:
