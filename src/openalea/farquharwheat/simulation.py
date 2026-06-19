@@ -27,7 +27,7 @@ class SimulationInputsError(SimulationError):
     pass
 
 
-class Simulation(object):
+class Simulation:
     """The Simulation class permits to initialize and run a simulation.
     """
 
@@ -53,7 +53,7 @@ class Simulation(object):
         #:     {(plant_index, axis_label, metamer_index, organ_label, element_label): {element_output_name: element_output_value, ...}, ...}
         self.outputs = {}
         #: the outputs computed by FarquharWheat
-        self.elements_outputs = ['Ag', 'An', 'Rd', 'Tr', 'Ts', 'gs', 'Ci']
+        self.elements_outputs = ['Ag', 'An', 'Rd', 'Tr', 'Ts', 'gs', 'Ci', 'width', 'height']
 
         self.elements_inputs_outputs = set(self.elements_inputs + self.elements_outputs)
 
@@ -208,6 +208,7 @@ class Simulation(object):
                         Ag = sum([Ag * area for Ag, area in zip(Ag_prim_list, areas_list)]) / sum(areas_list)
 
             element_outputs = {'Ag': Ag, 'An': An, 'Rd': Rd,
-                               'Tr': Tr, 'Ts': Ts, 'gs': gsw, 'Ci': Ci}
+                               'Tr': Tr, 'Ts': Ts, 'gs': gsw, 'Ci': Ci,
+                               'width': element_inputs['width'], 'height': element_inputs['height']}
 
             self.outputs[element_id] = element_outputs

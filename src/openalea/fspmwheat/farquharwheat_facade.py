@@ -151,7 +151,7 @@ class FarquharWheatFacade(object):
                                         triangle_heights = get_height({mtg_element_vid: self._shared_mtg.property('geometry')[mtg_element_vid]})
                                         mtg_element_input = np.nanmean(triangle_heights[mtg_element_vid])
                                     else:
-                                        mtg_element_input = None
+                                        mtg_element_input = 0
                                     height_element_list.append(mtg_element_input)
                                 #: Width is actually diameter for Sheath and Internodes
                                 if mtg_organ_label in ['sheath', 'internode', 'pedoncule', 'ear'] and farquharwheat_element_input_name == 'width':

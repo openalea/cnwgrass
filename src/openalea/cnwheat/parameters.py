@@ -12,7 +12,7 @@ import pandas as pd
 SECOND_TO_HOUR_RATE_CONVERSION = 3600
 
 
-class PopulationParameters(object):
+class PopulationParameters:
     """
     Internal parameters of populations.
     """
@@ -24,7 +24,7 @@ class PopulationParameters(object):
 POPULATION_PARAMETERS = PopulationParameters()
 
 
-class PlantParameters(object):
+class PlantParameters:
     """
     Internal parameters of plants.
     """
@@ -36,7 +36,7 @@ class PlantParameters(object):
 PLANT_PARAMETERS = PlantParameters()
 
 
-class AxisParameters(object):
+class AxisParameters:
     """
     Internal parameters of axes.
     """
@@ -48,7 +48,7 @@ class AxisParameters(object):
 AXIS_PARAMETERS = AxisParameters()
 
 
-class AxisInitCompartments(object):
+class AxisInitCompartments:
     """
     Initial values for compartments of axis.
     """
@@ -64,7 +64,7 @@ class AxisInitCompartments(object):
 AXIS_INIT_COMPARTMENTS = AxisInitCompartments()
 
 
-class EndospermParameters(object):
+class EndospermParameters:
     """
     Internal parameters of seed endosperm.
     """
@@ -83,7 +83,7 @@ class EndospermParameters(object):
 ENDOSPERM_PARAMETERS = EndospermParameters()
 
 
-class PhytomerParameters(object):
+class PhytomerParameters:
     """
     Internal parameters of phytomers.
     """
@@ -95,7 +95,7 @@ class PhytomerParameters(object):
 PHYTOMER_PARAMETERS = PhytomerParameters()
 
 
-class HiddenZoneParameters(object):
+class HiddenZoneParameters:
     """
     Internal parameters of hidden growing zones.
     """
@@ -120,7 +120,7 @@ class HiddenZoneParameters(object):
 HIDDEN_ZONE_PARAMETERS = HiddenZoneParameters()
 
 
-class HiddenZoneInitCompartments(object):
+class HiddenZoneInitCompartments:
     """
     Initial values for compartments of hidden zones.
     """
@@ -138,7 +138,7 @@ class HiddenZoneInitCompartments(object):
 HIDDEN_ZONE_INIT_COMPARTMENTS = HiddenZoneInitCompartments()
 
 
-class PhloemParameters(object):
+class PhloemParameters:
     """
     Internal parameters of phloem.
     """
@@ -150,7 +150,7 @@ class PhloemParameters(object):
 PHLOEM_PARAMETERS = PhloemParameters()
 
 
-class PhloemInitCompartments(object):
+class PhloemInitCompartments:
     """
     Initial values for compartments of phloem.
     """
@@ -163,7 +163,7 @@ class PhloemInitCompartments(object):
 PHLOEM_INIT_COMPARTMENTS = PhloemInitCompartments()
 
 
-class GrainsParameters(object):
+class GrainsParameters:
     """
     Internal parameters of grains.
     """
@@ -187,7 +187,7 @@ class GrainsParameters(object):
 GRAINS_PARAMETERS = GrainsParameters()
 
 
-class GrainsInitCompartments(object):
+class GrainsInitCompartments:
     """
     Initial values for compartments of grains.
     """
@@ -202,7 +202,7 @@ class GrainsInitCompartments(object):
 GRAINS_INIT_COMPARTMENTS = GrainsInitCompartments()
 
 
-class RootsParameters(object):
+class RootsParameters:
     """
     Internal parameters of roots.
     """
@@ -264,7 +264,7 @@ class RootsParameters(object):
 ROOTS_PARAMETERS = RootsParameters()
 
 
-class RootsInitCompartments(object):
+class RootsInitCompartments:
     """
     Initial values for compartments of roots.
     """
@@ -282,7 +282,7 @@ class RootsInitCompartments(object):
 ROOTS_INIT_COMPARTMENTS = RootsInitCompartments()
 
 
-class PhotosyntheticOrganParameters(object):
+class PhotosyntheticOrganParameters:
     """
     Internal parameters of photosynthetic organs.
     """
@@ -392,7 +392,7 @@ class SheathParameters(PhotosyntheticOrganParameters):
 SHEATH_PARAMETERS = SheathParameters()
 
 
-class PhotosyntheticOrganElementParameters(object):
+class PhotosyntheticOrganElementParameters:
     """
     Internal parameters of photosynthetic organs elements.
     """
@@ -404,7 +404,7 @@ class PhotosyntheticOrganElementParameters(object):
 PHOTOSYNTHETIC_ORGAN_ELEMENT_PARAMETERS = PhotosyntheticOrganElementParameters()
 
 
-class PhotosyntheticOrganElementInitCompartments(object):
+class PhotosyntheticOrganElementInitCompartments:
     """
     Initial values for compartments of photosynthetic organ elements.
     """
@@ -498,7 +498,7 @@ class SheathElementParameters(PhotosyntheticOrganElementParameters):
 SHEATH_ELEMENT_PARAMETERS = SheathElementParameters()
 
 
-class SoilParameters(object):
+class SoilParameters:
     """
     Internal parameters of soil.
     """

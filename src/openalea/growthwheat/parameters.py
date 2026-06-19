@@ -27,7 +27,7 @@ MINERAL_LIVING_TISSUE = 0.05  #: Mineral content of the structural mass (g g-1 m
 MINERAL_SENESCED_TISSUE = 0.05/2  #: Mineral content of the structural mass of a senescent tissue (g g-1 mstruct) (Thornley and Cannell, 2000)
 
 
-class Parameters(object):
+class Parameters:
     def __init__(self):
 
         # Shoot

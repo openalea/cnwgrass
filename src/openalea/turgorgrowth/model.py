@@ -13,7 +13,7 @@ from math import exp
 from openalea.turgorgrowth import parameters
 
 
-class Population(object):
+class Population:
     """
     The class :class:`Population`.
 
@@ -37,7 +37,7 @@ class Population(object):
             plant.calculate_aggregated_variables()
 
 
-class Plant(object):
+class Plant:
     """
     The class :class:`Plant` defines the water flow at plant scale.
 
@@ -64,7 +64,7 @@ class Plant(object):
             axis.calculate_aggregated_variables()
 
 
-class Axis(object):
+class Axis:
     """
     The class :class:`Axis`.
 
@@ -132,7 +132,7 @@ class Axis(object):
 
         return plant_WC_DM
 
-class Phytomer(object):
+class Phytomer:
     """
     The class :class:`Phytomer`.
 
@@ -190,7 +190,7 @@ class Phytomer(object):
     def nb_replications(self):
         return sum(int(v <= self.index) * self.cohorts_replications.get(v, 0) for v in self.cohorts) + 1
 
-class Organ(object):
+class Organ:
     """
     The class :class:`Organ`.
 
@@ -690,7 +690,7 @@ class Sheath(PhotosyntheticOrgan):
         super(Sheath, self).__init__(label, exposed_element, enclosed_element)
 
 
-class PhotosyntheticOrganElement(object):
+class PhotosyntheticOrganElement:
     """
     The class :class:`PhotosyntheticOrganElement` defines the water flow in a photosynthetic organ element.
 
@@ -969,7 +969,7 @@ class SheathElement(PhotosyntheticOrganElement):
     INIT_COMPARTMENTS = parameters.SHEATH_ELEMENT_INIT_COMPARTMENTS     #: the initial values of compartments and state parameters
 
 
-class Soil(object):
+class Soil:
     """
     The class :class:`Soil` defines the soil water potential as function of the soil relative water content.
     """

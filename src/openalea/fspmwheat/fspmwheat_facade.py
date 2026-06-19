@@ -53,7 +53,6 @@ class FSPMWheatFacade(object):
 
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
 
-        global AXES_VARIABLES, ELEMENTS_VARIABLES, HIDDENZONES_VARIABLES, ORGANS_VARIABLES, SOILS_VARIABLES
         AXES_VARIABLES.update(elongwheat_facade._simulation.axis_inputs_outputs, growthwheat_facade._simulation.axis_inputs_outputs)
         ELEMENTS_VARIABLES.update(elongwheat_facade._simulation.element_inputs_outputs, farquharwheat_facade._simulation.elements_inputs_outputs, growthwheat_facade._simulation.element_inputs_outputs)
         HIDDENZONES_VARIABLES.update(elongwheat_facade._simulation.hiddenzone_inputs_outputs, growthwheat_facade._simulation.hiddenzone_inputs_outputs)

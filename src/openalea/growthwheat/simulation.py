@@ -14,9 +14,6 @@ from openalea.respiwheat.model import RespirationModel
 
     The module :mod:`growthwheat.simulation`.
 
-    :copyright: Copyright 2014-2015 INRA-ECOSYS, see AUTHORS.
-    :license: LICENSE for details.
-
 """
 
 

@@ -60,7 +60,7 @@ Package architecture
 
 Elong-Wheat is a Python package which consists of several Python modules:
 
-* :mod:`openalea.elongwheat.model`: the state and the equations of the model, two classes available (:class:`ElongWheatModel <elongwheat.model.ElongWheatModel>` and :class:`ElongWheatModelHydraulics <elongwheat.model.ElongWheatModelHydraulics>`)
-* :mod:`openalea.elongwheat.parameters`: the parameters of the model, two classes available (:class:`Parameters <elongwheat.parameters.Parameters>` and :class:`ParametersHydraulics <elongwheat.parameters.ParametersHydraulics>`)
+* :mod:`openalea.elongwheat.model`: the state and the equations of the model, two classes available (:class:`ElongWheatModel <openalea.elongwheat.model.ElongWheatModel>` and :class:`ElongWheatModelHydraulics <openalea.elongwheat.model.ElongWheatModelHydraulics>`)
+* :mod:`openalea.elongwheat.parameters`: the parameters of the model, two classes available (:class:`Parameters <openalea.elongwheat.parameters.Parameters>` and :class:`ParametersHydraulics <openalea.elongwheat.parameters.ParametersHydraulics>`)
 * :mod:`openalea.elongwheat.simulation`: the simulator (front-end) to run the model,
 * and :mod:`openalea.elongwheat.converter`: functions to convert Elong-Wheat inputs/outputs to/from Pandas dataframes.

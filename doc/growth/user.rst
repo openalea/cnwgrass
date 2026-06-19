@@ -45,7 +45,7 @@ Package architecture
 
 Growth-Wheat is a Python package which consists of several Python modules:
 
-* :mod:`openalea.growthwheat.model`: the state and the equations of the model, two classes available (:class:`GrowthWheatModel <growthwheat.model.GrowthWheatModel>` and :class:`GrowthWheatModelHydraulics <growthwheat.model.GrowthWheatModelHydraulics>`)
-* :mod:`openalea.growthwheat.parameters`: the parameters of the model,  two classes available (:class:`Parameters <growthwheat.parameters.Parameters>` and :class:`ParametersHydraulics <growthwheat.parameters.ParametersHydraulics>`)
+* :mod:`openalea.growthwheat.model`: the state and the equations of the model, two classes available (:class:`GrowthWheatModel <openalea.growthwheat.model.GrowthWheatModel>` and :class:`GrowthWheatModelHydraulics <openalea.growthwheat.model.GrowthWheatModelHydraulics>`)
+* :mod:`openalea.growthwheat.parameters`: the parameters of the model,  two classes available (:class:`Parameters <openalea.growthwheat.parameters.Parameters>` and :class:`ParametersHydraulics <openalea.growthwheat.parameters.ParametersHydraulics>`)
 * :mod:`openalea.growthwheat.simulation`: the simulator (front-end) to run the model,
 * and :mod:`openalea.growthwheat.converter`: functions to convert Growth-Wheat inputs/outputs to/from Pandas dataframes.
