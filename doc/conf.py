@@ -11,7 +11,7 @@ release = meta.get("version")
 # for example take major/minor
 version = ".".join(release.split('.')[:3])
 desc = meta['Summary']
-author = 'R.Barillot, C.Chambon, M.Gauthier, B.Andrieu'
+author = 'R.Barillot, C.Chambon, M.Gauthier, V.Acker, B.Andrieu'
 urls = {k:v for k,v in [item.split(',') for item in meta.get_all('Project-URL')]}
 
 

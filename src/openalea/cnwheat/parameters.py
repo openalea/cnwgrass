@@ -12,40 +12,7 @@ import pandas as pd
 SECOND_TO_HOUR_RATE_CONVERSION = 3600
 
 
-def from_dataframe(object_, dataframe_):
-    """Set attributes of *object_* from data in *dataframe_*.
-
-    :Parameters:
-        - `object_` (:class:`object`) - The object to set.
-        - `dataframe_` (:class:`pandas.DataFrame`) - The dataframe used to set the attribute(s)
-          of *object_*.
-          *dataframe_* must have only 2 rows:
-
-              * one row is for the header and contains the name of each attribute,
-              * and one row contains the value of each attribute.
-    """
-    object_.__dict__.update(dataframe_.to_dict(orient='index')[dataframe_.first_valid_index()])
-
-
-def to_dataframe(object_):
-    """Create and return a dataframe from attributes of *object_*.
-
-    :Parameters:
-        - `object_` (:class:`object`) - The object used to create the dataframe.
-
-    :Returns:
-        A dataframe which contains the attributes of *object_*, with only 2 rows:
-
-          * one row is for the header and contains the name of each attribute,
-          * and one row contains the value of each attribute.
-
-    :Returns Type:
-        :class:`pandas.DataFrame`
-    """
-    return pd.DataFrame(object_.__dict__, index=[0]).sort_index(axis=1)
-
-
-class PopulationParameters(object):
+class PopulationParameters:
     """
     Internal parameters of populations.
     """
@@ -57,7 +24,7 @@ class PopulationParameters(object):
 POPULATION_PARAMETERS = PopulationParameters()
 
 
-class PlantParameters(object):
+class PlantParameters:
     """
     Internal parameters of plants.
     """
@@ -69,7 +36,7 @@ class PlantParameters(object):
 PLANT_PARAMETERS = PlantParameters()
 
 
-class AxisParameters(object):
+class AxisParameters:
     """
     Internal parameters of axes.
     """
@@ -81,21 +48,42 @@ class AxisParameters(object):
 AXIS_PARAMETERS = AxisParameters()
 
 
-class AxisInitCompartments(object):
+class AxisInitCompartments:
     """
     Initial values for compartments of axis.
     """
     def __init__(self):
-        self.C_exudated = 0                 #: initial value of C exudated by the roots (:math:`\mu` mol C)
-        self.sum_respi_shoot = 0            #: initial value of C respired by the shoot (exept leaf and internode growth respiration) (:math:`\mu` mol C)
-        self.sum_respi_roots = 1E-3         #: initial value of C respired by the roots (exept root growth respiration) (:math:`\mu` mol C)
+        self.SAM_temperature = 12           #: initial temperature of shoot apical meristem (°C)
+        self.C_exuded = 0                 #: initial value of C exudates by the roots (:math:`\mu` mol C)
+        self.sum_respi_shoot = 0            #: initial value of C respired by the shoot (except leaf and internode growth respiration) (:math:`\mu` mol C)
+        self.sum_respi_roots = 1E-3         #: initial value of C respired by the roots (except root growth respiration) (:math:`\mu` mol C)
+        self.nb_leaves = 11
 
 
 #: The instance of class :class:`cnwheat.parameters.HiddenZoneInitCompartments` for current process
 AXIS_INIT_COMPARTMENTS = AxisInitCompartments()
 
 
-class PhytomerParameters(object):
+class EndospermParameters:
+    """
+    Internal parameters of seed endosperm.
+    """
+    def __init__(self):
+        self.MOISTENING_RATE = 3.86E-6  #: Rate of seed moistening in usual agronomical conditions (s). todo: make this rate dependant on soil humidity/water potential
+        self.K_STARCH = 3.E-9           #: Starch hydrolysis constant (µmol-1 s-1 at 20°C)
+        self.STARCH_MIN = 0             #: Minimal starch content of the endosperm (µmol C)
+        self.STARCH_MAX = 1305          #: Maximal starch content of the endosperm (µmol C)
+
+        self.K_PROTEINS = 8.E-8         #: Protein hydrolysis constant (µmol-1 s-1 at 20°C)
+        self.PROTEINS_MIN = 0           #: Maximal protein content of the endosperm (µmol C)
+        self.PROTEINS_MAX = 60          #: Minimal protein content of the endosperm (µmol C)
+
+
+#: The instance of class :class:`cnwheat.parameters.SeedParameters` for current process
+ENDOSPERM_PARAMETERS = EndospermParameters()
+
+
+class PhytomerParameters:
     """
     Internal parameters of phytomers.
     """
@@ -107,7 +95,7 @@ class PhytomerParameters(object):
 PHYTOMER_PARAMETERS = PhytomerParameters()
 
 
-class HiddenZoneParameters(object):
+class HiddenZoneParameters:
     """
     Internal parameters of hidden growing zones.
     """
@@ -116,7 +104,7 @@ class HiddenZoneParameters(object):
         self.BETA = 1                      #: Kind of volumetric mass density at power -2/3 ((g m-3)**(-2/3))
         self.SIGMA = 0.025                 #: Coefficient of surface diffusion. Used in Fick's law (g m-2 s-1).
         self.VMAX_SFRUCTAN_POT = 0.015     #: Potential maximal rate of fructan synthesis (:math:`\mu` mol C s-1 g-1 MS)
-        self.VMAX_SFRUCTAN_RELATIVE = 10   #: Maximal rate of fructan synthesis in the division zone relative to the rate in mature tissus (:math:`\mu` mol C s-1 g-1 MS)
+        self.VMAX_SFRUCTAN_RELATIVE = 10   #: Maximal rate of fructan synthesis in the division zone relative to the rate in mature tissues (:math:`\mu` mol C s-1 g-1 MS)
         self.K_SFRUCTAN = 5000.            #: Affinity coefficient of fructan synthesis (:math:`\mu` mol C g-1 MS)
         self.K_REGUL_SFRUCTAN = 0.001      #: Affinity coefficient of the regulation function of fructan synthesis (:math:`\mu` mol g-1 MS)
         self.N_REGUL_SFRUCTAN = 3.         #: Parameter of the regulation function of fructan synthesis (dimensionless)
@@ -132,7 +120,7 @@ class HiddenZoneParameters(object):
 HIDDEN_ZONE_PARAMETERS = HiddenZoneParameters()
 
 
-class HiddenZoneInitCompartments(object):
+class HiddenZoneInitCompartments:
     """
     Initial values for compartments of hidden zones.
     """
@@ -150,9 +138,9 @@ class HiddenZoneInitCompartments(object):
 HIDDEN_ZONE_INIT_COMPARTMENTS = HiddenZoneInitCompartments()
 
 
-class PhloemParameters(object):
+class PhloemParameters:
     """
-    Internal parameters of phloems.
+    Internal parameters of phloem.
     """
     def __init__(self):
         self.ALPHA = 1  #: Proportion of structural mass containing substrate
@@ -162,7 +150,7 @@ class PhloemParameters(object):
 PHLOEM_PARAMETERS = PhloemParameters()
 
 
-class PhloemInitCompartments(object):
+class PhloemInitCompartments:
     """
     Initial values for compartments of phloem.
     """
@@ -175,7 +163,7 @@ class PhloemInitCompartments(object):
 PHLOEM_INIT_COMPARTMENTS = PhloemInitCompartments()
 
 
-class GrainsParameters(object):
+class GrainsParameters:
     """
     Internal parameters of grains.
     """
@@ -199,7 +187,7 @@ class GrainsParameters(object):
 GRAINS_PARAMETERS = GrainsParameters()
 
 
-class GrainsInitCompartments(object):
+class GrainsInitCompartments:
     """
     Initial values for compartments of grains.
     """
@@ -214,23 +202,32 @@ class GrainsInitCompartments(object):
 GRAINS_INIT_COMPARTMENTS = GrainsInitCompartments()
 
 
-class RootsParameters(object):
+class RootsParameters:
     """
     Internal parameters of roots.
     """
     def __init__(self):
 
         self.ALPHA = 1                       #: Proportion of structural mass containing substrate
-        self.SIGMA_SUCROSE = 1e-7            #: Conductivity of the roots-phloem pathway (g2 :math:`\mu` mol-1 m-2 s-1) ; used to compute the sucrose loaded to the phloem
+        self.SIGMA_SUCROSE_MIN = 1e-7        #: Minimal conductivity of the roots-phloem pathway (g2 :math:`\mu` mol-1 m-2 s-1) ; used after the total number of leaves has been emitted by the SAM
+        self.SIGMA_SUCROSE_MAX = 3e-6        #: Conductivity of the roots-phloem pathway (g2 :math:`\mu` mol-1 m-2 s-1) ; used before the total number of leaves has been emitted by the SAM
+        self.SIGMA_SUCROSE_K = 6             #: Used to calculate the conductivity of the root-phloem pathway according to the number of leaves emitted by the SAM (leaf)
+        self.SIGMA_SUCROSE_N = 9             #: Used to calculate the conductivity of the root-phloem pathway according to the number of leaves emitted by the SAM (dimensionless)
+        self.SIGMA_AMINO_ACIDS = 1e-8        #: Conductivity of the roots-phloem pathway for amino acids (g2 :math:`\mu` mol-1 m-2 s-1)
         self.BETA = 1                        #: Kind of volumetric mass density at power -2/3 ((g m-3)**(-2/3))
 
         # Regulation function by C in roots of nitrate uptake
-        self.K_C = 7000                      #: Affinity coefficient for the regulation function by root C (:math:`\mu` mol C sucrose g-1 MS)
+        self.K_C = 4000                      #: Affinity coefficient for the regulation function by root C (:math:`\mu` mol C sucrose g-1 MS)
         self.RELATIVE_VMAX_N_UPTAKE = 1
+
+        # Regulation function by SRWC of nitrate uptake (used if hydraulics option is True)
+        self.SRWC_crit = 45                 #: Critical soil relative water content threshold at which nitrate uptake is reduced by 50% (%)
+        self.n = -3.5                       #: Shape parameter (-)
+        self.m = 0.9                        #: Shape parameter (-)
 
         # Nitrate uptake
         self.NET_INFLUX_UPTAKE_RATIO = 0.6   #: ratio (net uptake : nitrate influx)
-        self.MIN_INFLUX_FOR_UPTAKE = 3.02E-03  #: Minimum influx rate below wich no net absorption happens (:math:`\mu` mol C sucrose g-1 mstruct s-1)
+        self.MIN_INFLUX_FOR_UPTAKE = 3.02E-03  #: Minimum influx rate below which no net absorption happens (:math:`\mu` mol C sucrose g-1 mstruct s-1)
         self.A_VMAX_HATS = -0.00004          #: Parameter for estimating the maximal rate of nitrates uptake at saturating soil N concentration;HATS (:math:`\mu` mol g-1 s-1)
         self.B_VMAX_HATS = 0.0549            #: Parameter for estimating the maximal rate of nitrates uptake at saturating soil N concentration;HATS (g :math:`\mu` mol-1)
         self.A_K_HATS = -85.324              #: Parameter for estimating the affinity coefficient of nitrates uptake at saturating soil N concentration;HATS (:math:`\mu` mol m-3)
@@ -248,7 +245,7 @@ class RootsParameters(object):
         self.K_AMINO_ACIDS_EXPORT = 0.045   #: Relative rate of amino acids export from roots (s-1)
 
         # Exudation
-        self.C_EXUDATION = 0.20               #: Proportion of C exudated from C sucrose unloaded to roots (Keith et al., 1986)
+        self.C_EXUDATION = 0.20               #: Proportion of C exuded from roots over C sucrose unloaded (Keith et al., 1986)
         self.N_EXUDATION_MAX = 0.2            #: Parameter used to limit the rate of N exudation (dimensionless)
 
         # Cytokinins
@@ -260,13 +257,14 @@ class RootsParameters(object):
         self.N_NIT_CYTOKININS = 1             #: A parameter for cytokinins synthesis (dimensionless)
         self.N_AMINO_ACIDS_CYTOKININS = 1
         self.K_CYTOKININS_EXPORT = 1.67E-3    #: Relative rate of cytokinins export from roots (s-1)
+        self.ROOT_INIT_CONC_CYTOKININS = 200  #: Root concentration in cytokinins in the seed
 
 
 #: The instance of class :class:`cnwheat.parameters.RootsParameters` for current process
 ROOTS_PARAMETERS = RootsParameters()
 
 
-class RootsInitCompartments(object):
+class RootsInitCompartments:
     """
     Initial values for compartments of roots.
     """
@@ -284,7 +282,7 @@ class RootsInitCompartments(object):
 ROOTS_INIT_COMPARTMENTS = RootsInitCompartments()
 
 
-class PhotosyntheticOrganParameters(object):
+class PhotosyntheticOrganParameters:
     """
     Internal parameters of photosynthetic organs.
     """
@@ -327,6 +325,7 @@ class PhotosyntheticOrganParameters(object):
 
         # cytokinins
         self.DELTA_D_CYTOKININS = 1.5e-05    #: Relative rate of cytokinins degradation (s-1)
+        self.ELEMENT_INIT_CONC_CYTOKININS = 200  #: Element concentration in cytokinins in the seed
 
 
 #: The instance of class :class:`cnwheat.parameters.PhotosyntheticOrganParameters` for current process
@@ -393,7 +392,7 @@ class SheathParameters(PhotosyntheticOrganParameters):
 SHEATH_PARAMETERS = SheathParameters()
 
 
-class PhotosyntheticOrganElementParameters(object):
+class PhotosyntheticOrganElementParameters:
     """
     Internal parameters of photosynthetic organs elements.
     """
@@ -405,7 +404,7 @@ class PhotosyntheticOrganElementParameters(object):
 PHOTOSYNTHETIC_ORGAN_ELEMENT_PARAMETERS = PhotosyntheticOrganElementParameters()
 
 
-class PhotosyntheticOrganElementInitCompartments(object):
+class PhotosyntheticOrganElementInitCompartments:
     """
     Initial values for compartments of photosynthetic organ elements.
     """
@@ -499,7 +498,7 @@ class SheathElementParameters(PhotosyntheticOrganElementParameters):
 SHEATH_ELEMENT_PARAMETERS = SheathElementParameters()
 
 
-class SoilParameters(object):
+class SoilParameters:
     """
     Internal parameters of soil.
     """

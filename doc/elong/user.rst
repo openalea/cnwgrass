@@ -16,12 +16,21 @@ Each growing leaves is represented by a set of compartments:
 - any exposed (emerged) part of the lamina (photosynthetically active)
 - any exposed part of the sheath (photosynthetically active).
 
-Tissue emergence are calculated according to the length of the pseudostem which depends on
-the above sheath and internodes of each growing leaf. Leaf elongation rate is regulated
-by the amino acids and sucrose concentration inside the hiddenzone. The dynamics of leaf elongation
-is coordinated with the emergence of the previous leaf:
-- before leaf n-1 emergence, leaf n follows an exponential-like function with a strong metabolic regulation
-- after leaf n-1 emergence, leaf n follows a predefined sigmoidal kinetics with low metabolic control
+Model functioning depends on the desired version:
+
+- When leaf status is not taken into account (hydraulics=False)
+  Tissue emergence is calculated according to the length of the pseudostem which depends on
+  the above sheath and internodes of each growing leaf. Leaf elongation rate is regulated
+  by the amino acids and sucrose concentration inside the hiddenzone. The dynamics of leaf elongation
+  is coordinated with the emergence of the previous leaf:
+    - before leaf n-1 emergence (Phase I), leaf n follows an exponential-like function with a strong metabolic regulation
+    - after leaf n-1 emergence (Phase II), leaf n follows a predefined sigmoidal kinetics with low metabolic control
+
+- When leaf status is taken into account (hydraulics=True)
+  Leaf elongation rate in Phase I is co-regulated by metabolite concentration in the hidden zone and water potential of the xylem.
+  Phase II is almost deactivated, as leaf elongation rate is calculated in :mod:`openalea.turgorgrowth`:
+  In this version, the separation between the lamina and the sheath is only occurring at the end of leaf elongation.
+
 
 At leaf n emergence, its maximal width and surfacic mass are defined according to the sucrose concentration
 of the hiddenzone averaged during to phyllochrons.
@@ -35,6 +44,7 @@ Inputs of elong-Wheat
 - Initial dimensions (m) and structural masses (g) of each hiddenzone, laminae, sheaths and internodes
 - Initial content of the metabolites calculated by CN-Wheat (µmol)
 - air and soil temperature (°C) : used to calculate the temperature of the hiddenzones and shoot apical meristem
+- the xylem water potential is also needed if Elongwheat is coupled with a hydraulic model.
 
 Details on each inputs are given in the docstring.
 
@@ -50,7 +60,7 @@ Package architecture
 
 Elong-Wheat is a Python package which consists of several Python modules:
 
-* :mod:`openalea.elongwheat.model`: the state and the equations of the model,
-* :mod:`openalea.elongwheat.parameters`: the parameters of the model,
+* :mod:`openalea.elongwheat.model`: the state and the equations of the model, two classes available (:class:`ElongWheatModel <openalea.elongwheat.model.ElongWheatModel>` and :class:`ElongWheatModelHydraulics <openalea.elongwheat.model.ElongWheatModelHydraulics>`)
+* :mod:`openalea.elongwheat.parameters`: the parameters of the model, two classes available (:class:`Parameters <openalea.elongwheat.parameters.Parameters>` and :class:`ParametersHydraulics <openalea.elongwheat.parameters.ParametersHydraulics>`)
 * :mod:`openalea.elongwheat.simulation`: the simulator (front-end) to run the model,
 * and :mod:`openalea.elongwheat.converter`: functions to convert Elong-Wheat inputs/outputs to/from Pandas dataframes.

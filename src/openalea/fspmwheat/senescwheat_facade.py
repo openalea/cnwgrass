@@ -56,7 +56,7 @@ class SenescWheatFacade(object):
         :param pandas.DataFrame shared_organs_inputs_outputs_df: the dataframe of inputs and outputs at organs scale shared between all models.
         :param pandas.DataFrame shared_axes_inputs_outputs_df: the dataframe of inputs and outputs at axis scale shared between all models.
         :param pandas.DataFrame shared_elements_inputs_outputs_df: the dataframe of inputs and outputs at element scale shared between all models.
-        :param dict update_parameters: A dictionary with the parameters to update, should have the form {'param1': value1, 'param2': value2, ...}.
+        :param dict or None update_parameters: A dictionary with the parameters to update, should have the form {'param1': value1, 'param2': value2, ...}.
         :param bool update_shared_df: If `True`  update the shared dataframes at init and at each run (unless stated otherwise)
         """
 
@@ -162,6 +162,9 @@ class SenescWheatFacade(object):
 
         # add the properties if needed
         mtg_property_names = self._shared_mtg.property_names()
+        for senescwheat_axes_data_name in converter.SENESCWHEAT_AXES_INPUTS_OUTPUTS:
+            if senescwheat_axes_data_name not in mtg_property_names:
+                self._shared_mtg.add_property(senescwheat_axes_data_name)
         if 'roots' not in mtg_property_names:
             self._shared_mtg.add_property('roots')
         for senescwheat_elements_data_name in converter.SENESCWHEAT_ELEMENTS_INPUTS_OUTPUTS:
@@ -178,6 +181,7 @@ class SenescWheatFacade(object):
 
                 # update the axis property in the MTG
                 axis_id = (mtg_plant_index, mtg_axis_label)
+
                 if axis_id in senescwheat_axes_data_dict:
                     senescwheat_axis_data_dict = senescwheat_axes_data_dict[axis_id]
                     for axis_data_name, axis_data_value in senescwheat_axis_data_dict.items():
@@ -189,12 +193,14 @@ class SenescWheatFacade(object):
                 if 'roots' not in self._shared_mtg.get_vertex_property(mtg_axis_vid):
                     self._shared_mtg.property('roots')[mtg_axis_vid] = {}
                 mtg_roots_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)['roots']
-                mtg_roots_properties.update(senescwheat_roots_data_dict[axis_id])
+                for roots_data_name, roots_data_value in senescwheat_roots_data_dict.items():
+                    self._shared_mtg.property(roots_data_name)[mtg_axis_vid] = roots_data_value
+
                 for mtg_metamer_vid in self._shared_mtg.components_iter(mtg_axis_vid):
                     mtg_metamer_index = int(self._shared_mtg.index(mtg_metamer_vid))
                     for mtg_organ_vid in self._shared_mtg.components_iter(mtg_metamer_vid):
                         mtg_organ_label = self._shared_mtg.label(mtg_organ_vid)
-                        # senesced_length_organ = 0.  # Temporaire
+                        # senesced_length_organ = 0.  # Temporary
                         if mtg_organ_label not in PHOTOSYNTHETIC_ORGANS_NAMES:
                             continue
                         for mtg_element_vid in self._shared_mtg.components_iter(mtg_organ_vid):

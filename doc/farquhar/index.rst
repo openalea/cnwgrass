@@ -12,8 +12,8 @@ Module description
 .. topic:: Overview
 
     Farquhar-Wheat is a model of leaf photosynthesis based on Farquhar's approach.
-    The package includes three main submodels for C assimilation,
-    stomatal conductance and energy balance calculation (leaf temperature).
+    In addition to the Farquhar model, this package also includes 4 models of
+    stomatal conductance and the energy balance calculation (leaf temperature).
     
 
 Documentation

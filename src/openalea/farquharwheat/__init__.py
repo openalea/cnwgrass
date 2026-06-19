@@ -6,5 +6,3 @@
     The model Farquhar-Wheat
 
 """
-
-__version__ = '2.0'

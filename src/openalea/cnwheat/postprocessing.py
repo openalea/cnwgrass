@@ -7,8 +7,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from openalea.cnwheat import simulation as cnwheat_simulation, model as cnwheat_model, parameters as cnwheat_parameters, tools as cnwheat_tools
+from openalea.cnwheat import simulation as cnwheat_simulation, model as cnwheat_model, parameters as cnwheat_parameters
 from openalea.respiwheat import model as respiwheat_model
+from openalea.fspmwheat import tools as fspmwheat_tools
 
 """
     cnwheat.postprocessing
@@ -25,7 +26,7 @@ from openalea.respiwheat import model as respiwheat_model
 #: the time index
 T_INDEX = cnwheat_simulation.Simulation.T_INDEX
 
-#: the index to locate the plants in the modeled system
+#: the index to locate the plants in the modelled system
 PLANTS_INDEXES = cnwheat_simulation.Simulation.PLANTS_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`PLANTS_INDEXES`
 PLANTS_T_INDEXES = cnwheat_simulation.Simulation.PLANTS_T_INDEXES
@@ -34,7 +35,7 @@ PLANTS_POSTPROCESSING_VARIABLES = []
 #: concatenation of :attr:`PLANTS_T_INDEXES`, :attr:`PLANTS_RUN_VARIABLES <cnwheat.simulation.Simulation.PLANTS_RUN_VARIABLES>` and :attr:`PLANTS_POSTPROCESSING_VARIABLES`
 PLANTS_RUN_POSTPROCESSING_VARIABLES = set(PLANTS_T_INDEXES + cnwheat_simulation.Simulation.PLANTS_RUN_VARIABLES + PLANTS_POSTPROCESSING_VARIABLES)
 
-#: the indexes to locate the axes in the modeled system
+#: the indexes to locate the axes in the modelled system
 AXES_INDEXES = cnwheat_simulation.Simulation.AXES_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`AXES_INDEXES`
 AXES_T_INDEXES = cnwheat_simulation.Simulation.AXES_T_INDEXES
@@ -45,12 +46,12 @@ AXES_POSTPROCESSING_VARIABLES = ['C_N_ratio', 'C_N_ratio_shoot', 'N_content', 'N
                                  'shoot_roots_mstruct_ratio', 'Total_Photosynthesis', 'Tillers_Photosynthesis', 'Tillers_Photosynthesis_An', 'NNI',
                                  'NS', 'NS_shoot', 'NS_stem', 'NS_laminae', 'NS_roots', 'mstruct_shoot', 'mstruct_laminae', 'mstruct_stem',
                                  'C_respired_shoot', 'C_respired_roots', 'Cont_WSC_DM', 'Cont_WSC_DM_shoot', 'Cont_WSC_DM_roots', 'Cont_WSC_DM_laminae', 'Cont_WSC_DM_stem',
-                                 'sum_C_g', 'sum_NSC_g']
+                                 'sum_C_g', 'sum_NSC_g', 'C_exuded']
 
 #: concatenation of :attr:`AXES_T_INDEXES`, :attr:`AXES_RUN_VARIABLES <cnwheat.simulation.Simulation.AXES_RUN_VARIABLES>` and :attr:`AXES_POSTPROCESSING_VARIABLES`
 AXES_RUN_POSTPROCESSING_VARIABLES = set(AXES_T_INDEXES + cnwheat_simulation.Simulation.AXES_RUN_VARIABLES + AXES_POSTPROCESSING_VARIABLES)
 
-#: the indexes to locate the phytomers in the modeled system
+#: the indexes to locate the phytomers in the modelled system
 PHYTOMERS_INDEXES = cnwheat_simulation.Simulation.PHYTOMERS_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`PHYTOMERS_INDEXES`
 PHYTOMERS_T_INDEXES = cnwheat_simulation.Simulation.PHYTOMERS_T_INDEXES
@@ -59,17 +60,17 @@ PHYTOMERS_POSTPROCESSING_VARIABLES = []
 #: concatenation of :attr:`PHYTOMERS_T_INDEXES`, :attr:`PHYTOMERS_RUN_VARIABLES <cnwheat.simulation.Simulation.PHYTOMERS_RUN_VARIABLES>` and :attr:`PHYTOMERS_POSTPROCESSING_VARIABLES`
 PHYTOMERS_RUN_POSTPROCESSING_VARIABLES = set(PHYTOMERS_T_INDEXES + cnwheat_simulation.Simulation.PHYTOMERS_RUN_VARIABLES + PHYTOMERS_POSTPROCESSING_VARIABLES)
 
-#: the indexes to locate the organs in the modeled system
+#: the indexes to locate the organs in the modelled system
 ORGANS_INDEXES = cnwheat_simulation.Simulation.ORGANS_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`ORGANS_INDEXES`
 ORGANS_T_INDEXES = cnwheat_simulation.Simulation.ORGANS_T_INDEXES
 #: organs post-processing variables
-ORGANS_POSTPROCESSING_VARIABLES = ['Conc_Amino_Acids', 'Conc_Nitrates', 'Conc_Sucrose', 'Conc_cytokinins', 'Dry_Mass', 'Proteins_N_Mass',  'N_tot', 'WSC_g']
+ORGANS_POSTPROCESSING_VARIABLES = ['Conc_Amino_Acids', 'Conc_Nitrates', 'Conc_Sucrose', 'Conc_cytokinins', 'Dry_Mass', 'Starch_g', 'Proteins_N_Mass', 'N_tot', 'WSC_g']
 ORGANS_RUN_VARIABLES_ADDITIONAL = ['sucrose_consumption_mstruct', 'AA_consumption_mstruct', 'synthetized_mstruct']
 #: concatenation of :attr:`ORGANS_T_INDEXES`, :attr:`ORGANS_RUN_VARIABLES <cnwheat.simulation.Simulation.ORGANS_RUN_VARIABLES>` and :attr:`ORGANS_POSTPROCESSING_VARIABLES`
 ORGANS_RUN_POSTPROCESSING_VARIABLES = set(ORGANS_T_INDEXES + cnwheat_simulation.Simulation.ORGANS_RUN_VARIABLES + ORGANS_POSTPROCESSING_VARIABLES + ORGANS_RUN_VARIABLES_ADDITIONAL)
 
-#: the indexes to locate the hidden zones in the modeled system
+#: the indexes to locate the hidden zones in the modelled system
 HIDDENZONE_INDEXES = cnwheat_simulation.Simulation.HIDDENZONE_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`HIDDENZONE_INDEXES`
 HIDDENZONE_T_INDEXES = cnwheat_simulation.Simulation.HIDDENZONE_T_INDEXES
@@ -80,7 +81,7 @@ HIDDENZONE_RUN_VARIABLES_ADDITIONAL = ['leaf_L', 'delta_leaf_L', 'internode_L', 
 #: concatenation of :attr:`HIDDENZONE_T_INDEXES`, :attr:`HIDDENZONE_RUN_VARIABLES <cnwheat.simulation.Simulation.HIDDENZONE_RUN_VARIABLES>` and :attr:`HIDDENZONE_POSTPROCESSING_VARIABLES`
 HIDDENZONE_RUN_POSTPROCESSING_VARIABLES = set(HIDDENZONE_T_INDEXES + cnwheat_simulation.Simulation.HIDDENZONE_RUN_VARIABLES + HIDDENZONE_RUN_VARIABLES_ADDITIONAL + HIDDENZONE_POSTPROCESSING_VARIABLES)
 
-#: the indexes to locate the elements in the modeled system
+#: the indexes to locate the elements in the modelled system
 ELEMENTS_INDEXES = cnwheat_simulation.Simulation.ELEMENTS_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`ELEMENTS_INDEXES`
 ELEMENTS_T_INDEXES = cnwheat_simulation.Simulation.ELEMENTS_T_INDEXES
@@ -92,7 +93,7 @@ ELEMENTS_RUN_VARIABLES_ADDITIONAL = ['length', 'PARa']
 #: concatenation of :attr:`ELEMENTS_T_INDEXES`, :attr:`ELEMENTS_RUN_VARIABLES <cnwheat.simulation.Simulation.ELEMENTS_RUN_VARIABLES>` and :attr:`ELEMENTS_POSTPROCESSING_VARIABLES`
 ELEMENTS_RUN_POSTPROCESSING_VARIABLES = set(ELEMENTS_T_INDEXES + cnwheat_simulation.Simulation.ELEMENTS_RUN_VARIABLES + ELEMENTS_RUN_VARIABLES_ADDITIONAL + ELEMENTS_POSTPROCESSING_VARIABLES)
 
-#: the indexes to locate the soils in the modeled system
+#: the indexes to locate the soils in the modelled system
 SOILS_INDEXES = cnwheat_simulation.Simulation.SOILS_INDEXES
 #: concatenation of :attr:`T_INDEX` and :attr:`SOILS_INDEXES`
 SOILS_T_INDEXES = cnwheat_simulation.Simulation.SOILS_T_INDEXES
@@ -119,7 +120,7 @@ class Roots:
     def calculate_WSC_g(sucrose):
         """Mass of Water Soluble Carbohydrates
 
-        :param float sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
 
         :return: Water Soluble Carbohydrates (g)
         :rtype: float
@@ -134,8 +135,8 @@ class Roots:
     def calculate_Conc_Nitrates(nitrates, mstruct):
         """Nitrate concentration.
 
-        :param float nitrates: Amount of nitrates (µmol` N)
-        :param float mstruct: Structural mass (g)
+        :param float or pandas.Series nitrates: Amount of nitrates (µmol` N)
+        :param float or pandas.Series mstruct: Structural mass (g)
 
         :return: Nitrate concentration (µmol` nitrates g-1 mstruct)
         :rtype: float
@@ -146,8 +147,8 @@ class Roots:
     def calculate_Conc_Amino_Acids(amino_acids, mstruct):
         """Amino_acid concentration.
 
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float mstruct: Structural mass (g)
+        :param float or pandas.Series amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series mstruct: Structural mass (g)
 
         :return: Amino_acid concentration (µmol` amino_acids g-1 mstruct)
         :rtype: float
@@ -158,8 +159,8 @@ class Roots:
     def calculate_conc_sucrose(sucrose, mstruct):
         """Sucrose concentration.
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float mstruct: Structural mass (g)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series mstruct: Structural mass (g)
 
         :return: Sucrose concentration (µmol` sucrose g-1 mstruct)
         :rtype: float
@@ -170,8 +171,8 @@ class Roots:
     def calculate_conc_cytokinins(cytokinins, mstruct):
         """Cytokinin concentration.
 
-        :param float cytokinins: Amount of cytokinins (AU)
-        :param float mstruct: Structural mass (g)
+        :param float or pandas.Series cytokinins: Amount of cytokinins (AU)
+        :param float or pandas.Series mstruct: Structural mass (g)
 
         :return: cytokinins concentration (AU cytokinins g-1 mstruct)
         :rtype: float
@@ -191,7 +192,7 @@ class Phloem:
     def calculate_WSC_g(sucrose):
         """Mass of Water Soluble Carbohydrates
 
-        :param float sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
 
         :return: Water Soluble Carbohydrates (g)
         :rtype: float
@@ -206,8 +207,8 @@ class Phloem:
     def calculate_conc_amino_acids(amino_acids, mstruct_axis):
         """Amino_acids concentration. Related to the structural dry mass of the culm.
 
-        :param float amino_acids: Amount of amino_acids in phloem (µmol` N)
-        :param float mstruct_axis: The structural dry mass of the axis (g)
+        :param float or pandas.Series amino_acids: Amount of amino_acids in phloem (µmol` N)
+        :param float or pandas.Series mstruct_axis: The structural dry mass of the axis (g)
 
         :return: Amino_acids concentration (µmol` amino_acids g-1 mstruct)
         :rtype: float
@@ -218,8 +219,8 @@ class Phloem:
     def calculate_conc_sucrose(sucrose, mstruct_axis):
         """Sucrose concentration. Related to the structural dry mass of the culm
 
-        :param float sucrose: Amount of sucrose in phloem (µmol` C)
-        :param float mstruct_axis: The structural dry mass of the axis (g)
+        :param float or pandas.Series sucrose: Amount of sucrose in phloem (µmol` C)
+        :param float or pandas.Series mstruct_axis: The structural dry mass of the axis (g)
 
         :return: Sucrose concentration (µmol` sucrose g-1 mstruct)
         :rtype: float
@@ -239,9 +240,9 @@ class Grains:
     def calculate_dry_mass(structure, starch, proteins):
         """Grain total dry mass.
 
-        :param float structure: Grain structural C mass (µmol` C)
-        :param float starch:  Grain starch content (µmol` C)
-        :param float proteins: Grain protein content (µmol` N)
+        :param float or pandas.Series structure: Grain structural C mass (µmol` C)
+        :param float or pandas.Series starch:  Grain starch content (µmol` C)
+        :param float or pandas.Series proteins: Grain protein content (µmol` N)
 
         :return: Grain total dry mass (g)
         :rtype: float
@@ -258,8 +259,8 @@ class Grains:
     def calculate_WSC_g(sucrose, starch):
         """ Mass of Water Soluble Carbohydrates
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float starch: Amount of sucrose (µmol` C)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series starch: Amount of sucrose (µmol` C)
 
         :return: Water Soluble Carbohydrates (g)
         :rtype: float
@@ -274,13 +275,67 @@ class Grains:
     def calculate_protein_N_mass(proteins):
         """Grain total protein mass.
 
-        :param float proteins: Grain protein content (µmol` N)
+        :param float or pandas.Series proteins: Grain protein content (µmol` N)
 
         :return: Grain total protein mass (g)
         :rtype: float
         """
         mass_N_proteins = proteins * 1E-6 * cnwheat_model.EcophysiologicalConstants.N_MOLAR_MASS  #: Mass of nitrogen in proteins (g)
         # masS_proteins = mass_N_proteins / EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO     #: Total mass of proteins (g)
+        return mass_N_proteins
+
+
+class Endosperm:
+    """
+    Post-processing to apply on Endosperm outputs.
+    """
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def calculate_dry_mass(starch, proteins, mstruct):
+        """Endosperm total dry mass.
+
+        :param float or pandas.Series starch:  Endosperm starch content (µmol` C)
+        :param float or pandas.Series proteins: Endosperm protein content (µmol` N)
+        :param float or pandas.Series mstruct: structural mass (g)
+
+        :return: Endosperm total dry mass (g)
+        :rtype: float
+        """
+        #: Carbohydrates mass, grain carbohydrates supposed to be mainly starch i.e. glucose polymers (C6 H12 O6)
+        C_mass = (starch * 1E-6 * cnwheat_model.EcophysiologicalConstants.C_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.HEXOSE_MOLAR_MASS_C_RATIO
+
+        #: N mass, grain proteins were supposed to be gluten mainly composed of Glu, Gln and Pro
+        N_mass = (proteins * 1E-6 * cnwheat_model.EcophysiologicalConstants.N_MOLAR_MASS) / cnwheat_model.Grains.AMINO_ACIDS_MOLAR_MASS_N_RATIO
+
+        return C_mass + N_mass + mstruct
+
+    @staticmethod
+    def calculate_starch_g(starch):
+        """ Endosperm starch mass
+
+        :param float or pandas.Series starch: Endosperm starch content (µmol` C)
+
+        :return: starch (g)
+        :rtype: float
+        """
+        C_MOLAR_MASS = cnwheat_model.EcophysiologicalConstants.C_MOLAR_MASS
+        starch_g = (starch * 1E-6 * C_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.HEXOSE_MOLAR_MASS_C_RATIO
+
+        return starch_g
+
+    @staticmethod
+    def calculate_protein_N_mass(proteins):
+        """Endosperm protein mass.
+
+        :param float or pandas.Series proteins: Endosperm protein content (µmol` N)
+
+        :return: Endosperm protein N mass (g)
+        :rtype: float
+        """
+        mass_N_proteins = proteins * 1E-6 * cnwheat_model.EcophysiologicalConstants.N_MOLAR_MASS  #: Mass of nitrogen in proteins (g)
         return mass_N_proteins
 
 
@@ -293,15 +348,14 @@ class HiddenZone:
         pass
 
     @staticmethod
-    def calculate_dry_mass(sucrose, starch, fructan, amino_acids, proteins, mstruct):
+    def calculate_dry_mass(sucrose, fructan, amino_acids, proteins, mstruct):
         """Dry mass
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float starch: Amount of starch (µmol` C)
-        :param float fructan: Amount of fructan (µmol` C)
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float mstruct: strcural mass (g)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series fructan: Amount of fructan (µmol` C)
+        :param float or pandas.Series amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series mstruct: structural mass (g)
 
         :return: Dry mass (g)
         :rtype: float
@@ -309,7 +363,6 @@ class HiddenZone:
         C_MOLAR_MASS = cnwheat_model.EcophysiologicalConstants.C_MOLAR_MASS
         N_MOLAR_MASS = cnwheat_model.EcophysiologicalConstants.N_MOLAR_MASS
         dry_mass = ((sucrose * 1E-6 * C_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.HEXOSE_MOLAR_MASS_C_RATIO +
-                    (starch * 1E-6 * C_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.HEXOSE_MOLAR_MASS_C_RATIO +
                     (fructan * 1E-6 * C_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.HEXOSE_MOLAR_MASS_C_RATIO +
                     (amino_acids * 1E-6 * N_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
                     (proteins * 1E-6 * N_MOLAR_MASS) / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
@@ -321,8 +374,8 @@ class HiddenZone:
     def calculate_WSC_g(sucrose, fructan):
         """Mass of Water Soluble Carbohydrates
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float fructan: Amount of fructan (µmol` C)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series fructan: Amount of fructan (µmol` C)
 
         :return: Water Soluble Carbohydrates (g)
         :rtype: float
@@ -339,12 +392,12 @@ class HiddenZone:
     def calculate_C_g(sucrose, starch, fructan, amino_acids, proteins, mstruct):
         """Mass of carbon metabolites
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float starch: Amount of starch (µmol` C)
-        :param float fructan: Amount of fructan (µmol` C)
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float mstruct: strcural mass (g)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series starch: Amount of starch (µmol` C)
+        :param float or pandas.Series fructan: Amount of fructan (µmol` C)
+        :param float or pandas.Series amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series mstruct: structural mass (g)
 
         :return: Dry mass (g)
         :rtype: float
@@ -354,8 +407,8 @@ class HiddenZone:
         C_mass = ((sucrose * 1E-6 * C_MOLAR_MASS) +
                   (starch * 1E-6 * C_MOLAR_MASS) +
                   (fructan * 1E-6 * C_MOLAR_MASS) +
-                  (
-                              amino_acids * 1E-6 * N_MOLAR_MASS) * cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_C_RATIO / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
+                  (amino_acids * 1E-6 * N_MOLAR_MASS) *
+                  cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_C_RATIO / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
                   (proteins * 1E-6 * N_MOLAR_MASS) * cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_C_RATIO / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
                   mstruct * cnwheat_model.EcophysiologicalConstants.RATIO_C_mstruct)
 
@@ -365,9 +418,9 @@ class HiddenZone:
     def calculate_N_g(amino_acids, proteins, Nstruct):
         """Mass of N metabolites
 
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float Nstruct: N structural mass(g)
+        :param float or pandas.Series amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series Nstruct: N structural mass(g)
 
         :return: Dry mass (g)
         :rtype: float
@@ -383,7 +436,7 @@ class HiddenZone:
     def calculate_fructan_g(fructan):
         """Mass of fructans
 
-        :param float fructan: Amount of fructans (µmol` C)
+        :param float or pandas.Series fructan: Amount of fructans (µmol` C)
 
         :return: Dry mass (g)
         :rtype: float
@@ -395,7 +448,7 @@ class HiddenZone:
     def calculate_proteins_g(proteins):
         """Mass of proteins
 
-        :param float proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series proteins: Amount of proteins (µmol` N)
 
         :return: Dry mass (g)
         :rtype: float
@@ -407,8 +460,8 @@ class HiddenZone:
     def calculate_Conc_Amino_Acids(amino_acids, mstruct):
         """Amino acid concentration.
 
-        :param float amino_acids: N amino acids (µmol` N)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series amino_acids: N amino acids (µmol` N)
+        :param float or pandas.Series mstruct: Structural mass
 
         :return: Amino_acid concentration (µmol` amino acids g-1 mstruct)
         :rtype: float
@@ -419,8 +472,8 @@ class HiddenZone:
     def calculate_conc_sucrose(sucrose, mstruct):
         """Sucrose concentration.
 
-        :param float sucrose: C sucrose (µmol` C)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series sucrose: C sucrose (µmol` C)
+        :param float or pandas.Series mstruct: Structural mass
 
         :return: Sucrose concentration (µmol` sucrose g-1 mstruct)
         :rtype: float
@@ -431,8 +484,8 @@ class HiddenZone:
     def calculate_conc_fructan(fructan, mstruct):
         """Fructan concentration.
 
-        :param float fructan: C fructan (µmol` C)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series fructan: C fructan (µmol` C)
+        :param float or pandas.Series mstruct: Structural mass
 
         :return: Fructan concentration (µmol` fructan g-1 mstruct, eq. glucose).
         :rtype: float
@@ -443,8 +496,8 @@ class HiddenZone:
     def calculate_conc_protein(proteins, mstruct):
         """Proteins concentration.
 
-        :param float proteins: N proteins (µmol` N)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series proteins: N proteins (µmol` N)
+        :param float or pandas.Series mstruct: Structural mass
 
         :return: Protein concentration (g proteins g-1 mstruct)
         :rtype: float
@@ -457,9 +510,9 @@ class HiddenZone:
     def calculate_RER(delta_leaf_L, leaf_L, delta_t):
         """Relative Extension Rate.
 
-        :param float delta_leaf_L: delta of leaf length between t and t-1 (m)
-        :param float leaf_L: leaf length (m)
-        :param float delta_t: delta_t (s)
+        :param float or pandas.Series delta_leaf_L: delta of leaf length between t and t-1 (m)
+        :param float or pandas.Series leaf_L: leaf length (m)
+        :param float or pandas.Series delta_t: delta_t (s)
 
         :return: Relative Extension Rate (s-1)
         :rtype: float
@@ -480,13 +533,13 @@ class Element:
         """Dry mass
 
         :param triosesP: Amount of triose phosphates (µmol` C)
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float starch: Amount of sucrose (µmol` C)
-        :param float fructan: Amount of sucrose (µmol` C)
-        :param float nitrates: Amount of nitrates (µmol` N)
-        :param float amino_acids: Amount of sucrose (µmol` N)
-        :param float proteins: Amount of sucrose (µmol` N)
-        :param float mstruct: strcural mass (g)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series starch: Amount of sucrose (µmol` C)
+        :param float or pandas.Series fructan: Amount of sucrose (µmol` C)
+        :param float or pandas.Series nitrates: Amount of nitrates (µmol` N)
+        :param float or pandas.Series amino_acids: Amount of sucrose (µmol` N)
+        :param float or pandas.Series proteins: Amount of sucrose (µmol` N)
+        :param float or pandas.Series mstruct: structural mass (g)
 
         :return: Dry mass (g)
         :rtype: float
@@ -508,10 +561,10 @@ class Element:
     def calculate_WSC_g(triosesP, sucrose, starch, fructan):
         """ Mass of Water Soluble Carbohydrates
 
-        :param triosesP: Amount of triose phosphates (µmol` C)
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float starch: Amount of sucrose (µmol` C)
-        :param float fructan: Amount of sucrose (µmol` C)
+        :param float or pandas.Series triosesP: Amount of triose phosphates (µmol` C)
+        :param float or pandas.Series sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series starch: Amount of sucrose (µmol` C)
+        :param float or pandas.Series fructan: Amount of sucrose (µmol` C)
 
         :return: Water Soluble Carbohydrates (g)
         :rtype: float
@@ -529,7 +582,7 @@ class Element:
     def calculate_fructan_g(fructan):
         """Mass of fructans
 
-        :param float fructan: Amount of fructans (µmol` C)
+        :param float or pandas.Series  fructan: Amount of fructans (µmol` C)
 
         :return: Dry mass (g)
         :rtype: float
@@ -541,13 +594,13 @@ class Element:
     def calculate_C_g(triosesP, sucrose, starch, fructan, amino_acids, proteins, mstruct):
         """Mass of carbon metabolites
 
-        :param float triosesP: Amount of triose phosphates (µmol` C)
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float starch: Amount of starch (µmol` C)
-        :param float fructan: Amount of fructan (µmol` C)
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float mstruct: strcural mass (g)
+        :param float or pandas.Series  triosesP: Amount of triose phosphates (µmol` C)
+        :param float or pandas.Series  sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series  starch: Amount of starch (µmol` C)
+        :param float or pandas.Series  fructan: Amount of fructan (µmol` C)
+        :param float or pandas.Series  amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series  proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series  mstruct: structural mass (g)
 
         :return: Dry mass (g)
         :rtype: float
@@ -558,8 +611,8 @@ class Element:
                   (sucrose * 1E-6 * C_MOLAR_MASS) +
                   (starch * 1E-6 * C_MOLAR_MASS) +
                   (fructan * 1E-6 * C_MOLAR_MASS) +
-                  (
-                              amino_acids * 1E-6 * N_MOLAR_MASS) * cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_C_RATIO / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
+                  (amino_acids * 1E-6 * N_MOLAR_MASS) *
+                  cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_C_RATIO / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
                   (proteins * 1E-6 * N_MOLAR_MASS) * cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_C_RATIO / cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_MOLAR_MASS_N_RATIO +
                   mstruct * cnwheat_model.EcophysiologicalConstants.RATIO_C_mstruct)
 
@@ -569,10 +622,10 @@ class Element:
     def calculate_N_g(nitrates, amino_acids, proteins, Nstruct):
         """Mass of N metabolites
 
-        :param float nitrates: Amount of nitrates (µmol` N)
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float Nstruct: N structural mass(g)
+        :param float or pandas.Series  nitrates: Amount of nitrates (µmol` N)
+        :param float or pandas.Series  amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series  proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series  Nstruct: N structural mass(g)
 
         :return: Dry mass (g)
         :rtype: float
@@ -589,8 +642,8 @@ class Element:
     def calculate_conc_triosesP(triosesP, mstruct):
         """Triose Phosphates concentration.
 
-        :param float triosesP: Amount of triose phosphates (µmol` C)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  triosesP: Amount of triose phosphates (µmol` C)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Triose phosphates concentration (µmol` triosesP g-1 mstruct)
         :rtype: float
@@ -601,8 +654,8 @@ class Element:
     def calculate_conc_sucrose(sucrose, mstruct):
         """Sucrose concentration.
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  sucrose: Amount of sucrose (µmol` C)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Sucrose concentration (µmol` sucrose g-1 mstruct)
         :rtype: float
@@ -613,8 +666,8 @@ class Element:
     def calculate_conc_starch(starch, mstruct):
         """Starch concentration.
 
-        :param float starch: Amount of sucrose (µmol` C)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  starch: Amount of sucrose (µmol` C)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Starch concentration (µmol` starch g-1 mstruct)
         :rtype: float
@@ -625,8 +678,8 @@ class Element:
     def calculate_conc_fructan(fructan, mstruct):
         """Fructan concentration.
 
-        :param float fructan: Amount of fructan (µmol` C)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  fructan: Amount of fructan (µmol` C)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Fructan concentration (µmol` fructan g-1 mstruct, eq. glucose).
         :rtype: float
@@ -637,8 +690,8 @@ class Element:
     def calculate_Conc_Nitrates(nitrates, mstruct):
         """Nitrate concentration.
 
-        :param float nitrates: Amount of nitrates (µmol` N)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  nitrates: Amount of nitrates (µmol` N)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Nitrate concentration (µmol` nitrates g-1 mstruct)
         :rtype: float
@@ -649,8 +702,8 @@ class Element:
     def calculate_Conc_Amino_Acids(amino_acids, mstruct):
         """Amino_acid concentration.
 
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  amino_acids: Amount of amino acids (µmol` N)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Amino_acid concentration (µmol` amino acids g-1 mstruct)
         :rtype: float
@@ -661,8 +714,8 @@ class Element:
     def calculate_conc_proteins(proteins, mstruct):
         """Protein concentration.
 
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Protein concentration (g proteins g-1 mstruct)
         :rtype: float
@@ -675,8 +728,8 @@ class Element:
     def calculate_conc_cytokinins(cytokinins, mstruct):
         """Cytokinin concentration.
 
-        :param float cytokinins: Amount of cytokinins (AU)
-        :param float mstruct: Structural mass
+        :param float or pandas.Series  cytokinins: Amount of cytokinins (AU)
+        :param float or pandas.Series  mstruct: Structural mass
 
         :return: Cytokinin concentration (AU g-1 mstruct)
         :rtype: float
@@ -687,11 +740,11 @@ class Element:
     def calculate_SLN(nitrates, amino_acids, proteins, Nstruct, green_area):
         """ Surfacic Leaf Nitrogen (SLN, g.m-2)
 
-        :param float nitrates: Amount of nitrates (µmol` N)
-        :param float amino_acids: Amount of amino_acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float Nstruct: Structural N (g)
-        :param float green_area: Green area (m-2)
+        :param float or pandas.Series  nitrates: Amount of nitrates (µmol` N)
+        :param float or pandas.Series  amino_acids: Amount of amino_acids (µmol` N)
+        :param float or pandas.Series  proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series  Nstruct: Structural N (g)
+        :param float or pandas.Series  green_area: Green area (m-2)
 
         :return: Surfacic Leaf Nitrogen (SLN, g.m-2)
         :rtype: float
@@ -703,10 +756,10 @@ class Element:
     def calculate_SLN_nonstruct(nitrates, amino_acids, proteins, green_area):
         """ Surfacic Leaf Nitrogen (SLN, g.m-2)
 
-        :param float nitrates: Amount of nitrates (µmol` N)
-        :param float amino_acids: Amount of amino_acids (µmol` N)
-        :param float proteins: Amount of proteins (µmol` N)
-        :param float green_area: Green area (m-2)
+        :param float or pandas.Series  nitrates: Amount of nitrates (µmol` N)
+        :param float or pandas.Series  amino_acids: Amount of amino_acids (µmol` N)
+        :param float or pandas.Series  proteins: Amount of proteins (µmol` N)
+        :param float or pandas.Series  green_area: Green area (m-2)
 
         :return: Surfacic Leaf Nitrogen (SLN, g.m-2)
         :rtype: float
@@ -718,8 +771,8 @@ class Element:
     def calculate_SLA(dry_mass, green_area):
         """Specific Leaf Area (SLA, m2.kg-1)
 
-        :param float dry_mass: Dry mass (g)
-        :param float green_area: Green area (m-2)
+        :param float or pandas.Series  dry_mass: Dry mass (g)
+        :param float or pandas.Series  green_area: Green area (m-2)
 
         :return: Specific Leaf Area (SLA, m2 kg-1)
         :rtype: float
@@ -728,13 +781,13 @@ class Element:
 
     @staticmethod
     def calculate_surfacic_non_structural(dry_mass, mstruct, green_area):
-        """Surfacic content of non structural mass
+        """Surfacic content of non-structural mass
 
-        :param float dry_mass: Dry mass (g)
-        :param float mstruct: Structural mass (g)
-        :param float green_area: Green area (m-2)
+        :param float or pandas.Series  dry_mass: Dry mass (g)
+        :param float or pandas.Series  mstruct: Structural mass (g)
+        :param float or pandas.Series  green_area: Green area (m-2)
 
-        :return: Surfacic non structural mass (g m-2)
+        :return: Surfacic non-structural mass (g m-2)
         :rtype: float
         """
         return (dry_mass - mstruct) / green_area
@@ -743,10 +796,10 @@ class Element:
     def calculate_ratio_non_structural(dry_mass, mstruct):
         """Surfacic content of nitrogen
 
-        :param float dry_mass: Dry mass (g)
-        :param float mstruct: Structural mass (g)
+        :param float or pandas.Series  dry_mass: Dry mass (g)
+        :param float or pandas.Series  mstruct: Structural mass (g)
 
-        :return: Surfacic non structural mass (g m-2)
+        :return: Surfacic non-structural mass (g m-2)
         :rtype: float
         """
         return (1 - mstruct / dry_mass) * 100
@@ -789,7 +842,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             * hidden zone (see :attr:`HIDDENZONE_RUN_POSTPROCESSING_VARIABLES`)
             * element (see :attr:`ELEMENTS_RUN_POSTPROCESSING_VARIABLES`)
             * and soil (see :attr:`SOILS_RUN_POSTPROCESSING_VARIABLES`)
-        depending of the dataframes given as argument.
+        depending on the dataframes given as argument.
         For example, if user passes only dataframes `plants_df`, `axes_df` and `metamers_df`,
         then only post-processing dataframes of plants, axes and metamers are returned.
     :rtype: tuple [pandas.DataFrame]
@@ -800,7 +853,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     # plants
     if plants_df is not None:
         pp_plants_df = pd.concat([plants_df, pd.DataFrame(columns=PLANTS_POSTPROCESSING_VARIABLES)], sort=False)
-        pp_plants_df = pp_plants_df.reindex(PLANTS_RUN_POSTPROCESSING_VARIABLES, axis=1, copy=False)
+        pp_plants_df = pp_plants_df.reindex(list(PLANTS_RUN_POSTPROCESSING_VARIABLES), axis=1, copy=False)
         pp_plants_df['plant'] = pp_plants_df['plant'].astype(int)
         returned_dataframes.append(pp_plants_df)
     else:
@@ -809,7 +862,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
     # metamers
     if metamers_df is not None:
         pp_metamers_df = pd.concat([metamers_df, pd.DataFrame(columns=PHYTOMERS_POSTPROCESSING_VARIABLES)], sort=False)
-        pp_metamers_df = pp_metamers_df.reindex(PHYTOMERS_RUN_POSTPROCESSING_VARIABLES, axis=1, copy=False)
+        pp_metamers_df = pp_metamers_df.reindex(list(PHYTOMERS_RUN_POSTPROCESSING_VARIABLES), axis=1, copy=False)
         pp_metamers_df[['plant', 'metamer']] = pp_metamers_df[['plant', 'metamer']].astype(int)
         returned_dataframes.append(pp_metamers_df)
     else:
@@ -871,7 +924,14 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         pp_organs_df.loc[pp_organs_df.organ == 'grains', 'Dry_Mass'] = Grains.calculate_dry_mass(grains_df['structure'], grains_df['starch'], grains_df['proteins'])
         pp_organs_df.loc[pp_organs_df.organ == 'grains', 'WSC_g'] = Grains.calculate_WSC_g(grains_df['sucrose'], grains_df['starch'])
         pp_organs_df.loc[pp_organs_df.organ == 'grains', 'Proteins_N_Mass'] = Grains.calculate_protein_N_mass(grains_df['proteins'])
-        pp_organs_df = pp_organs_df.reindex(columns=ORGANS_RUN_POSTPROCESSING_VARIABLES, copy=False)
+
+        # endosperm
+        endosperms_df = organs_df.loc[organs_df.organ == 'endosperm']
+        pp_organs_df.loc[pp_organs_df.organ == 'endosperm', 'Dry_Mass'] = Endosperm.calculate_dry_mass(endosperms_df['starch'], endosperms_df['proteins'], endosperms_df['mstruct'])
+        pp_organs_df.loc[pp_organs_df.organ == 'endosperm', 'Starch_g'] = Endosperm.calculate_starch_g(endosperms_df['starch'])
+        pp_organs_df.loc[pp_organs_df.organ == 'endosperm', 'Proteins_N_Mass'] = Endosperm.calculate_protein_N_mass(endosperms_df['proteins'])
+
+        pp_organs_df = pp_organs_df.reindex(columns=list(ORGANS_RUN_POSTPROCESSING_VARIABLES), copy=False)
         pp_organs_df['plant'] = pp_organs_df['plant'].astype(int)
         returned_dataframes.append(pp_organs_df)
     else:
@@ -915,7 +975,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
                                                        elements_df.fillna(0)['starch'],
                                                        elements_df.fillna(0)['fructan'], )
         pp_elements_df = pd.concat([elements_df, pd.DataFrame(columns=ELEMENTS_POSTPROCESSING_VARIABLES, dtype='float64')], sort=False)
-        pp_elements_df.loc[:, 'Conc_TriosesP'] = Element.calculate_conc_triosesP(elements_df['triosesP'], elements_df['mstruct'])
+        # pp_elements_df.loc[:, 'Conc_TriosesP'] = Element.calculate_conc_triosesP(elements_df['triosesP'], elements_df['mstruct'])
         pp_elements_df.loc[:, 'Conc_Starch'] = Element.calculate_conc_starch(elements_df['starch'], elements_df['mstruct'])
         pp_elements_df.loc[:, 'Conc_Sucrose'] = Element.calculate_conc_sucrose(elements_df['sucrose'], elements_df['mstruct'])
         pp_elements_df.loc[:, 'Conc_Fructan'] = Element.calculate_conc_fructan(elements_df['fructan'], elements_df['mstruct'])
@@ -956,10 +1016,10 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
                 continue
             curr_organ_elements_df = elements_df.loc[group.index]
             pp_curr_organ_elements_df = pp_elements_df.loc[group.index]
-            R_residual = np.vectorize(respiwheat_model.RespirationModel.R_residual)(curr_organ_elements_df['sucrose'], curr_organ_elements_df['mstruct'] * parameters_class.ALPHA,
-                                                                                    curr_organ_elements_df['Total_Organic_Nitrogen'], curr_organ_elements_df['Ts'])
+            R_residual = np.vectorize(respiwheat_model.RespirationModel.R_residual)(curr_organ_elements_df['sucrose'].fillna(0), curr_organ_elements_df['mstruct'].fillna(0) * parameters_class.ALPHA,
+                                                                                    curr_organ_elements_df['Total_Organic_Nitrogen'].fillna(0), curr_organ_elements_df['Ts'].fillna(0))
             pp_curr_organ_elements_df.loc[:, 'R_residual'] = R_residual
-        pp_elements_df = pp_elements_df.reindex(columns=ELEMENTS_RUN_POSTPROCESSING_VARIABLES, copy=False)
+        pp_elements_df = pp_elements_df.reindex(columns=list(ELEMENTS_RUN_POSTPROCESSING_VARIABLES))
         pp_elements_df[['plant', 'metamer']] = pp_elements_df[['plant', 'metamer']].astype(int)
         returned_dataframes.append(pp_elements_df)
     else:
@@ -971,7 +1031,6 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         # hiddenzones_df = hiddenzones_df.merge(nb_replications_df, on='metamer')
 
         hiddenzones_df['sum_dry_mass'] = HiddenZone.calculate_dry_mass(hiddenzones_df.fillna(0)['sucrose'],
-                                                                       0,  # hiddenzones_df.fillna(0)['starch'],
                                                                        hiddenzones_df.fillna(0)['fructan'],
                                                                        hiddenzones_df.fillna(0)['amino_acids'],
                                                                        hiddenzones_df.fillna(0)['proteins'],
@@ -997,9 +1056,9 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
         pp_hiddenzones_df.loc[:, 'Cont_WSC_DM'] = hiddenzones_df['WSC_g'] / hiddenzones_df['sum_dry_mass'] * 100
         pp_hiddenzones_df.loc[:, 'N_content'] = pp_hiddenzones_df['N_g'] / pp_hiddenzones_df['sum_dry_mass'] * 100
         if set(hiddenzones_df.columns).issuperset(['delta_leaf_L', 'leaf_L']):
-            # this is temporary: those post-processing should be done in model "elong-wheat"
+            # this is temporary: those post-processing should be done in model "elongwheat"
             pp_hiddenzones_df.loc[:, 'RER'] = HiddenZone.calculate_RER(hiddenzones_df['delta_leaf_L'], hiddenzones_df['leaf_L'], delta_t)
-        pp_hiddenzones_df = pp_hiddenzones_df.reindex(columns=HIDDENZONE_RUN_POSTPROCESSING_VARIABLES, copy=False)
+        pp_hiddenzones_df = pp_hiddenzones_df.reindex(columns=list(HIDDENZONE_RUN_POSTPROCESSING_VARIABLES), copy=False)
         pp_hiddenzones_df[['plant', 'metamer']] = pp_hiddenzones_df[['plant', 'metamer']].astype(int)
         returned_dataframes.append(pp_hiddenzones_df)
     else:
@@ -1027,26 +1086,41 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             hz_df_MS['mstruct_tillers'] = hz_df_MS['mstruct'] * hz_df_MS['nb_replications']
             elt_df_MS['mstruct_tillers'] = elt_df_MS['mstruct'] * elt_df_MS['nb_replications']
             sum_mstruct_shoot = hz_df_MS.groupby(['t', 'plant', 'axis'])['mstruct_tillers'].agg('sum') + elt_df_MS.groupby(['t', 'plant', 'axis'])['mstruct_tillers'].agg('sum')
-            sum_mstruct_laminae = elt_df_MS[elt_df_MS.element == 'LeafElement1'].groupby(['t', 'plant', 'axis'])['mstruct_tillers'].agg('sum')
-            sum_mstruct_stem = sum_mstruct_shoot - sum_mstruct_laminae
+            sum_mstruct_shoot.fillna(0, inplace=True)
+            if not elements_df.empty:
+                sum_mstruct_laminae = elt_df_MS[elt_df_MS.element == 'LeafElement1'].groupby(['t', 'plant', 'axis'])['mstruct_tillers'].agg('sum')
+                if sum_mstruct_laminae.empty:
+                    sum_mstruct_laminae = pd.Series([0] * len(axes_df.index), index=sum_mstruct_shoot.index)
+                    sum_mstruct_stem = sum_mstruct_shoot
+                else:
+                    mux = (pd.MultiIndex.from_product((range(sum_mstruct_shoot.index.get_level_values(0).min(), sum_mstruct_laminae.index.get_level_values(0).max() + 1),
+                                                       sum_mstruct_laminae.index.get_level_values(1).unique(), sum_mstruct_laminae.index.get_level_values(2).unique())))
+                    sum_mstruct_laminae = sum_mstruct_laminae.reindex(mux, fill_value=0)
+                    sum_mstruct_stem = sum_mstruct_shoot - sum_mstruct_laminae
+
+            else:
+                sum_mstruct_laminae = pd.Series([0] * len(axes_df.index))
+                sum_mstruct_stem = sum_mstruct_shoot
             sum_mstruct_roots = organs_df[(organs_df['organ'] == 'roots')].groupby(['t', 'plant', 'axis'])['mstruct'].agg('sum')
 
             shoot_roots_mstruct_ratio = sum_mstruct_shoot / sum_mstruct_roots
 
             # Phloem
             phloem_shoot_root = 1 / (1 + 1 / shoot_roots_mstruct_ratio)
-            phloem_laminae = sum_mstruct_laminae / (sum_mstruct_shoot + sum_mstruct_roots)
             phloem_stem = sum_mstruct_stem / (sum_mstruct_shoot + sum_mstruct_roots)
             sum_dry_mass_phloem = organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['sum_dry_mass'].agg('sum')
             sum_dry_mass_phloem_shoot = sum_dry_mass_phloem * phloem_shoot_root
-            sum_dry_mass_phloem_laminae = sum_dry_mass_phloem * phloem_laminae
             sum_dry_mass_phloem_roots = sum_dry_mass_phloem * (1 - phloem_shoot_root)
             sum_N_g_phloem_shoot = organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['N_g'].agg('sum') * phloem_shoot_root
             sum_C_g_phloem_shoot = organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['C_g'].agg('sum') * phloem_shoot_root
             sum_WSC_g_phloem_shoot = pp_organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum') * phloem_shoot_root
-            sum_WSC_g_phloem_laminae = pp_organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum') * phloem_laminae
             sum_WSC_g_phloem_stem = pp_organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum') * phloem_stem
             sum_WSC_g_phloem_roots = pp_organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum') * (1 - phloem_shoot_root)
+
+            if not elements_df.empty:
+                phloem_laminae = sum_mstruct_laminae / (sum_mstruct_shoot + sum_mstruct_roots)
+                sum_dry_mass_phloem_laminae = sum_dry_mass_phloem * phloem_laminae
+                sum_WSC_g_phloem_laminae = pp_organs_df[(organs_df['organ'] == 'phloem')].groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum') * phloem_laminae
 
             # Total shoot
             hz_df_MS['sum_dry_mass_tillers'] = hz_df_MS['sum_dry_mass'] * hz_df_MS['nb_replications']
@@ -1055,9 +1129,14 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             sum_dry_mass_shoot = sum_dry_mass_phloem_shoot + \
                                  hz_df_MS.groupby(['t', 'plant', 'axis'])['sum_dry_mass_tillers'].agg('sum') + \
                                  elt_df_MS.groupby(['t', 'plant', 'axis'])['sum_dry_mass_tillers'].agg('sum')
-            sum_dry_mass_laminae = sum_dry_mass_phloem_laminae + \
-                                 elt_df_MS[elt_df_MS.element == 'LeafElement1'].groupby(['t', 'plant', 'axis'])['sum_dry_mass_tillers'].agg('sum')
-            sum_dry_mass_stem = sum_dry_mass_shoot - sum_dry_mass_laminae
+            if not elements_df.empty:
+                sum_dry_mass_laminae = sum_dry_mass_phloem_laminae + \
+                                       elt_df_MS[elt_df_MS.element == 'LeafElement1'].groupby(['t', 'plant', 'axis'])['sum_dry_mass_tillers'].agg('sum')
+                sum_dry_mass_laminae.fillna(0, inplace=True)
+                sum_dry_mass_stem = sum_dry_mass_shoot - sum_dry_mass_laminae
+            else:
+                sum_dry_mass_laminae = pd.Series([0] * len(axes_df.index))
+                sum_dry_mass_stem = sum_dry_mass_shoot
             sum_dry_mass_total_shoot = sum_dry_mass_phloem_shoot + \
                                        hz_df_MS.groupby(['t', 'plant', 'axis'])['sum_dry_mass_tillers'].agg('sum') + \
                                        elt_df_MS.groupby(['t', 'plant', 'axis'])['sum_dry_mass_total_tillers'].agg('sum')
@@ -1075,15 +1154,12 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             sum_N_g = (organs_df[organs_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['N_g'].agg('sum') +
                        hz_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum') +
                        elt_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum'))
-            sum_N_g_total = (organs_df[organs_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['N_g'].agg('sum') +
-                             hz_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum') +
-                             elt_df_MS.groupby(['t', 'plant', 'axis'])['N_g_total_tillers'].agg('sum'))
             N_content = sum_N_g / sum_dry_mass * 100
             N_content_mstruct = sum_N_g / sum_mstruct * 100
 
             sum_N_g_shoot = (sum_N_g_phloem_shoot +
                              hz_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum') +
-                             elt_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum'))
+                             elt_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum')).fillna(0)
             sum_N_g_total_shoot = (sum_N_g_phloem_shoot +
                                    hz_df_MS.groupby(['t', 'plant', 'axis'])['N_g_tillers'].agg('sum') +
                                    elt_df_MS.groupby(['t', 'plant', 'axis'])['N_g_total_tillers'].agg('sum'))
@@ -1102,15 +1178,17 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
                           pp_organs_df.groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum')
 
             sum_WSC_g_shoot = (sum_WSC_g_phloem_shoot +
-                             hz_df_MS.groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum') +
-                             elt_df_MS.groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum'))
-            sum_WSC_g_laminae = (sum_WSC_g_phloem_laminae +
-                               elt_df_MS[elt_df_MS.element == 'LeafElement1' ].groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum'))
-            sum_WSC_g_stem = (sum_WSC_g_phloem_stem +
                                hz_df_MS.groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum') +
-                               elt_df_MS[~(elt_df_MS.element == 'LeafElement1')].groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum'))
+                               elt_df_MS.groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum'))
+            if not elements_df.empty:
+                sum_WSC_g_laminae = (sum_WSC_g_phloem_laminae +
+                                     elt_df_MS[elt_df_MS.element == 'LeafElement1'].groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum')).fillna(0)
+            else:
+                sum_WSC_g_laminae = pd.Series([0] * len(axes_df.index))
+            sum_WSC_g_stem = (sum_WSC_g_phloem_stem +
+                              hz_df_MS.groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum') +
+                              elt_df_MS[~(elt_df_MS.element == 'LeafElement1')].groupby(['t', 'plant', 'axis'])['WSC_g_tillers'].agg('sum'))
             sum_WSC_g_roots = (sum_WSC_g_phloem_roots + pp_organs_df[(organs_df['organ'] == 'roots')].groupby(['t', 'plant', 'axis'])['WSC_g'].agg('sum'))
-
 
             # C/N ratio
             hz_df_MS['C_g_tillers'] = hz_df_MS['C_g'] * hz_df_MS['nb_replications']
@@ -1121,7 +1199,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
                        elt_df_MS.groupby(['t', 'plant', 'axis'])['C_g_tillers'].agg('sum'))
             sum_C_g_shoot = (sum_C_g_phloem_shoot +
                              hz_df_MS.groupby(['t', 'plant', 'axis'])['C_g_tillers'].agg('sum') +
-                             elt_df_MS.groupby(['t', 'plant', 'axis'])['C_g_tillers'].agg('sum'))
+                             elt_df_MS.groupby(['t', 'plant', 'axis'])['C_g_tillers'].agg('sum')).fillna(0)
 
             C_N_ratio = sum_C_g / sum_N_g
             C_N_ratio_shoot = sum_C_g_shoot / sum_N_g_shoot
@@ -1129,31 +1207,55 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             # C non structural
             sum_NSC_g = sum_C_g.values - (axes_df['mstruct'] * cnwheat_model.EcophysiologicalConstants.RATIO_C_mstruct)
 
-            # Photosyntheses
-            elements_df['Tillers_Photosynthesis'] = elements_df['Photosynthesis'] * elements_df['nb_replications']
-            elements_df['Tillers_Photosynthesis_An'] = elements_df['An'] * elements_df['green_area'] * 3600 * elements_df['nb_replications']
-            tillers_photosynthesis = elements_df[elements_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['Tillers_Photosynthesis'].agg('sum')  # TEMPORARY : porter au niveau de la plante
-            tillers_photosynthesis_An = elements_df[elements_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['Tillers_Photosynthesis_An'].agg('sum')
-            tot_photosynthesis = elements_df[elements_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['Photosynthesis'].agg('sum')
+            # Photosynthesis
+            if not elements_df.empty:
+                elements_df['Tillers_Photosynthesis'] = elements_df['Photosynthesis'] * elements_df['nb_replications']
+                elements_df['Tillers_Photosynthesis_An'] = elements_df['An'] * elements_df['green_area'] * 3600 * elements_df['nb_replications']
+                tillers_photosynthesis = elements_df[elements_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['Tillers_Photosynthesis'].agg('sum')  # TEMPORARY : porter au niveau de la plante
+                mux = (pd.MultiIndex.from_product((range(pp_axes_df.index.get_level_values(0).min(), tillers_photosynthesis.index.get_level_values(0).max() + 1),
+                                                   tillers_photosynthesis.index.get_level_values(1).unique(), tillers_photosynthesis.index.get_level_values(2).unique())))
+                tillers_photosynthesis = tillers_photosynthesis.reindex(mux, fill_value=0)
+                tillers_photosynthesis_An = elements_df[elements_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['Tillers_Photosynthesis_An'].agg('sum')
+                tillers_photosynthesis_An = tillers_photosynthesis_An.reindex(mux, fill_value=0)
+                tot_photosynthesis = elements_df[elements_df['axis'] == 'MS'].groupby(['t', 'plant', 'axis'])['Photosynthesis'].agg('sum')
+                tot_photosynthesis = tot_photosynthesis.reindex(mux, fill_value=0)
+            else:
+                tillers_photosynthesis = pd.Series([0] * len(axes_df.index))
+                tillers_photosynthesis_An = pd.Series([0] * len(axes_df.index))
+                tot_photosynthesis = pd.Series([0] * len(axes_df.index))
 
             # INN
             DM_t_ha = sum_dry_mass_shoot * 250 * 10 ** -2  # convert from g.plant-1 to t.ha-1
             N_content_critical = np.where(DM_t_ha < 1.55, 4.4, 5.35 * DM_t_ha ** -0.442)  # from Justes 1994 : valid at field scale from Feekes 3 i.e. mid tillering
             NNI = N_content_shoot / N_content_critical
 
-            # Ratio Non Structural Mass
+            # Ratio Non-Structural Mass
             NS_shoot = (1 - sum_mstruct_shoot / sum_dry_mass_shoot) * 100
             NS_stem = (1 - sum_mstruct_stem / sum_dry_mass_stem) * 100
-            NS_laminae = (1 - sum_mstruct_laminae / sum_dry_mass_laminae) * 100
+            if not elements_df.empty:
+                NS_laminae = (1 - sum_mstruct_laminae / sum_dry_mass_laminae) * 100
+            else:
+                NS_laminae = pd.Series([0] * len(axes_df.index))
             NS_roots = (1 - sum_mstruct_roots / sum_dry_mass_roots) * 100
             NS = (1 - sum_mstruct / sum_dry_mass) * 100
 
             # C_respired_shoot
-            hz_df_MS['Respi_growth_tillers'] = hz_df_MS['Respi_growth'].fillna(0) * hz_df_MS['nb_replications'].fillna(1)
-            C_respired_shoot = pp_axes_df.sum_respi_shoot.fillna(0.) + hz_df_MS.groupby(AXES_T_INDEXES, as_index=False)['Respi_growth_tillers'].sum().Respi_growth_tillers
+            hiddenzones_df['sum_respi'] = (hiddenzones_df.Respi_growth.fillna(0) + hiddenzones_df.R_residual.fillna(0)) * hiddenzones_df.nb_replications
+            hz_respi = hiddenzones_df.groupby('t')['sum_respi'].sum()
+            elements_df['sum_respi'] = (elements_df.R_phloem_loading + elements_df.R_Nnit_red + elements_df.R_residual) * elements_df.nb_replications
+            elements_respi = elements_df.groupby('t')['sum_respi'].sum()
+            grains_df['sum_respi'] = (grains_df.R_grain_growth_struct + grains_df.R_grain_growth_starch).fillna(0)
+            grains_respi = grains_df.groupby('t')['sum_respi'].sum()
+            C_respired_shoot = hz_respi.add(elements_respi, fill_value=0).add(grains_respi, fill_value=0)
 
             # C_respired_roots
-            C_respired_roots = pp_axes_df.sum_respi_roots.fillna(0.) + organs_df[(organs_df['organ'] == 'roots')]['Respi_growth'].reset_index(drop=True)
+            roots_df['sum_respi_roots'] = roots_df['Respi_growth'] + roots_df['sum_respi']
+            C_respired_roots = roots_df['sum_respi_roots'].reset_index(drop=True)
+
+            # C exuded
+            roots_df['sum_C_exuded'] = (roots_df.C_exudation + roots_df.N_exudation * cnwheat_model.EcophysiologicalConstants.AMINO_ACIDS_C_RATIO / cnwheat_model.
+                                          EcophysiologicalConstants.AMINO_ACIDS_N_RATIO) * roots_df.mstruct
+            C_exuded_roots = roots_df['sum_C_exuded'].reset_index(drop=True)
 
             # Add to axes df
             pp_axes_df.sort_values(AXES_T_INDEXES, inplace=True)  # Make sure axes_df is sorted
@@ -1195,11 +1297,15 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             pp_axes_df.loc[:, 'WSC_g'] = WSC_g_plant.values
             pp_axes_df.loc[:, 'Cont_WSC_DM'] = pp_axes_df['WSC_g'] / pp_axes_df['sum_dry_mass'] * 100
             pp_axes_df.loc[:, 'Cont_WSC_DM_shoot'] = sum_WSC_g_shoot.values / sum_dry_mass_shoot.values * 100
-            pp_axes_df.loc[:, 'Cont_WSC_DM_laminae'] = sum_WSC_g_laminae.values / sum_dry_mass_laminae.values * 100
+            if sum_dry_mass_laminae.sum() != 0:
+                pp_axes_df.loc[:, 'Cont_WSC_DM_laminae'] = sum_WSC_g_laminae.to_numpy() / sum_dry_mass_laminae.replace(0, np.nan).to_numpy() * 100
+            else:
+                pp_axes_df.loc[:, 'Cont_WSC_DM_laminae'] = [0] * len(pp_axes_df.index)
             pp_axes_df.loc[:, 'Cont_WSC_DM_stem'] = sum_WSC_g_stem.values / sum_dry_mass_stem.values * 100
             pp_axes_df.loc[:, 'Cont_WSC_DM_roots'] = sum_WSC_g_roots.values / sum_dry_mass_roots.values * 100
+            pp_axes_df.loc[:, 'C_exuded'] = C_exuded_roots.values
 
-        pp_axes_df = pp_axes_df.reindex(AXES_RUN_POSTPROCESSING_VARIABLES, axis=1, copy=False)
+        pp_axes_df = pp_axes_df.reindex(list(AXES_RUN_POSTPROCESSING_VARIABLES), axis=1)
         pp_axes_df['plant'] = pp_axes_df['plant'].astype(int)
         returned_dataframes.append(pp_axes_df)
     else:
@@ -1222,7 +1328,7 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
 # -- PLEASE USE THIS FUNCTION FOR THE GENERATION OF GRAPHS --
 # -----------------------------------------------------------
 
-def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, soils_df=None, graphs_dirpath='.'):
+def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_df=None, soils_df=None, meteo_data=None, graphs_dirpath='.'):
     """
     Generate graphs to validate the outputs of CN-Wheat, and save them in directory `graphs_dirpath`.
 
@@ -1231,6 +1337,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
     :param pandas.DataFrame organs_df: CN-Wheat outputs at organ scale (see :attr:`ORGANS_RUN_POSTPROCESSING_VARIABLES`)
     :param pandas.DataFrame elements_df: CN-Wheat outputs at element scale (see :attr:`ELEMENTS_RUN_POSTPROCESSING_VARIABLES`)
     :param pandas.DataFrame soils_df: CN-Wheat outputs at soil scale (see :attr:`SOILS_RUN_POSTPROCESSING_VARIABLES`)
+    :param pandas.DataFrame meteo_data: the meteo dataframe having the mapping between t (hours) and calendar dates
     :param str graphs_dirpath: the path of the directory to save the generated graphs in
     """
 
@@ -1266,21 +1373,22 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
         for org_ph in (['blade'], ['sheath'], ['internode'], ['peduncle', 'ear']):
             for variable_name, variable_label in graph_variables_ph_elements.items():
                 graph_name = variable_name + '_' + '_'.join(org_ph) + '.PNG'
-                cnwheat_tools.plot_cnwheat_ouputs(elements_df,
+                fspmwheat_tools.plot_outputs(elements_df,
                                                   x_name=x_name,
                                                   y_name=variable_name,
                                                   x_label=x_label,
                                                   y_label=variable_label,
                                                   colors=[colors[i - 1] for i in elements_df.metamer.unique().tolist()],
-                                                  filters={'organ': org_ph},
+                                                  filters={'axis': 'MS', 'organ': org_ph},
                                                   plot_filepath=os.path.join(graphs_dirpath, graph_name),
+                                                  meteo_data=meteo_data,
                                                   explicit_label=False)
 
-    # 2) Roots, grains and phloem
+    # 2) Roots, grains, endosperm and phloem
     if organs_df is not None:
-        # 'R_growth': u'Growth respiration of roots (µmol C h$^{-1}$)',
         graph_variables_organs = {'Conc_Sucrose': u'[Sucrose] (µmol g$^{-1}$ mstruct)', 'Dry_Mass': 'Dry mass (g)', 'Conc_Nitrates': u'[Nitrates] (µmol g$^{-1}$ mstruct)',
-                                  'Conc_Amino_Acids': u'[Amino Acids] (µmol g$^{-1}$ mstruct)', 'Proteins_N_Mass': u'[N Proteins] (g)', 'Uptake_Nitrates': u'Nitrates uptake (µmol h$^{-1}$)',
+                                  'Conc_Amino_Acids': u'[Amino Acids] (µmol g$^{-1}$ mstruct)', 'Proteins_N_Mass': 'N Proteins (g)', 'Starch_g': 'Endosperm starch (g)',
+                                  'Uptake_Nitrates': u'Nitrates uptake (µmol h$^{-1}$)',
                                   'sucrose': u'Sucrose (µmol)', 'amino_acids': u'Amino Acids (µmol)', 'Unloading_Sucrose': u'Unloaded sucrose (µmol C g$^{-1}$ mstruct h$^{-1}$)',
                                   'Unloading_Amino_Acids': u'Unloaded Amino Acids (µmol N AA g$^{-1}$ mstruct h$^{-1}$)',
                                   'S_Amino_Acids': u'Rate of amino acids synthesis (µmol N g$^{-1}$ mstruct h$^{-1}$)', 'S_Proteins': u'Rate of protein synthesis (µmol N h$^{-1}$)',
@@ -1292,12 +1400,12 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                   'N_exudation': u'Nitrogen lost by root exudation (µmol N g$^{-1}$ mstruct h$^{-1}$', 'Conc_cytokinins': u'[cytokinins] (UA g$^{-1}$ mstruct)',
                                   'S_cytokinins': u'Rate of cytokinins synthesis (UA g$^{-1}$ mstruct)', 'Export_cytokinins': 'Export of cytokinins from roots (UA h$^{-1}$)',
                                   'HATS_LATS': u'Potential uptake (µmol h$^{-1}$)', 'regul_transpiration': u'Regulating transpiration function',
-                                  'senesced_mstruct': u'Cumulated senesced mstruct (g)', 'synthetized_mstruct': u'Cumulated synthetized mstruct (g)'}
+                                  'senesced_mstruct': u'Cumulated senesced mstruct (g)', 'synthetized_mstruct': u'Cumulated synthetized mstruct (g)', }
 
-        for org in (['roots'], ['grains'], ['phloem']):
+        for org in (['roots'], ['grains'], ['phloem'], ['endosperm']):
             for variable_name, variable_label in graph_variables_organs.items():
                 graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
-                cnwheat_tools.plot_cnwheat_ouputs(organs_df,
+                fspmwheat_tools.plot_outputs(organs_df,
                                                   x_name=x_name,
                                                   y_name=variable_name,
                                                   x_label=x_label,
@@ -1305,6 +1413,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                                   colors=['blue'],
                                                   filters={'organ': org},
                                                   plot_filepath=os.path.join(graphs_dirpath, graph_name),
+                                                  meteo_data=meteo_data,
                                                   explicit_label=False)
 
     # 3) Soil
@@ -1313,7 +1422,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
         Conc_Nitrates_soil = soils_df['Conc_Nitrates_Soil'] * 14E-6
         ax1.plot(soils_df['t'], Conc_Nitrates_soil)
         ax1.set_ylabel(u'[Nitrates] (g m$^{-3}$)')
-        ax1.set_xlabel('Time from flowering (hour)')
+        ax1.set_xlabel('Time (hour)')
         ax1.set_title = 'Conc Nitrates Soil'
         ax1.set_ylim(bottom=0)
         plt.savefig(os.path.join(graphs_dirpath, 'Conc_Nitrates_Soil.PNG'), format='PNG', bbox_inches='tight')
@@ -1330,7 +1439,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
         for variable_name, variable_label in graph_variables_hiddenzones.items():
             graph_name = variable_name + '_hz' + '.PNG'
-            cnwheat_tools.plot_cnwheat_ouputs(hiddenzones_df,
+            fspmwheat_tools.plot_outputs(hiddenzones_df,
                                               x_name=x_name,
                                               y_name=variable_name,
                                               x_label=x_label,
@@ -1338,13 +1447,14 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                               colors=[colors[i - 1] for i in hiddenzones_df.metamer.unique().tolist()],
                                               filters={'plant': 1, 'axis': 'MS'},
                                               plot_filepath=os.path.join(graphs_dirpath, graph_name),
+                                              meteo_data=meteo_data,
                                               explicit_label=False)
 
     # 4) Axes
     graph_variables_axes = {'mstruct': 'Axis mstruct (g)',
                             'C_N_ratio': u'C/N mass ratio', 'C_N_ratio_shoot': u'C/N mass ratio of the shoot',
                             'N_content': u'N content in the axis (% DM)', 'N_content_shoot': u'N content in the shoot (% DM)',
-                            'N_content_total_DM_shoot': u'N content in the shoot acounting for partly senesced leaves (% DM)',
+                            'N_content_total_DM_shoot': u'N content in the shoot accounting for partly senesced leaves (% DM)',
                             'N_content_roots': u'N content in the roots (% DM)',
                             'N_content_mstruct': u'N content in the axis (% mstruct)', 'N_content_mstruct_shoot': u'N content in the shoot (% mstruct)',
                             'N_content_mstruct_roots': u'N content in the roots (% mstruct)',
@@ -1361,7 +1471,7 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
 
     for variable_name, variable_label in graph_variables_axes.items():
         graph_name = variable_name + '_axis' + '.PNG'
-        cnwheat_tools.plot_cnwheat_ouputs(axes_df,
+        fspmwheat_tools.plot_outputs(axes_df,
                                           x_name=x_name,
                                           y_name=variable_name,
                                           x_label=x_label,
@@ -1369,4 +1479,5 @@ def generate_graphs(axes_df=None, hiddenzones_df=None, organs_df=None, elements_
                                           colors=['blue'],
                                           filters={'plant': 1, 'axis': 'MS'},
                                           plot_filepath=os.path.join(graphs_dirpath, graph_name),
+                                          meteo_data=meteo_data,
                                           explicit_label=False)

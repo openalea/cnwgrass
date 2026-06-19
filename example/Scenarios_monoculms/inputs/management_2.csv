@@ -1,0 +1,4 @@
+name,value
+plant_density,{1: 1}
+N_fertilizations,"{""constant_Conc_Nitrates"": 357143}"
+inter_row,1

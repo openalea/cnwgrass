@@ -22,7 +22,7 @@ local_scheme = "no-local-version"
 [project]
 name = "openalea.wheatfspm"
 authors = [
-  { name = "Romain Barillot, Camille Chambon, Marion Gauthier, Bruno Andrieu" },
+  { name = "Romain Barillot, Camille Chambon, Marion Gauthier, Victoria Acker, Bruno Andrieu" },
 ]
 description = "WheatFspm is a Functional Structural Plant Model (FSPM) of wheat ."
 readme = "README.md"

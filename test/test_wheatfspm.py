@@ -7,10 +7,9 @@ from openalea.fspmwheat import caribu_facade
 from openalea.fspmwheat import cnwheat_facade
 from openalea.fspmwheat import elongwheat_facade
 from openalea.fspmwheat import farquharwheat_facade
-from openalea.fspmwheat import fspmwheat_facade
 from openalea.fspmwheat import growthwheat_facade
 from openalea.fspmwheat import senescwheat_facade
-
+from openalea.fspmwheat import turgorgrowth_facade
 
 # -- SIMULATION PARAMETERS --
 # Length of the simulation (in hours)
@@ -23,6 +22,7 @@ FARQUHARWHEAT_TIMESTEP = 1
 ELONGWHEAT_TIMESTEP = 1
 GROWTHWHEAT_TIMESTEP = 1
 CNWHEAT_TIMESTEP = 1
+TURGORGROWTH_TIMESTEP = 1
 
 # Define default plant density (culm m-2)
 PLANT_DENSITY = {1: 250.}
@@ -102,6 +102,9 @@ g = adel_wheat.load(directory=INPUTS_DIRPATH)
 def test_cnwheat():
     # -- CNWHEAT --
     # Initial states
+    cnwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME][
+        [i for i in cnwheat_facade.cnwheat_converter.AXES_VARIABLES if i in inputs_dataframes[AXES_INITIAL_STATE_FILENAME].columns]].copy()
+
     cnwheat_organs_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME][
         [i for i in cnwheat_facade.cnwheat_converter.ORGANS_VARIABLES if i in inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].columns]].copy()
 
@@ -119,6 +122,7 @@ def test_cnwheat():
                                                    CNWHEAT_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
                                                    PLANT_DENSITY,
                                                    {},
+                                                   cnwheat_axes_initial_state,
                                                    cnwheat_organs_initial_state,
                                                    cnwheat_hiddenzones_initial_state,
                                                    cnwheat_elements_initial_state,
@@ -128,30 +132,18 @@ def test_cnwheat():
                                                    shared_hiddenzones_inputs_outputs_df,
                                                    shared_elements_inputs_outputs_df,
                                                    shared_soils_inputs_outputs_df,
+                                                   tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5},
                                                    update_shared_df=UPDATE_SHARED_DF)
 
     # Run facade
-    cnwheat_facade_.run(12, 10, {'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5})
+    cnwheat_facade_.run(12, 10)
 
 
 def test_elongwheat():
     # Initial states
-    elongwheat_hiddenzones_initial_state = inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME][
-        elongwheat_facade.converter.HIDDENZONE_TOPOLOGY_COLUMNS + [i for i in
-                                                                   elongwheat_facade.simulation.HIDDENZONE_INPUTS
-                                                                   if i in
-                                                                   inputs_dataframes[
-                                                                       HIDDENZONES_INITIAL_STATE_FILENAME].columns]].copy()
-    elongwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME][
-        elongwheat_facade.converter.ELEMENT_TOPOLOGY_COLUMNS + [i for i in elongwheat_facade.simulation.ELEMENT_INPUTS
-                                                                if
-                                                                i in
-                                                                inputs_dataframes[
-                                                                    ELEMENTS_INITIAL_STATE_FILENAME].columns]].copy()
-    elongwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME][
-        elongwheat_facade.converter.AXIS_TOPOLOGY_COLUMNS + [i for i in elongwheat_facade.simulation.AXIS_INPUTS if
-                                                             i in inputs_dataframes[
-                                                                 AXES_INITIAL_STATE_FILENAME].columns]].copy()
+    elongwheat_hiddenzones_initial_state = inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME]
+    elongwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME]
+    elongwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME]
 
     phytoT_df = pd.read_csv(os.path.join(INPUTS_DIRPATH, 'phytoT.csv'))
 
@@ -165,7 +157,6 @@ def test_elongwheat():
                                                             shared_hiddenzones_inputs_outputs_df,
                                                             shared_elements_inputs_outputs_df,
                                                             adel_wheat, phytoT_df,
-                                                            None,
                                                             update_shared_df=UPDATE_SHARED_DF)
     # Run facade
     elongwheat_facade_.run(12, 10)
@@ -186,13 +177,8 @@ def test_farquharwheat():
     g.property('diameter').update({19: 0.003, 34: 0.003})
 
     # Initial states
-    farquharwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME][
-        farquharwheat_facade.converter.ELEMENT_TOPOLOGY_COLUMNS +
-        [i for i in farquharwheat_facade.converter.FARQUHARWHEAT_ELEMENTS_INPUTS if i in inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME].columns]].copy()
-
-    farquharwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME][
-        farquharwheat_facade.converter.AXIS_TOPOLOGY_COLUMNS +
-        [i for i in farquharwheat_facade.converter.FARQUHARWHEAT_AXES_INPUTS if i in inputs_dataframes[AXES_INITIAL_STATE_FILENAME].columns]].copy()
+    farquharwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME]
+    farquharwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME]
 
     # Use the initial version of the photosynthesis sub-model (as in Barillot et al. 2016, and in Gauthier et al. 2020)
     update_parameters_farquharwheat = {'SurfacicProteins': False, 'NSC_Retroinhibition': False}
@@ -202,7 +188,7 @@ def test_farquharwheat():
                                                                      farquharwheat_elements_initial_state,
                                                                      farquharwheat_axes_initial_state,
                                                                      shared_elements_inputs_outputs_df,
-                                                                     update_parameters_farquharwheat,
+                                                                     update_parameters=update_parameters_farquharwheat,
                                                                      update_shared_df=UPDATE_SHARED_DF)
 
     # Run facade
@@ -210,21 +196,10 @@ def test_farquharwheat():
 
 def test_growthwheat():
     # Initial states
-    growthwheat_hiddenzones_initial_state = inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME][
-        growthwheat_facade.converter.HIDDENZONE_TOPOLOGY_COLUMNS +
-        [i for i in growthwheat_facade.simulation.HIDDENZONE_INPUTS if i in inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME].columns]].copy()
-
-    growthwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME][
-        growthwheat_facade.converter.ELEMENT_TOPOLOGY_COLUMNS +
-        [i for i in growthwheat_facade.simulation.ELEMENT_INPUTS if i in inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME].columns]].copy()
-
-    growthwheat_root_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].loc[inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME]['organ'] == 'roots'][
-        growthwheat_facade.converter.ROOT_TOPOLOGY_COLUMNS +
-        [i for i in growthwheat_facade.simulation.ROOT_INPUTS if i in inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].columns]].copy()
-
-    growthwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME][
-        growthwheat_facade.converter.AXIS_TOPOLOGY_COLUMNS +
-        [i for i in growthwheat_facade.simulation.AXIS_INPUTS if i in inputs_dataframes[AXES_INITIAL_STATE_FILENAME].columns]].copy()
+    growthwheat_hiddenzones_initial_state = inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME]
+    growthwheat_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME]
+    growthwheat_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME]
+    growthwheat_root_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME]
 
     # Facade initialisation
     growthwheat_facade_ = growthwheat_facade.GrowthWheatFacade(g,
@@ -237,7 +212,6 @@ def test_growthwheat():
                                                                shared_hiddenzones_inputs_outputs_df,
                                                                shared_elements_inputs_outputs_df,
                                                                shared_axes_inputs_outputs_df,
-                                                               None,
                                                                update_shared_df=UPDATE_SHARED_DF)
         # Run facade
     growthwheat_facade_.run()
@@ -269,10 +243,47 @@ def test_senescwheat():
                                                                shared_organs_inputs_outputs_df,
                                                                shared_axes_inputs_outputs_df,
                                                                shared_elements_inputs_outputs_df,
-                                                               None,
                                                                update_shared_df=UPDATE_SHARED_DF)
     # Run facade
     senescwheat_facade_.run()
 
-def test_fspmwheat():
-    fspmwheat_facade.FSPMWheatFacade(g)
+def test_turgorgrowth():
+    # Initial states
+    turgorgrowth_axes_initial_state = inputs_dataframes[AXES_INITIAL_STATE_FILENAME][
+        [i for i in turgorgrowth_facade.turgorgrowth_converter.AXES_VARIABLES if
+         i in inputs_dataframes[AXES_INITIAL_STATE_FILENAME].columns]].copy()
+
+    turgorgrowth_organs_initial_state = inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME][
+        [i for i in turgorgrowth_facade.turgorgrowth_converter.ORGANS_VARIABLES if
+         i in inputs_dataframes[ORGANS_INITIAL_STATE_FILENAME].columns]].copy()
+
+    turgorgrowth_hiddenzones_initial_state = inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME][
+        [i for i in turgorgrowth_facade.turgorgrowth_converter.HIDDENZONE_VARIABLES if
+         i in inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME].columns]].copy()
+
+    turgorgrowth_elements_initial_state = inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME][
+        [i for i in turgorgrowth_facade.turgorgrowth_converter.ELEMENTS_VARIABLES if
+         i in inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME].columns]].copy()
+
+    turgorgrowth_soils_initial_state = inputs_dataframes[SOILS_INITIAL_STATE_FILENAME][
+        [i for i in turgorgrowth_facade.turgorgrowth_converter.SOILS_VARIABLES if
+         i in inputs_dataframes[SOILS_INITIAL_STATE_FILENAME].columns]].copy()
+
+    # Facade initialisation
+    turgorgrowth_facade_ = turgorgrowth_facade.TurgorGrowthFacade(g,
+                                                                  TURGORGROWTH_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
+                                                                  {},
+                                                                  turgorgrowth_axes_initial_state,
+                                                                  turgorgrowth_hiddenzones_initial_state,
+                                                                  turgorgrowth_elements_initial_state,
+                                                                  turgorgrowth_organs_initial_state,
+                                                                  turgorgrowth_soils_initial_state,
+                                                                  shared_axes_inputs_outputs_df,
+                                                                  shared_hiddenzones_inputs_outputs_df,
+                                                                  shared_elements_inputs_outputs_df,
+                                                                  shared_organs_inputs_outputs_df,
+                                                                  shared_soils_inputs_outputs_df,
+                                                                  update_shared_df=UPDATE_SHARED_DF)
+
+    # Run facade
+    turgorgrowth_facade_.run()

@@ -11,7 +11,7 @@ import matplotlib.ticker as mtick
 import matplotlib.image as mpimg
 
 from openalea.elongwheat import parameters as elongwheat_parameters
-from example.example_fspmwheat.Scenarios_monoculms import tools
+from example.Scenarios_monoculms import tools
 
 # ----- Import scenarios list and description
 scenarios_df = pd.read_csv(os.path.join('inputs', 'scenarios_list.csv'), index_col='Scenario')

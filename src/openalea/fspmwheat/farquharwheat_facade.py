@@ -19,7 +19,7 @@ from openalea.fspmwheat import tools
 
 """
 
-#: the name of the organs modeled by FarquharWheat
+#: the name of the organs modelled by FarquharWheat
 FARQUHARWHEAT_ORGANS_NAMES = {'internode', 'blade', 'sheath', 'peduncle', 'ear'}
 
 #: names of the elements
@@ -44,6 +44,8 @@ class FarquharWheatFacade(object):
                  model_elements_inputs_df,
                  model_axes_inputs_df,
                  shared_elements_inputs_outputs_df,
+                 stomatal_model_name='BWB',
+                 hydraulics=False,
                  update_parameters=None,
                  update_shared_df=True):
         """
@@ -51,14 +53,21 @@ class FarquharWheatFacade(object):
         :param pandas.DataFrame model_elements_inputs_df: the inputs of the model at elements scale.
         :param pandas.DataFrame model_axes_inputs_df: the inputs of the model at axis scale.
         :param pandas.DataFrame shared_elements_inputs_outputs_df: the dataframe of inputs and outputs at elements scale shared between all models.
-        :param dict update_parameters: A dictionary with the parameters to update, should have the form {'param1': value1, 'param2': value2, ...}.
+        :param str stomatal_model_name: the model of stomatal conductance. Should be one of 'BWB', 'Leuning', 'Tuzet' or 'hydraulics'.
+        :param bool hydraulics: if True the model will assume the coupling to the turgor-driven growth model.
+        :param None or dict update_parameters: A dictionary with the parameters to update, should have the form {'param1': value1, 'param2': value2, ...}.
         :param bool update_shared_df: If `True`  update the shared dataframes at init and at each run (unless stated otherwise)
         """
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
 
-        self._simulation = simulation.Simulation(update_parameters=update_parameters)  #: the simulator to use to run the model
+        self._simulation = simulation.Simulation(update_parameters=update_parameters, stomatal_model_name=stomatal_model_name, hydraulics=hydraulics)  #: the simulator to use to run the model
 
+        model_elements_inputs_df = model_elements_inputs_df[converter.ELEMENT_TOPOLOGY_COLUMNS +
+                                                            [i for i in self._simulation.elements_inputs if i in model_elements_inputs_df.columns]].copy()
+        model_axes_inputs_df = model_axes_inputs_df[converter.AXIS_TOPOLOGY_COLUMNS +
+                                                    [i for i in self._simulation.axes_inputs if i in model_axes_inputs_df.columns]].copy()
         all_farquharwheat_inputs_dict = converter.from_dataframe(model_elements_inputs_df, model_axes_inputs_df)
+
         self._update_shared_MTG(all_farquharwheat_inputs_dict)
 
         self._shared_elements_inputs_outputs_df = shared_elements_inputs_outputs_df  #: the dataframe at elements scale shared between all models
@@ -81,7 +90,7 @@ class FarquharWheatFacade(object):
         self._update_shared_MTG({'elements': self._simulation.outputs, 'axes': ''})
 
         if update_shared_df or (update_shared_df is None and self._update_shared_df):
-            farquharwheat_elements_outputs_df = converter.to_dataframe(self._simulation.outputs)
+            farquharwheat_elements_outputs_df = converter.to_dataframe(self._simulation.outputs, self._simulation.elements_outputs)
             self._update_shared_dataframes(farquharwheat_elements_outputs_df)
 
     def _initialize_model(self):
@@ -100,7 +109,7 @@ class FarquharWheatFacade(object):
                     continue
                 axis_id = (mtg_plant_index, mtg_axis_label)
                 farquharwheat_axis_inputs_dict = {}
-                for farquharwheat_axis_input_name in converter.FARQUHARWHEAT_AXES_INPUTS:
+                for farquharwheat_axis_input_name in self._simulation.axes_inputs:
                     farquharwheat_axis_inputs_dict[farquharwheat_axis_input_name] = self._shared_mtg.get_vertex_property(mtg_axis_vid).get(farquharwheat_axis_input_name)
 
                 height_element_list = [0.]
@@ -116,11 +125,11 @@ class FarquharWheatFacade(object):
                         for mtg_element_vid in self._shared_mtg.components_iter(mtg_organ_vid):
                             mtg_element_properties = self._shared_mtg.get_vertex_property(mtg_element_vid)
                             mtg_element_label = self._shared_mtg.label(mtg_element_vid)
-                            mtg_element_length = np.nan_to_num(self._shared_mtg.get_vertex_property(mtg_element_vid).get('length', 0.))
-                            mtg_element_green_area = np.nan_to_num(self._shared_mtg.get_vertex_property(mtg_element_vid).get('green_area', 0.))
+                            mtg_element_length = self._shared_mtg.get_vertex_property(mtg_element_vid).get('length', 0.)
+                            mtg_element_green_area = self._shared_mtg.get_vertex_property(mtg_element_vid).get('green_area', 0.)
 
                             if mtg_element_label not in FARQUHARWHEAT_ELEMENTS_INPUTS or mtg_element_length <= 0 or mtg_element_green_area == 0:
-                                continue  # to excluse topElement, baseElement and elements with null length
+                                continue  # to exclude topElement, baseElement and elements with null length
                             if mtg_element_label == 'HiddenElement' and (self._shared_mtg.get_vertex_property(mtg_element_vid).get('is_growing', True) or np.isnan(
                                     self._shared_mtg.get_vertex_property(mtg_element_vid).get('is_growing', True))):
                                 continue
@@ -130,7 +139,7 @@ class FarquharWheatFacade(object):
                             farquharwheat_element_inputs_dict = {}
                             FARQUHARWHEAT_ELEMENT_DEFAULT_PROPERTIES = parameters.ElementDefaultProperties().__dict__
 
-                            for farquharwheat_element_input_name in converter.FARQUHARWHEAT_ELEMENTS_INPUTS:
+                            for farquharwheat_element_input_name in self._simulation.elements_inputs:
                                 mtg_element_input = mtg_element_properties.get(farquharwheat_element_input_name)
                                 if mtg_element_input is None:
                                     mtg_element_input = FARQUHARWHEAT_ELEMENT_DEFAULT_PROPERTIES.get(farquharwheat_element_input_name)
@@ -138,11 +147,11 @@ class FarquharWheatFacade(object):
                                 if mtg_element_label in FARQUHARWHEAT_VISIBLE_ELEMENTS_INPUTS and farquharwheat_element_input_name == 'height':
                                     mtg_element_geom = self._shared_mtg.property('geometry').get(mtg_element_vid)
                                     if mtg_element_geom is not None:  # It seems like visible elements with very little area don't have geometry.
-                                        # TODO : Ckeck ADEL's area threshold for geometry representation
+                                        # TODO : Check ADEL's area threshold for geometry representation
                                         triangle_heights = get_height({mtg_element_vid: self._shared_mtg.property('geometry')[mtg_element_vid]})
                                         mtg_element_input = np.nanmean(triangle_heights[mtg_element_vid])
                                     else:
-                                        mtg_element_input = None
+                                        mtg_element_input = 0
                                     height_element_list.append(mtg_element_input)
                                 #: Width is actually diameter for Sheath and Internodes
                                 if mtg_organ_label in ['sheath', 'internode', 'pedoncule', 'ear'] and farquharwheat_element_input_name == 'width':
@@ -153,8 +162,6 @@ class FarquharWheatFacade(object):
                             all_farquharwheat_elements_inputs_dict[element_id] = farquharwheat_element_inputs_dict
 
                 farquharwheat_axis_inputs_dict['height_canopy'] = np.nanmax(np.array(height_element_list, dtype=np.float64))
-                if np.isnan(farquharwheat_axis_inputs_dict['height_canopy']) or (farquharwheat_axis_inputs_dict['height_canopy'] is None):
-                    farquharwheat_axis_inputs_dict['height_canopy'] = parameters.AxisDefaultProperties().__dict__['height']
                 all_farquharwheat_axes_inputs_dict[axis_id] = farquharwheat_axis_inputs_dict
 
         self._simulation.initialize({'elements': all_farquharwheat_elements_inputs_dict, 'axes': all_farquharwheat_axes_inputs_dict})
@@ -167,7 +174,7 @@ class FarquharWheatFacade(object):
         """
         # add the properties if needed
         mtg_property_names = self._shared_mtg.property_names()
-        for farquharwheat_elements_data_name in converter.FARQUHARWHEAT_ELEMENTS_INPUTS_OUTPUTS:
+        for farquharwheat_elements_data_name in self._simulation.elements_inputs_outputs:
             if farquharwheat_elements_data_name not in mtg_property_names:
                 self._shared_mtg.add_property(farquharwheat_elements_data_name)
 

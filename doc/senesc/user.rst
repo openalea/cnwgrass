@@ -12,7 +12,7 @@ Introduction
 Senesc-Wheat simulates leaf senescence according to :
  - the ratio between the amount of proteins in the leaf at a given timestep and the maximal protein amount recorded in that leaf.
    When the ratio drops below a threshold, the senescence is triggered. The dynamics of N is provided by CN-Wheat.
- - a maximal age of the leaf. Leaf age is expressed in time compsensated for the effects of temperature.
+ - a maximal age of the leaf. Leaf age is expressed in time compensated for the effects of temperature.
 
 When the senescence is triggered, a small fraction of the leaf dies, reducing its green area.
 A fixed proportion of C-N metabolites are remobilised from the death to living tissues.

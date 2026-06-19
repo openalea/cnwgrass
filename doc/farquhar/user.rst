@@ -20,9 +20,11 @@ at an infra-leaf scale (scene primitive).
   (i) the actual surfacic N amount (stimulation of the assimilation rates) and
   (ii) the actual non-structural carbohydrate content (TPU limitation).
 
-- Calculation of the stomatal conductance is obtained from the BWB model
+- Calculation of the stomatal conductance is obtained either from the approach of BWB,Leuning, Tuzet or a combination of the two latter (called hydraulics).
+  The choice of the stomatal model bu users is made in the front end script main.py and should be one of 'BWB', 'Leuning', 'Tuzet' or 'hydraulics'.
+  The models 'Tuzet' and 'hydraulics' require to provide the organ water potential.
 
-- Leaf erergy balance is computed from the weather data inputs, C assimilation and
+- Leaf energy balance is computed from the weather data inputs, C assimilation and
   stomatal conductance in order to simulate organ temperature.
 
 The 3 processes described above are therefore coupled and iteratively computed until
@@ -37,7 +39,7 @@ Inputs of Farquhar-Wheat
 - Ur : wind speed at 2m height above canopy (m s-1)
 - height_canopy (m)
 - height : organ height (m)
-- width : lamina width or sheath diamter (m)
+- width : lamina width or sheath diameter (m)
 - PARa : PAR absorbed (µmol m-2 s-1)
 - nitrates : amount of nitrates (µmol N)
 - amino_acids : amount of amino acids (µmol N)
@@ -49,6 +51,7 @@ Inputs of Farquhar-Wheat
 - PARa_prim: PAR absorbed by the primitive (µmol m-2 s-1)
 - area_prim: area of the primitive (m²)
 - organ_label
+- water_potential: the water potential of the organ (MPa), depending on the chosen stomatal model
 
 Outputs of Farquhar-Wheat
 =========================
