@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.image as mpimg
 
-from openalea.elongwheat import parameters as elongwheat_parameters
+from openalea.morphogenesis import parameters as morphogenesis_parameters
 from example.Scenarios_monoculms import tools
 
 # ----- Import scenarios list and description
@@ -35,10 +35,10 @@ def graph_RER(scenario, scenario_graphs_dirpath=None, scenario_outputs_dirpath=N
     scenario_dict = tools.buildDic(scenarios_df.to_dict('index')[scenario])
 
     rer_param = {}
-    if scenario_dict.get('elongwheat'):
-        rer_param = scenario_dict['elongwheat'].get('RERmax', {})
+    if scenario_dict.get('morphogenesis'):
+        rer_param = scenario_dict['morphogenesis'].get('RERmax', {})
     if rer_param == {}:
-        rer_param = dict((k, v) for k, v in elongwheat_parameters.RERmax.items())
+        rer_param = dict((k, v) for k, v in morphogenesis_parameters.RERmax.items())
 
     # ------ Simulated RER
 

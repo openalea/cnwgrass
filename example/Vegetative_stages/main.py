@@ -1,4 +1,4 @@
-from openalea.fspmwheat.fspmwheat_runner import run as fspmwheat_runner
+from openalea.integration.runner import run as runner
 
 
 """
@@ -17,7 +17,7 @@ METEO_FILENAME = 'meteo_Ljutovac2002.csv'
 
 
 if __name__ == '__main__':
-    fspmwheat_runner(simulation_length=simulation_length, forced_start_time=0,
+    runner(simulation_length=simulation_length, forced_start_time=0,
                     run_simu=True, run_postprocessing=True, generate_graphs=True, run_from_outputs=False,
                     tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5}, heterogeneous_canopy=True,
                     METEO_FILENAME=METEO_FILENAME, MANAGEMENT_FILENAME='management.csv')

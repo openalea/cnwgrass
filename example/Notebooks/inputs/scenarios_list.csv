@@ -1,4 +1,4 @@
-Scenario,Simulation_Length,Run_Simulation,Scenario_label,Plant_Density,Inter_Row,constant_Conc_Nitrates,METEO_FILENAME,Management_filename,growthwheat:VMAX_ROOTS_GROWTH_PREFLO,elongwheat:max_nb_leaves
+Scenario,Simulation_Length,Run_Simulation,Scenario_label,Plant_Density,Inter_Row,constant_Conc_Nitrates,METEO_FILENAME,Management_filename,growth:VMAX_ROOTS_GROWTH_PREFLO,morphogenesis:max_nb_leaves
 1,48,True,N5U_PAR100_D1,1,1,35714,meteo_PAR100.csv,management_1.csv,0.01539,50
 2,48,True,N50U_PAR100_D1,1,1,357143,meteo_PAR100.csv,management_2.csv,0.01539,50
 3,48,True,N5U_PAR500_D500,500,0.15,35714.28571,meteo_PAR500.csv,management_3.csv,0.01539,50

@@ -1,0 +1,209 @@
+# -*- coding: latin-1 -*-
+
+import numpy as np
+
+from openalea.astk.plantgl_utils import get_height  # for height calculation
+
+from openalea.gasexchange import converter, simulation, parameters
+from openalea.integration import tools
+
+"""
+    integration.gasexchange_facade
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    The module :mod:`integration.gasexchange_facade` is a facade of the model Gas-Exchange.
+
+    This module permits to initialize and run the model Gas-Exchange from a :class:`MTG <openalea.mtg.mtg.MTG>`
+    in a convenient and transparent way, wrapping all the internal complexity of the model, and dealing
+    with all the tedious initialization and conversion processes.
+
+"""
+
+#: the name of the organs modelled by Gas-Exchange
+GASEXCHANGE_ORGANS_NAMES = {'internode', 'blade', 'sheath', 'peduncle', 'ear'}
+
+#: names of the elements
+GASEXCHANGE_ELEMENTS_INPUTS = ['HiddenElement', 'StemElement', 'LeafElement1']
+GASEXCHANGE_VISIBLE_ELEMENTS_INPUTS = ['StemElement', 'LeafElement1']
+
+#: the columns which define the topology in the elements scale dataframe shared between all models
+SHARED_ELEMENTS_INPUTS_OUTPUTS_INDEXES = ['plant', 'axis', 'metamer', 'organ', 'element']
+
+
+class GasExchangeFacade(object):
+    """
+    The GasExchangeFacade class permits to initialize, run the model Gas-Exchange
+    from a :class:`MTG <openalea.mtg.mtg.MTG>`, and update the MTG and the dataframes
+    shared between all models.
+
+    Use :meth:`run` to run the model.
+
+    """
+
+    def __init__(self, shared_mtg,
+                 model_elements_inputs_df,
+                 model_axes_inputs_df,
+                 shared_elements_inputs_outputs_df,
+                 stomatal_model_name='BWB',
+                 hydraulics=False,
+                 update_parameters=None,
+                 update_shared_df=True):
+        """
+        :param openalea.mtg.mtg.MTG shared_mtg: The MTG shared between all models.
+        :param pandas.DataFrame model_elements_inputs_df: the inputs of the model at elements scale.
+        :param pandas.DataFrame model_axes_inputs_df: the inputs of the model at axis scale.
+        :param pandas.DataFrame shared_elements_inputs_outputs_df: the dataframe of inputs and outputs at elements scale shared between all models.
+        :param str stomatal_model_name: the model of stomatal conductance. Should be one of 'BWB', 'Leuning', 'Tuzet' or 'hydraulics'.
+        :param bool hydraulics: if True the model will assume the coupling to the turgor-driven growth model.
+        :param None or dict update_parameters: A dictionary with the parameters to update, should have the form {'param1': value1, 'param2': value2, ...}.
+        :param bool update_shared_df: If `True`  update the shared dataframes at init and at each run (unless stated otherwise)
+        """
+        self._shared_mtg = shared_mtg  #: the MTG shared between all models
+
+        self._simulation = simulation.Simulation(update_parameters=update_parameters, stomatal_model_name=stomatal_model_name, hydraulics=hydraulics)  #: the simulator to use to run the model
+
+        model_elements_inputs_df = model_elements_inputs_df[converter.ELEMENT_TOPOLOGY_COLUMNS +
+                                                            [i for i in self._simulation.elements_inputs if i in model_elements_inputs_df.columns]].copy()
+        model_axes_inputs_df = model_axes_inputs_df[converter.AXIS_TOPOLOGY_COLUMNS +
+                                                    [i for i in self._simulation.axes_inputs if i in model_axes_inputs_df.columns]].copy()
+        all_gasexchange_inputs_dict = converter.from_dataframe(model_elements_inputs_df, model_axes_inputs_df)
+
+        self._update_shared_MTG(all_gasexchange_inputs_dict)
+
+        self._shared_elements_inputs_outputs_df = shared_elements_inputs_outputs_df  #: the dataframe at elements scale shared between all models
+        self._update_shared_df = update_shared_df
+        if self._update_shared_df:
+            self._update_shared_dataframes(model_elements_inputs_df)
+
+    def run(self, Ta, ambient_CO2, RH, Ur, update_shared_df=None):
+        """
+        Run the model and update the MTG and the dataframes shared between all models.
+
+        :param float Ta: air temperature at t (degree Celsius)
+        :param float ambient_CO2: air CO2 at t (µmol mol-1)
+        :param float RH: relative humidity at t (decimal fraction)
+        :param float Ur: wind speed at the top of the canopy at t (m s-1)
+        :param bool update_shared_df: if 'True', update the shared dataframes at this time step.
+        """
+        self._initialize_model()
+        self._simulation.run(Ta, ambient_CO2, RH, Ur)
+        self._update_shared_MTG({'elements': self._simulation.outputs, 'axes': ''})
+
+        if update_shared_df or (update_shared_df is None and self._update_shared_df):
+            gasexchange_elements_outputs_df = converter.to_dataframe(self._simulation.outputs, self._simulation.elements_outputs)
+            self._update_shared_dataframes(gasexchange_elements_outputs_df)
+
+    def _initialize_model(self):
+        """
+        Initialize the inputs of the model from the MTG shared between all models.
+        """
+        all_gasexchange_elements_inputs_dict = {}
+        all_gasexchange_axes_inputs_dict = {}
+
+        # traverse the MTG recursively from top ...
+        for mtg_plant_vid in self._shared_mtg.components_iter(self._shared_mtg.root):
+            mtg_plant_index = int(self._shared_mtg.index(mtg_plant_vid))
+            for mtg_axis_vid in self._shared_mtg.components_iter(mtg_plant_vid):
+                mtg_axis_label = self._shared_mtg.label(mtg_axis_vid)
+                if mtg_axis_label != 'MS':
+                    continue
+                axis_id = (mtg_plant_index, mtg_axis_label)
+                gasexchange_axis_inputs_dict = {}
+                for gasexchange_axis_input_name in self._simulation.axes_inputs:
+                    gasexchange_axis_inputs_dict[gasexchange_axis_input_name] = self._shared_mtg.get_vertex_property(mtg_axis_vid).get(gasexchange_axis_input_name)
+
+                height_element_list = [0.]
+
+                for mtg_metamer_vid in self._shared_mtg.components_iter(mtg_axis_vid):
+                    mtg_metamer_index = int(self._shared_mtg.index(mtg_metamer_vid))
+                    for mtg_organ_vid in self._shared_mtg.components_iter(mtg_metamer_vid):
+                        mtg_organ_label = self._shared_mtg.label(mtg_organ_vid)
+                        # mtg_organ_length = np.nan_to_num(self._shared_mtg.get_vertex_property(mtg_organ_vid).get('length', 0))
+                        if mtg_organ_label not in GASEXCHANGE_ORGANS_NAMES:  # or mtg_organ_length <= 0
+                            continue
+
+                        for mtg_element_vid in self._shared_mtg.components_iter(mtg_organ_vid):
+                            mtg_element_properties = self._shared_mtg.get_vertex_property(mtg_element_vid)
+                            mtg_element_label = self._shared_mtg.label(mtg_element_vid)
+                            mtg_element_length = self._shared_mtg.get_vertex_property(mtg_element_vid).get('length', 0.)
+                            mtg_element_green_area = self._shared_mtg.get_vertex_property(mtg_element_vid).get('green_area', 0.)
+
+                            if mtg_element_label not in GASEXCHANGE_ELEMENTS_INPUTS or mtg_element_length <= 0 or mtg_element_green_area == 0:
+                                continue  # to exclude topElement, baseElement and elements with null length
+                            if mtg_element_label == 'HiddenElement' and (self._shared_mtg.get_vertex_property(mtg_element_vid).get('is_growing', True) or np.isnan(
+                                    self._shared_mtg.get_vertex_property(mtg_element_vid).get('is_growing', True))):
+                                continue
+
+                            element_id = (mtg_plant_index, mtg_axis_label, mtg_metamer_index, mtg_organ_label, mtg_element_label)
+
+                            gasexchange_element_inputs_dict = {}
+                            GASEXCHANGE_ELEMENT_DEFAULT_PROPERTIES = parameters.ElementDefaultProperties().__dict__
+
+                            for gasexchange_element_input_name in self._simulation.elements_inputs:
+                                mtg_element_input = mtg_element_properties.get(gasexchange_element_input_name)
+                                if mtg_element_input is None:
+                                    mtg_element_input = GASEXCHANGE_ELEMENT_DEFAULT_PROPERTIES.get(gasexchange_element_input_name)
+                                #: Height computation for growing visible elements
+                                if mtg_element_label in GASEXCHANGE_VISIBLE_ELEMENTS_INPUTS and gasexchange_element_input_name == 'height':
+                                    mtg_element_geom = self._shared_mtg.property('geometry').get(mtg_element_vid)
+                                    if mtg_element_geom is not None:  # It seems like visible elements with very little area don't have geometry.
+                                        # TODO : Check ADEL's area threshold for geometry representation
+                                        triangle_heights = get_height({mtg_element_vid: self._shared_mtg.property('geometry')[mtg_element_vid]})
+                                        mtg_element_input = np.nanmean(triangle_heights[mtg_element_vid])
+                                    else:
+                                        mtg_element_input = 0
+                                    height_element_list.append(mtg_element_input)
+                                #: Width is actually diameter for Sheath and Internodes
+                                if mtg_organ_label in ['sheath', 'internode', 'pedoncule', 'ear'] and gasexchange_element_input_name == 'width':
+                                    mtg_element_input = mtg_element_properties.get('diameter', 0.0)
+
+                                gasexchange_element_inputs_dict[gasexchange_element_input_name] = mtg_element_input
+
+                            all_gasexchange_elements_inputs_dict[element_id] = gasexchange_element_inputs_dict
+
+                gasexchange_axis_inputs_dict['height_canopy'] = np.nanmax(np.array(height_element_list, dtype=np.float64))
+                all_gasexchange_axes_inputs_dict[axis_id] = gasexchange_axis_inputs_dict
+
+        self._simulation.initialize({'elements': all_gasexchange_elements_inputs_dict, 'axes': all_gasexchange_axes_inputs_dict})
+
+    def _update_shared_MTG(self, gasexchange_data_dict):
+        """
+        Update the MTG shared between all models from the inputs or the outputs of the model.
+
+        :param dict gasexchange_data_dict: Gas-Exchange outputs.
+        """
+        # add the properties if needed
+        mtg_property_names = self._shared_mtg.property_names()
+        for gasexchange_elements_data_name in self._simulation.elements_inputs_outputs:
+            if gasexchange_elements_data_name not in mtg_property_names:
+                self._shared_mtg.add_property(gasexchange_elements_data_name)
+
+        # traverse the MTG recursively from top ...
+        for mtg_plant_vid in self._shared_mtg.components_iter(self._shared_mtg.root):
+            mtg_plant_index = int(self._shared_mtg.index(mtg_plant_vid))
+            for mtg_axis_vid in self._shared_mtg.components_iter(mtg_plant_vid):
+                mtg_axis_label = self._shared_mtg.label(mtg_axis_vid)
+                for mtg_metamer_vid in self._shared_mtg.components_iter(mtg_axis_vid):
+                    mtg_metamer_index = int(self._shared_mtg.index(mtg_metamer_vid))
+                    for mtg_organ_vid in self._shared_mtg.components_iter(mtg_metamer_vid):
+                        mtg_organ_label = self._shared_mtg.label(mtg_organ_vid)
+                        if mtg_organ_label not in GASEXCHANGE_ORGANS_NAMES:
+                            continue
+                        for mtg_element_vid in self._shared_mtg.components_iter(mtg_organ_vid):
+                            mtg_element_label = self._shared_mtg.label(mtg_element_vid)
+                            element_id = (mtg_plant_index, mtg_axis_label, mtg_metamer_index, mtg_organ_label, mtg_element_label)
+                            if element_id not in gasexchange_data_dict['elements']:
+                                continue
+                            # update the element in the MTG
+                            gasexchange_element_data_dict = gasexchange_data_dict['elements'][element_id]
+                            for gasexchange_element_data_name, gasexchange_element_data_value in gasexchange_element_data_dict.items():
+                                self._shared_mtg.property(gasexchange_element_data_name)[mtg_element_vid] = gasexchange_element_data_value
+                                if mtg_organ_label in ['sheath', 'internode', 'pedoncule', 'ear'] and gasexchange_element_data_name == 'width':
+                                    self._shared_mtg.property('diameter')[mtg_element_vid] = gasexchange_element_data_value
+
+    def _update_shared_dataframes(self, gasexchange_elements_data_df):
+        """
+        Update the dataframes shared between all models from the inputs dataframes or the outputs dataframes of the model.
+        :param pandas.DataFrame gasexchange_elements_data_df: Gas-Exchange outputs.
+        """
+        tools.combine_dataframes_inplace(gasexchange_elements_data_df, SHARED_ELEMENTS_INPUTS_OUTPUTS_INDEXES, self._shared_elements_inputs_outputs_df)

@@ -26,14 +26,14 @@ If you want to make your own development of the model, please fork the repositor
       :maxdepth: 1
       :caption: Contents:
 
-      cnwheat/index.rst
-      elong/index.rst
+      cnmetabolism/index.rst
+      morphogenesis/index.rst
       growth/index.rst
-      farquhar/index.rst
-      respi/index.rst
-      senesc/index.rst
-      fspm/index.rst
-      turgor/index.rst
+      gasexchange/index.rst
+      respiration/index.rst
+      senescence/index.rst
+      integration/index.rst
+      hydraulics/index.rst
 
 Indices and tables
 ==================

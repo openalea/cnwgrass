@@ -1,61 +1,61 @@
-.. |growthwheat| replace:: :mod:`openalea.growthwheat`
+.. |growth| replace:: :mod:`openalea.growth`
 
-.. _growthwheat_reference:
+.. _growth_reference:
 
 Reference guide
 #################
 
-This manual details, for each module of |growthwheat|, 
-the functions and objects included in |growthwheat|, 
+This manual details, for each module of |growth|,
+the functions and objects included in |growth|,
 describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.growthwheat.__init__
+.. currentmodule:: openalea.growth.__init__
 
-|growthwheat| package
+|growth| package
 *********************************************************
 
-.. automodule:: openalea.growthwheat
+.. automodule:: openalea.growth
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.growthwheat.model` module
+:mod:`openalea.growth.model` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.model
+.. automodule:: openalea.growth.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.growthwheat.simulation` module
+:mod:`openalea.growth.simulation` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.simulation
+.. automodule:: openalea.growth.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.growthwheat.converter` module
+:mod:`openalea.growth.converter` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.converter
+.. automodule:: openalea.growth.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.growthwheat.parameters` module
+:mod:`openalea.growth.parameters` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.parameters
+.. automodule:: openalea.growth.parameters
     :members:
     :undoc-members:
     :show-inheritance:

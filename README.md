@@ -38,14 +38,14 @@ WheatFspm consists in a set of sub-models (named submodules in git) which share 
 ![WheatFSPM workflow](https://github.com/openalea/WheatFspm/blob/master/doc/_static/Modular_structure.png?raw=true "WheatFSPM workflow") 
 *Adapted from Gauthier et al. (2020)*
 
-* *Farquhar-Wheat*: Farquhar-based model of photosynthesis, stomatal conductance, organ temperature and transpiration.
-* *Elong-Wheat*: regulation of leaf and internode elongation by C and N metabolites, temperature and coordination rules.
-* *Growth-Wheat*: growth in biomass of leaves, internodes and roots ; related consumption in C and N metabolites.
-* *CN-Wheat*: synthesis and degradation of C and N metabolites at organ level and allocation between tillers' organs. 
-* *Turgor-Growth*: water fluxes, organ water potential and co-regulation of leaf growth with Elong-Wheat.
-* *Respi-Wheat*: respiratory-costs related to the main biological processes.
-* *Senesc-Wheat*: organ senescence and consequences in organ biomass, green area and remobilisation of C and N metabolites.
-* *Fspm-Wheat*: is the submodule containing the interfaces (facades) for reading/updating information between each sub-model and the MTG. Also includes the scripts to be run for using all sub-models.
+* *Gas-Exchange*: Farquhar-based model of photosynthesis, stomatal conductance, organ temperature and transpiration.
+* *Morphogenesis*: regulation of leaf and internode elongation by C and N metabolites, temperature and coordination rules.
+* *Growth*: growth in biomass of leaves, internodes and roots ; related consumption in C and N metabolites.
+* *CN-Metabolism*: synthesis and degradation of C and N metabolites at organ level and allocation between tillers' organs. 
+* *Hydraulics*: water fluxes, organ water potential and co-regulation of leaf growth with Morphogenesis.
+* *Respiration*: respiratory-costs related to the main biological processes.
+* *Senescence*: organ senescence and consequences in organ biomass, green area and remobilisation of C and N metabolites.
+* *Integration*: is the submodule containing the interfaces (facades) for reading/updating information between each sub-model and the MTG. Also includes the scripts to be run for using all sub-models.
 
 Full documentation of each submodule is available at https://wheatfspm.readthedocs.io/
 
@@ -127,8 +127,8 @@ To run the example:
 * To run the simulation, use : `python main.py`
 
 ## Farquhar_standalone
-An example to show how to initialize and run the model Farquhar-Wheat in a standalone version.
-The example runs Farquhar-Wheat with two different options : either with or without a coupling with a hydraulic model.
+An example to show how to initialize and run the model Gas-Exchange in a standalone version.
+The example runs Gas-Exchange with two different options : either with or without a coupling with a hydraulic model.
 
 To run the example:
 * Open a command line interpreter in `WheatFspm\example\Farquhar_standalone`
