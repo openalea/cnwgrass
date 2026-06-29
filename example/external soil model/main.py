@@ -7,7 +7,7 @@ from openalea.integration.runner import run as runner
     main
     ~~~~
 
-    This example illustrates the coupling of WheatFspm with an external soil model, which provides root N uptake as an input.
+    This example illustrates the coupling of CNW-Grass with an external soil model, which provides root N uptake as an input.
     The initial conditions and weather data are the same as "Vegetative_stages".
     No coupling with hydraulics.
 

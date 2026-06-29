@@ -1,25 +1,25 @@
-# WheatFspm
+# CNW-Grass
 [![License](https://img.shields.io/badge/license-CeCILL--C-blue )](https://img.shields.io/badge/license-CeCILL--C-blue )
 
-[![OpenAlea CI](https://github.com/openalea/WheatFspm/actions/workflows/openalea_ci.yml/badge.svg?branch=master)](https://github.com/openalea/WheatFspm/actions/workflows/openalea_ci.yml)
-[![Documentation Status](https://readthedocs.org/projects/WheatFspm/badge/?version=latest)](https://WheatFspm.readthedocs.io/en/latest/?badge=latest)
+[![OpenAlea CI](https://github.com/openalea/cnwgrass/actions/workflows/openalea_ci.yml/badge.svg?branch=master)](https://github.com/openalea/cnwgrass/actions/workflows/openalea_ci.yml)
+[![Documentation Status](https://readthedocs.org/projects/cnwgrass/badge/?version=latest)](https://cnwgrass.readthedocs.io/en/latest/?badge=latest)
 
-[![Platform](https://anaconda.org/openalea3/openalea.wheatfspm/badges/version.svg)](https://anaconda.org/openalea3/openalea.wheatfspm)
-[![Platform](https://anaconda.org/openalea3/openalea.wheatfspm/badges/platforms.svg)](https://anaconda.org/openalea3/openalea.wheatfspm)
+[![Platform](https://anaconda.org/openalea3/openalea.cnwgrass/badges/version.svg)](https://anaconda.org/openalea3/openalea.cnwgrass)
+[![Platform](https://anaconda.org/openalea3/openalea.cnwgrass/badges/platforms.svg)](https://anaconda.org/openalea3/openalea.cnwgrass)
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
 
-[![Anaconda-Server Badge](https://anaconda.org/openalea3/openalea.wheatfspm/badges/latest_release_relative_date.svg)](https://anaconda.org/openalea3/openalea.wheatfspm)
+[![Anaconda-Server Badge](https://anaconda.org/openalea3/openalea.cnwgrass/badges/latest_release_relative_date.svg)](https://anaconda.org/openalea3/openalea.cnwgrass)
 
 ## About
 
-WheatFspm is a Functional Structural Plant Model (FSPM) of wheat which fully integrates shoot morphogenesis and the 
+CNW-Grass is a Functional Structural Plant Model (FSPM) of grasses which fully integrates shoot morphogenesis and the 
 metabolism of carbon (C) and nitrogen (N) at organ scale within a 3D representation of plant architecture. 
 Plants are described as a collection of tillers, each consisting in individual shoot organs (lamina, sheath, internode, peduncle, chaff), 
 a single root compartment, the grains, and a phloem.
-WheatFspm also includes a hydraulic model allowing to compute water flow in the plant and the co-regulation of 
+CNW-Grass also includes a hydraulic model allowing to compute water flow in the plant and the co-regulation of 
 leaf growth by metabolic and hydraulic processes. In this case, the plants also include a xylem compartment.
 
-WheatFspm simulates:
+CNW-Grass simulates:
 * Organ photosynthesis, temperature and transpiration from light distribution within the 3D canopy.
 * Leaf and internode elongation.
 * Leaf, internode and root growth in mass.
@@ -30,12 +30,12 @@ WheatFspm simulates:
 Model inputs are the pedoclimatic conditions (temperature, light, humidity, CO<sub>2</sub>, wind, 
 soil NO<sub>3</sub><sup>-</sup>, Soil Relative Water Content) and initial dimensions, mass and metabolic composition of individual organs.
 
-![Growing canopy](https://github.com/openalea/WheatFspm/blob/master/doc/_static/Vegetative_stages_topview.gif?raw=true "Growing canopy")
+![Growing canopy](https://github.com/openalea/cnwgrass/blob/master/doc/_static/Vegetative_stages_topview.gif?raw=true "Growing canopy")
 
 # Description
-WheatFspm consists in a set of sub-models (named submodules in git) which share inputs/outputs through an MTG object:
+CNW-Grass consists in a set of sub-models (named submodules in git) which share inputs/outputs through an MTG object:
 
-![WheatFSPM workflow](https://github.com/openalea/WheatFspm/blob/master/doc/_static/Modular_structure.png?raw=true "WheatFSPM workflow") 
+![CNW-Grass workflow](https://github.com/openalea/cnwgrass/blob/master/doc/_static/Modular_structure.png?raw=true "CNW-Grass workflow") 
 *Adapted from Gauthier et al. (2020)*
 
 * *Gas-Exchange*: Farquhar-based model of photosynthesis, stomatal conductance, organ temperature and transpiration.
@@ -47,7 +47,7 @@ WheatFspm consists in a set of sub-models (named submodules in git) which share 
 * *Senescence*: organ senescence and consequences in organ biomass, green area and remobilisation of C and N metabolites.
 * *Integration*: is the submodule containing the interfaces (facades) for reading/updating information between each sub-model and the MTG. Also includes the scripts to be run for using all sub-models.
 
-Full documentation of each submodule is available at https://wheatfspm.readthedocs.io/
+Full documentation of each submodule is available at https://cnwgrass.readthedocs.io/
 
 # Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -71,7 +71,7 @@ Full documentation of each submodule is available at https://wheatfspm.readthedo
 # Installation
 
 ## Prerequisites
-*WheatFspm* has the following dependencies, which are automatically installed (see [Installing](#installing)):
+*CNW-Grass* has the following dependencies, which are automatically installed (see [Installing](#installing)):
 
     * [openalea.MTG](https://github.com/openalea/mtg)
     * [openalea.Plantgl](https://github.com/openalea/plantgl)
@@ -85,45 +85,45 @@ For general information about OpenAlea installation, see https://openalea.readth
 ### Users
 
 ```shell
-conda create -n wheatfspm openalea.wheatfspm -c conda-forge -c openalea3
+conda create -n cnwgrass openalea.cnwgrass -c conda-forge -c openalea3
 ```
-To activate the environment: `conda activate wheatfspm`
+To activate the environment: `conda activate cnwgrass`
 
 ### Developers
 
 1) To clone the project, please use:
 ```commandline
-git clone https://github.com/openalea/WheatFspm
+git clone https://github.com/openalea/cnwgrass
 ```
 
 2) Move to the cloned directory, then create and activate a conda environment with dependencies:
 ```commandline
-conda env create -n wheatfspm -f conda/environment.yml 
-activate wheatfspm
+conda env create -n cnwgrass -f conda/environment.yml 
+activate cnwgrass
 ```
 # Documentation
-https://wheatfspm.rtfd.io
+https://cnwgrass.rtfd.io
 
 # Usage
 
-To date, *WheatFspm* has been used in four main contexts described below. 
+To date, *CNW-Grass* has been used in four main contexts described below. 
 
-The scripts to run *WheatFSPM* are located in:
-* `WheatFspm\example\NEMA`
-* `WheatFspm\example\Papier_FSPMA2016`
-* `WheatFspm\example\Vegetative_stages`
-* `WheatFspm\example\Scenarii_monoculms`
+The scripts to run *CNW-Grass* are located in:
+* `cnwgrass\example\NEMA`
+* `cnwgrass\example\Papier_FSPMA2016`
+* `cnwgrass\example\Vegetative_stages`
+* `cnwgrass\example\Scenarii_monoculms`
 
 ## external soil model
-This example illustrates the coupling of WheatFspm with an external soil model, which provides root N uptake as an input.
+This example illustrates the coupling of CNW-Grass with an external soil model, which provides root N uptake as an input.
 The initial conditions and weather data are the same as "Vegetative_stages".
 No coupling with hydraulics implemented.
 
 In this example, to mimic the coupling with an external soil model, the [main.py](example/Farquhar_standalone/main.py)root N uptake at each time step 
-is provided as an input in `WheatFspm\example\external soil model\inputs\nitrates_uptake_forcings.csv` 
+is provided as an input in `cnwgrass\example\external soil model\inputs\nitrates_uptake_forcings.csv` 
 
 To run the example:
-* Open a command line interpreter in `WheatFspm\example\external soil model`
+* Open a command line interpreter in `cnwgrass\example\external soil model`
 * To run the simulation, use : `python main.py`
 
 ## Farquhar_standalone
@@ -131,7 +131,7 @@ An example to show how to initialize and run the model Gas-Exchange in a standal
 The example runs Gas-Exchange with two different options : either with or without a coupling with a hydraulic model.
 
 To run the example:
-* Open a command line interpreter in `WheatFspm\example\Farquhar_standalone`
+* Open a command line interpreter in `cnwgrass\example\Farquhar_standalone`
 * To run the simulation, use : `python main.py`
 
 ## NEMA
@@ -139,18 +139,18 @@ This example deals with the post-flowering stages of wheat development under 3 n
 This work led to the research articles [Barillot *et al.* (2016a)](https://doi.org/10.1093/aob/mcw143) and [Barillot *et al.* (2016b)](https://doi.org/10.1093/aob/mcw144).
 
 To run the example:
-* Open a command line interpreter in `WheatFspm\example\NEMA`
+* Open a command line interpreter in `cnwgrass\example\NEMA`
 * To run the 3 scenarios, use : `python main.py`
 
 ## Scenarios monoculms
 This example explores the plasticity of leaf growth during the vegetative stages of wheat development. 
 The growth of wheat monoculms was simulated for highly contrasting conditions of soil nitrogen concentration, incident light and planting density.
-The list of scenarios and their characteristics are specified in  `WheatFspm\example\Scenarios_monoculms\inputs\scenarios_list.csv`
+The list of scenarios and their characteristics are specified in  `cnwgrass\example\Scenarios_monoculms\inputs\scenarios_list.csv`
 This work led to the research article [Gauthier *et al.* (2021)](https://doi.org/10.1093/insilicoplants/diab034).
 The original outputs as well as a singularity container with the code version used for the paper can be found at [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5503312.svg)](https://doi.org/10.5281/zenodo.5503312)
  
 To run the example:
-* Open a command line interpreter in `WheatFspm\example\Scenarios_monoculms`
+* Open a command line interpreter in `cnwgrass\example\Scenarios_monoculms`
 * List the scenarios you want to run in the script *main.py* (scenario id should match with those listed in the *scenarios_list.csv* file) 
 * Run the script *main.py*: `python main.py`
 * The whole set of scenarios was run in the high-performance computing center [MESO@LR](https://meso-lr.umontpellier.fr/) (Université de Montpellier, France) 
@@ -158,12 +158,12 @@ To run the example:
 ## Vegetative_stages
 This example simulates the early vegetative stages of wheat growth as measured from a field experiment conducted in 1998-99 in Grignon (France). It mainly covers the processes of leaf, internode and roots growth.
 Tillering is simplified: tiller emergence is a model input while tiller metabolism and growth is approximated from that  of the main stem.
-This work led to the research article [Gauthier *et al.* (2020)](https://doi.org/10.1093/jxb/eraa276). Results were obtained from the tag [paper_JXBot_2020](https://github.com/openalea/WheatFspm/releases/tag/paper_JXBot_2020).
+This work led to the research article [Gauthier *et al.* (2020)](https://doi.org/10.1093/jxb/eraa276). Results were obtained from the tag [paper_JXBot_2020](https://github.com/openalea/cnwgrass/releases/tag/paper_JXBot_2020).
 The simulation starts at leaf 4 emergence on December 1998 and finishes on April 1999 at the beginning of internode elongation.
 The model only accounts for C-N relations, there is no effect of water (hydraulics=False).
  
 To run the example:
-* Open a command line interpreter in `WheatFspm\example\Vegetative_stages`
+* Open a command line interpreter in `cnwgrass\example\Vegetative_stages`
 * Run script *main.py*: `python main.py`
 
 ## Vegetative_stages_hydraulics
