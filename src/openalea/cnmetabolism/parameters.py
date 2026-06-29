@@ -1,5 +1,4 @@
 # -*- coding: latin-1 -*-
-import pandas as pd
 
 """
     cnmetabolism.parameters
