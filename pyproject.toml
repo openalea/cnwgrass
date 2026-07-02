@@ -20,11 +20,11 @@ version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
 
 [project]
-name = "openalea.wheatfspm"
+name = "openalea.cnw-grass"
 authors = [
   { name = "Romain Barillot, Camille Chambon, Marion Gauthier, Victoria Acker, Bruno Andrieu" },
 ]
-description = "WheatFspm is a Functional Structural Plant Model (FSPM) of wheat ."
+description = "CNW-Grass is a Functional Structural Plant Model (FSPM) of wheat ."
 readme = "README.md"
 license = "CECILL-C"
 license-files = ["LICEN[CS]E*"]
@@ -91,11 +91,11 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/openalea/WheatFspm"
+Repository = "https://github.com/openalea/cnwgrass"
 Homepage = "https://openalea.rtfd.io"
-"Bug Tracker" = "https://github.com/openalea/WheatFspm/issues"
-Discussions = "https://github.com/openalea/WheatFspm/discussions"
-Changelog = "https://github.com/openalea/WheatFspm/releases"
+"Bug Tracker" = "https://github.com/openalea/cnwgrass/issues"
+Discussions = "https://github.com/openalea/cnwgrass/discussions"
+Changelog = "https://github.com/openalea/cnwgrass/releases"
 
 [tool.setuptools.package-data]
 "*" = ['*']

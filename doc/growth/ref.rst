@@ -1,61 +1,61 @@
-.. |growthwheat| replace:: :mod:`openalea.growthwheat`
+.. |growth| replace:: :mod:`openalea.cnwgrass.growth`
 
-.. _growthwheat_reference:
+.. _growth_reference:
 
 Reference guide
 #################
 
-This manual details, for each module of |growthwheat|, 
-the functions and objects included in |growthwheat|, 
+This manual details, for each module of |growth|,
+the functions and objects included in |growth|,
 describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.growthwheat.__init__
+.. currentmodule:: openalea.cnwgrass.growth.__init__
 
-|growthwheat| package
+|growth| package
 *********************************************************
 
-.. automodule:: openalea.growthwheat
+.. automodule:: openalea.cnwgrass.growth
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.growthwheat.model` module
+:mod:`openalea.cnwgrass.growth.model` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.model
+.. automodule:: openalea.cnwgrass.growth.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.growthwheat.simulation` module
+:mod:`openalea.cnwgrass.growth.simulation` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.simulation
+.. automodule:: openalea.cnwgrass.growth.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.growthwheat.converter` module
+:mod:`openalea.cnwgrass.growth.converter` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.converter
+.. automodule:: openalea.cnwgrass.growth.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.growthwheat.parameters` module
+:mod:`openalea.cnwgrass.growth.parameters` module
 *********************************************************
 
-.. automodule:: openalea.growthwheat.parameters
+.. automodule:: openalea.cnwgrass.growth.parameters
     :members:
     :undoc-members:
     :show-inheritance:

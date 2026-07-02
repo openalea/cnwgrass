@@ -1,0 +1,38 @@
+
+.. _integration:
+
+.. module:: openalea.cnwgrass.integration
+   :no-index:
+
+Integration documentation
+############################
+
+Module description
+==================
+
+.. topic:: Overview
+
+    Integration is a subpackage used to couple the models cn-metabolism, gas-exchange, morphogenesis, hydraulics,
+    growth, respiration, senescence, adel-wheat and caribu. The coupling between models occurs
+    through an MTG used to described plant architecture.
+    
+
+Documentation
+=============
+
+.. toctree::
+    :maxdepth: 2
+
+    User Guide<user.rst>   
+    Reference Guide<ref.rst>
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+
+.. |integration| replace:: :mod:`integration`
+

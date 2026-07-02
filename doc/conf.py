@@ -5,7 +5,7 @@ import os
 import pydata_sphinx_theme # Pydata theme: https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html
 
 from importlib.metadata import metadata
-project='wheatfspm'
+project='CNW-Grass'
 meta = metadata('openalea.' + project)
 release = meta.get("version")
 # for example take major/minor
@@ -119,7 +119,7 @@ htmlhelp_basename = project + '_documentation'
 html_context = {
     # "github_url": "https://github.com", # or your GitHub Enterprise site
     "github_user": "openalea",
-    "github_repo": "wheatfspm",
+    "github_repo": "cnw-grass",
     "github_version": "master",
     "doc_path": "doc",
 }
@@ -128,7 +128,7 @@ html_context = {
 latex_elements = {
 }
 latex_documents = [
-    (master_doc, 'wheatfspm.tex', u'WheatFspm Documentation',
+    (master_doc, 'cnw-grass.tex', u'CNW-Grass Documentation',
      u'INRAE / inria / CIRAD', 'manual'),
 ]
 

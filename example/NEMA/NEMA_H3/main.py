@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 import datetime
-import logging
 import os
 import random
 import time
@@ -12,8 +11,7 @@ import numpy as np
 import pandas as pd
 
 from openalea.adel.adel_dynamic import AdelDyn
-from openalea.cnwheat import tools as cnwheat_tools
-from openalea.fspmwheat import cnwheat_facade, farquharwheat_facade, senescwheat_facade, growthwheat_facade, caribu_facade, elongwheat_facade
+from openalea.cnwgrass.integration import cnmetabolism_facade, gasexchange_facade, senescence_facade, growth_facade, caribu_facade, morphogenesis_facade
 
 """
     main
@@ -35,41 +33,41 @@ GRAPHS_DIRPATH = 'graphs'
 # adelwheat inputs at t0
 ADELWHEAT_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'adelwheat')  #  the directory adelwheat must contain files 'adel0000.pckl' and 'scene0000.bgeom'
 
-# cnwheat inputs at t0
-CNWHEAT_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'cnwheat')
-CNWHEAT_PLANTS_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'plants_inputs.csv')
-CNWHEAT_AXES_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'axes_inputs.csv')
-CNWHEAT_METAMERS_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'metamers_inputs.csv')
-CNWHEAT_ORGANS_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'organs_inputs.csv')
-CNWHEAT_HIDDENZONE_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'hiddenzones_inputs.csv')
-CNWHEAT_ELEMENTS_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'elements_inputs.csv')
-CNWHEAT_SOILS_INPUTS_FILEPATH = os.path.join(CNWHEAT_INPUTS_DIRPATH, 'soils_inputs.csv')
+# cnmetabolism inputs at t0
+CNMETABOLISM_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'cnmetabolism')
+CNMETABOLISM_PLANTS_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'plants_inputs.csv')
+CNMETABOLISM_AXES_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'axes_inputs.csv')
+CNMETABOLISM_METAMERS_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'metamers_inputs.csv')
+CNMETABOLISM_ORGANS_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'organs_inputs.csv')
+CNMETABOLISM_HIDDENZONE_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'hiddenzones_inputs.csv')
+CNMETABOLISM_ELEMENTS_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'elements_inputs.csv')
+CNMETABOLISM_SOILS_INPUTS_FILEPATH = os.path.join(CNMETABOLISM_INPUTS_DIRPATH, 'soils_inputs.csv')
 
-# farquharwheat inputs at t0
-FARQUHARWHEAT_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'farquharwheat')
-FARQUHARWHEAT_INPUTS_FILEPATH = os.path.join(FARQUHARWHEAT_INPUTS_DIRPATH, 'inputs.csv')
-FARQUHARWHEAT_AXES_INPUTS_FILEPATH = os.path.join(FARQUHARWHEAT_INPUTS_DIRPATH, 'SAM_inputs.csv')
-METEO_FILEPATH = os.path.join(FARQUHARWHEAT_INPUTS_DIRPATH, 'meteo_Clermont_rebuild.csv')
-CARIBU_FILEPATH = os.path.join(FARQUHARWHEAT_INPUTS_DIRPATH, 'inputs_eabs.csv')
+# gasexchange inputs at t0
+GASEXCHANGE_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'gasexchange')
+GASEXCHANGE_INPUTS_FILEPATH = os.path.join(GASEXCHANGE_INPUTS_DIRPATH, 'inputs.csv')
+GASEXCHANGE_AXES_INPUTS_FILEPATH = os.path.join(GASEXCHANGE_INPUTS_DIRPATH, 'SAM_inputs.csv')
+METEO_FILEPATH = os.path.join(GASEXCHANGE_INPUTS_DIRPATH, 'meteo_Clermont_rebuild.csv')
+CARIBU_FILEPATH = os.path.join(GASEXCHANGE_INPUTS_DIRPATH, 'inputs_eabs.csv')
 
-# elongwheat inputs at t0
-ELONGWHEAT_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'elongwheat')
-ELONGWHEAT_HZ_INPUTS_FILEPATH = os.path.join(ELONGWHEAT_INPUTS_DIRPATH, 'hiddenzones_inputs.csv')
-ELONGWHEAT_ELEMENTS_INPUTS_FILEPATH = os.path.join(ELONGWHEAT_INPUTS_DIRPATH, 'elements_inputs.csv')
-ELONGWHEAT_AXES_INPUTS_FILEPATH = os.path.join(ELONGWHEAT_INPUTS_DIRPATH, 'SAM_inputs.csv')
+# morphogenesis inputs at t0
+MORPHOGENESIS_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'morphogenesis')
+MORPHOGENESIS_HZ_INPUTS_FILEPATH = os.path.join(MORPHOGENESIS_INPUTS_DIRPATH, 'hiddenzones_inputs.csv')
+MORPHOGENESIS_ELEMENTS_INPUTS_FILEPATH = os.path.join(MORPHOGENESIS_INPUTS_DIRPATH, 'elements_inputs.csv')
+MORPHOGENESIS_AXES_INPUTS_FILEPATH = os.path.join(MORPHOGENESIS_INPUTS_DIRPATH, 'SAM_inputs.csv')
 
-# senescwheat inputs at t0
-SENESCWHEAT_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'senescwheat')
-SENESCWHEAT_ROOTS_INPUTS_FILEPATH = os.path.join(SENESCWHEAT_INPUTS_DIRPATH, 'roots_inputs.csv')
-SENESCWHEAT_AXES_INPUTS_FILEPATH = os.path.join(SENESCWHEAT_INPUTS_DIRPATH, 'SAM_inputs.csv')
-SENESCWHEAT_ELEMENTS_INPUTS_FILEPATH = os.path.join(SENESCWHEAT_INPUTS_DIRPATH, 'elements_inputs.csv')
+# senescence inputs at t0
+SENESCENCE_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'senescence')
+SENESCENCE_ROOTS_INPUTS_FILEPATH = os.path.join(SENESCENCE_INPUTS_DIRPATH, 'roots_inputs.csv')
+SENESCENCE_AXES_INPUTS_FILEPATH = os.path.join(SENESCENCE_INPUTS_DIRPATH, 'SAM_inputs.csv')
+SENESCENCE_ELEMENTS_INPUTS_FILEPATH = os.path.join(SENESCENCE_INPUTS_DIRPATH, 'elements_inputs.csv')
 
-# growthwheat inputs at t0
-GROWTHWHEAT_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'growthwheat')
-GROWTHWHEAT_HIDDENZONE_INPUTS_FILEPATH = os.path.join(GROWTHWHEAT_INPUTS_DIRPATH, 'hiddenzones_inputs.csv')
-GROWTHWHEAT_ORGANS_INPUTS_FILEPATH = os.path.join(GROWTHWHEAT_INPUTS_DIRPATH, 'organs_inputs.csv')
-GROWTHWHEAT_ROOTS_INPUTS_FILEPATH = os.path.join(GROWTHWHEAT_INPUTS_DIRPATH, 'roots_inputs.csv')
-GROWTHWHEAT_AXES_INPUTS_FILEPATH = os.path.join(GROWTHWHEAT_INPUTS_DIRPATH, 'SAM_inputs.csv')
+# growth inputs at t0
+GROWTH_INPUTS_DIRPATH = os.path.join(INPUTS_DIRPATH, 'growth')
+GROWTH_HIDDENZONE_INPUTS_FILEPATH = os.path.join(GROWTH_INPUTS_DIRPATH, 'hiddenzones_inputs.csv')
+GROWTH_ORGANS_INPUTS_FILEPATH = os.path.join(GROWTH_INPUTS_DIRPATH, 'organs_inputs.csv')
+GROWTH_ROOTS_INPUTS_FILEPATH = os.path.join(GROWTH_INPUTS_DIRPATH, 'roots_inputs.csv')
+GROWTH_AXES_INPUTS_FILEPATH = os.path.join(GROWTH_INPUTS_DIRPATH, 'SAM_inputs.csv')
 
 # the path of the CSV files where to save the states of the modeled system at each step
 OUTPUTS_DIRPATH = 'outputs'
@@ -102,7 +100,7 @@ INPUTS_OUTPUTS_PRECISION = 5  # 10
 #
 # LOGGING_LEVEL = logging.INFO  # can be one of: DEBUG, INFO, WARNING, ERROR, CRITICAL
 #
-# cnwheat_tools.setup_logging(LOGGING_CONFIG_FILEPATH, LOGGING_LEVEL, log_model=False, log_compartments=False, log_derivatives=False)
+# cnmetabolism_tools.setup_logging(LOGGING_CONFIG_FILEPATH, LOGGING_LEVEL, log_model=False, log_compartments=False, log_derivatives=False)
 
 
 def calculate_PARa_from_df(g, Eabs_df, PARi, multiple_sources=False, ratio_diffus_PAR=None):
@@ -112,7 +110,7 @@ def calculate_PARa_from_df(g, Eabs_df, PARi, multiple_sources=False, ratio_diffu
 
     Eabs_df_grouped = Eabs_df.groupby(['plant', 'metamer', 'organ'])
 
-    #: the name of the elements modeled by FarquharWheat
+    #: the name of the elements modeled by Gas-Exchange
     CARIBU_ELEMENTS_NAMES = {'StemElement', 'LeafElement1'}
 
     PARa_element_data_dict = {}
@@ -148,11 +146,11 @@ def main(stop_time, run_simu=True, make_graphs=True):
         Eabs_df = pd.read_csv(CARIBU_FILEPATH)
 
         # define the time step in hours for each simulator
-        senescwheat_ts = 2
-        growthwheat_ts = 2
-        farquharwheat_ts = 2
-        elongwheat_ts = 2
-        cnwheat_ts = 1
+        senescence_ts = 2
+        growth_ts = 2
+        gasexchange_ts = 2
+        morphogenesis_ts = 2
+        cnmetabolism_ts = 1
 
         hour_to_second_conversion_factor = 3600
 
@@ -176,81 +174,81 @@ def main(stop_time, run_simu=True, make_graphs=True):
                                                     shared_elements_inputs_outputs_df,
                                                     adel_wheat)
 
-        # senescwheat
-        senescwheat_roots_inputs_t0 = pd.read_csv(SENESCWHEAT_ROOTS_INPUTS_FILEPATH)
-        senescwheat_axes_inputs_t0 = pd.read_csv(SENESCWHEAT_AXES_INPUTS_FILEPATH)
-        senescwheat_elements_inputs_t0 = pd.read_csv(SENESCWHEAT_ELEMENTS_INPUTS_FILEPATH)
-        senescwheat_facade_ = senescwheat_facade.SenescWheatFacade(g,
-                                                                   senescwheat_ts * hour_to_second_conversion_factor,
-                                                                   senescwheat_roots_inputs_t0,
-                                                                   senescwheat_axes_inputs_t0,
-                                                                   senescwheat_elements_inputs_t0,
-                                                                   shared_organs_inputs_outputs_df,
-                                                                   shared_axes_inputs_outputs_df,
-                                                                   shared_elements_inputs_outputs_df)
-        # growthwheat
-        growthwheat_hiddenzones_inputs_t0 = pd.read_csv(GROWTHWHEAT_HIDDENZONE_INPUTS_FILEPATH)
-        growthwheat_organ_inputs_t0 = pd.read_csv(GROWTHWHEAT_ORGANS_INPUTS_FILEPATH)
-        growthwheat_root_inputs_t0 = pd.read_csv(GROWTHWHEAT_ROOTS_INPUTS_FILEPATH)
-        growthwheat_axes_inputs_t0 = pd.read_csv(GROWTHWHEAT_AXES_INPUTS_FILEPATH)
-        growthwheat_facade_ = growthwheat_facade.GrowthWheatFacade(g,
-                                                                   growthwheat_ts * hour_to_second_conversion_factor,
-                                                                   growthwheat_hiddenzones_inputs_t0,
-                                                                   growthwheat_organ_inputs_t0,
-                                                                   growthwheat_root_inputs_t0,
-                                                                   growthwheat_axes_inputs_t0,
-                                                                   shared_organs_inputs_outputs_df,
-                                                                   shared_hiddenzones_inputs_outputs_df,
-                                                                   shared_elements_inputs_outputs_df,
-                                                                   shared_axes_inputs_outputs_df)
-
-        # farquharwheat
-        farquharwheat_elements_inputs_t0 = pd.read_csv(FARQUHARWHEAT_INPUTS_FILEPATH)
-        farquharwheat_axes_inputs_t0 = pd.read_csv(FARQUHARWHEAT_AXES_INPUTS_FILEPATH)
-        # Use the initial version of the photosynthesis sub-model (as in Barillot et al. 2016, and in Gauthier et al. 2020)
-        update_parameters_farquharwheat = {'SurfacicProteins': False, 'NSC_Retroinhibition': False}
-
-        farquharwheat_facade_ = farquharwheat_facade.FarquharWheatFacade(g,
-                                                                         farquharwheat_elements_inputs_t0,
-                                                                         farquharwheat_axes_inputs_t0,
-                                                                         shared_elements_inputs_outputs_df,
-                                                                         update_parameters=update_parameters_farquharwheat)
-
-        # elongwheat # Only for temperature related computations
-        elongwheat_hiddenzones_inputs_t0 = pd.read_csv(ELONGWHEAT_HZ_INPUTS_FILEPATH)
-        elongwheat_elements_inputs_t0 = pd.read_csv(ELONGWHEAT_ELEMENTS_INPUTS_FILEPATH)
-        elongwheat_axes_inputs_t0 = pd.read_csv(ELONGWHEAT_AXES_INPUTS_FILEPATH)
-
-        elongwheat_facade_ = elongwheat_facade.ElongWheatFacade(g,
-                                                                elongwheat_ts * hour_to_second_conversion_factor,
-                                                                elongwheat_axes_inputs_t0,
-                                                                elongwheat_hiddenzones_inputs_t0,
-                                                                elongwheat_elements_inputs_t0,
+        # senescence
+        senescence_roots_inputs_t0 = pd.read_csv(SENESCENCE_ROOTS_INPUTS_FILEPATH)
+        senescence_axes_inputs_t0 = pd.read_csv(SENESCENCE_AXES_INPUTS_FILEPATH)
+        senescence_elements_inputs_t0 = pd.read_csv(SENESCENCE_ELEMENTS_INPUTS_FILEPATH)
+        senescence_facade_ = senescence_facade.SENESCENCEFacade(g,
+                                                                senescence_ts * hour_to_second_conversion_factor,
+                                                                senescence_roots_inputs_t0,
+                                                                senescence_axes_inputs_t0,
+                                                                senescence_elements_inputs_t0,
+                                                                shared_organs_inputs_outputs_df,
                                                                 shared_axes_inputs_outputs_df,
-                                                                shared_hiddenzones_inputs_outputs_df,
-                                                                shared_elements_inputs_outputs_df,
-                                                                adel_wheat, option_static=True)
-        # cnwheat
-        cnwheat_organs_inputs_t0 = pd.read_csv(CNWHEAT_ORGANS_INPUTS_FILEPATH)
-        cnwheat_hiddenzones_inputs_t0 = pd.read_csv(CNWHEAT_HIDDENZONE_INPUTS_FILEPATH)
-        cnwheat_elements_inputs_t0 = pd.read_csv(CNWHEAT_ELEMENTS_INPUTS_FILEPATH)
-        cnwheat_soils_inputs_t0 = pd.read_csv(CNWHEAT_SOILS_INPUTS_FILEPATH)
-        update_cnwheat_parameters = {'roots': {'K_AMINO_ACIDS_EXPORT': 25*3E-5,
+                                                                shared_elements_inputs_outputs_df)
+        # growth
+        growth_hiddenzones_inputs_t0 = pd.read_csv(GROWTH_HIDDENZONE_INPUTS_FILEPATH)
+        growth_organ_inputs_t0 = pd.read_csv(GROWTH_ORGANS_INPUTS_FILEPATH)
+        growth_root_inputs_t0 = pd.read_csv(GROWTH_ROOTS_INPUTS_FILEPATH)
+        growth_axes_inputs_t0 = pd.read_csv(GROWTH_AXES_INPUTS_FILEPATH)
+        growth_facade_ = growth_facade.GrowthFacade(g,
+                                                    growth_ts * hour_to_second_conversion_factor,
+                                                    growth_hiddenzones_inputs_t0,
+                                                    growth_organ_inputs_t0,
+                                                    growth_root_inputs_t0,
+                                                    growth_axes_inputs_t0,
+                                                    shared_organs_inputs_outputs_df,
+                                                    shared_hiddenzones_inputs_outputs_df,
+                                                    shared_elements_inputs_outputs_df,
+                                                    shared_axes_inputs_outputs_df)
+
+        # gasexchange
+        gasexchange_elements_inputs_t0 = pd.read_csv(GASEXCHANGE_INPUTS_FILEPATH)
+        gasexchange_axes_inputs_t0 = pd.read_csv(GASEXCHANGE_AXES_INPUTS_FILEPATH)
+        # Use the initial version of the photosynthesis sub-model (as in Barillot et al. 2016, and in Gauthier et al. 2020)
+        update_parameters_gasexchange = {'SurfacicProteins': False, 'NSC_Retroinhibition': False}
+
+        gasexchange_facade_ = gasexchange_facade.GasExchangeFacade(g,
+                                                                   gasexchange_elements_inputs_t0,
+                                                                   gasexchange_axes_inputs_t0,
+                                                                   shared_elements_inputs_outputs_df,
+                                                                   update_parameters=update_parameters_gasexchange)
+
+        # morphogenesis # Only for temperature related computations
+        morphogenesis_hiddenzones_inputs_t0 = pd.read_csv(MORPHOGENESIS_HZ_INPUTS_FILEPATH)
+        morphogenesis_elements_inputs_t0 = pd.read_csv(MORPHOGENESIS_ELEMENTS_INPUTS_FILEPATH)
+        morphogenesis_axes_inputs_t0 = pd.read_csv(MORPHOGENESIS_AXES_INPUTS_FILEPATH)
+
+        morphogenesis_facade_ = morphogenesis_facade.MorphogenesisFacade(g,
+                                                                         morphogenesis_ts * hour_to_second_conversion_factor,
+                                                                         morphogenesis_axes_inputs_t0,
+                                                                         morphogenesis_hiddenzones_inputs_t0,
+                                                                         morphogenesis_elements_inputs_t0,
+                                                                         shared_axes_inputs_outputs_df,
+                                                                         shared_hiddenzones_inputs_outputs_df,
+                                                                         shared_elements_inputs_outputs_df,
+                                                                         adel_wheat, option_static=True)
+        # cnmetabolism
+        cnmetabolism_organs_inputs_t0 = pd.read_csv(CNMETABOLISM_ORGANS_INPUTS_FILEPATH)
+        cnmetabolism_hiddenzones_inputs_t0 = pd.read_csv(CNMETABOLISM_HIDDENZONE_INPUTS_FILEPATH)
+        cnmetabolism_elements_inputs_t0 = pd.read_csv(CNMETABOLISM_ELEMENTS_INPUTS_FILEPATH)
+        cnmetabolism_soils_inputs_t0 = pd.read_csv(CNMETABOLISM_SOILS_INPUTS_FILEPATH)
+        update_cnmetabolism_parameters = {'roots': {'K_AMINO_ACIDS_EXPORT': 25*3E-5,
                                                'K_NITRATE_EXPORT': 25*1E-6}}
 
-        cnwheat_facade_ = cnwheat_facade.CNWheatFacade(g,
-                                                       cnwheat_ts * hour_to_second_conversion_factor,
-                                                       CULM_DENSITY,
-                                                       update_cnwheat_parameters,
-                                                       cnwheat_organs_inputs_t0,
-                                                       cnwheat_hiddenzones_inputs_t0,
-                                                       cnwheat_elements_inputs_t0,
-                                                       cnwheat_soils_inputs_t0,
-                                                       shared_axes_inputs_outputs_df,
-                                                       shared_organs_inputs_outputs_df,
-                                                       shared_hiddenzones_inputs_outputs_df,
-                                                       shared_elements_inputs_outputs_df,
-                                                       shared_soils_inputs_outputs_df)
+        cnmetabolism_facade_ = cnmetabolism_facade.CNMetabolismFacade(g,
+                                                                      cnmetabolism_ts * hour_to_second_conversion_factor,
+                                                                      CULM_DENSITY,
+                                                                      update_cnmetabolism_parameters,
+                                                                      cnmetabolism_organs_inputs_t0,
+                                                                      cnmetabolism_hiddenzones_inputs_t0,
+                                                                      cnmetabolism_elements_inputs_t0,
+                                                                      cnmetabolism_soils_inputs_t0,
+                                                                      shared_axes_inputs_outputs_df,
+                                                                      shared_organs_inputs_outputs_df,
+                                                                      shared_hiddenzones_inputs_outputs_df,
+                                                                      shared_elements_inputs_outputs_df,
+                                                                      shared_soils_inputs_outputs_df)
 
         # adel_wheat.update_geometry(g) # NE FONCTIONNE PAS car MTG non compatible (pas de top et base element)
         # adel_wheat.plot(g)
@@ -276,43 +274,43 @@ def main(stop_time, run_simu=True, make_graphs=True):
 
         try:
 
-            for t_elongwheat in range(start_time, stop_time, elongwheat_ts):  # Only to compute temperature related variable
+            for t_morphogenesis in range(start_time, stop_time, morphogenesis_ts):  # Only to compute temperature related variable
 
-                # run ElongWheat
-                Tair, Tsoil = meteo.loc[t_elongwheat, ['air_temperature', 'air_temperature']]
-                elongwheat_facade_.run(Tair, Tsoil, option_static=True)
+                # run Morphogenesis
+                Tair, Tsoil = meteo.loc[t_morphogenesis, ['air_temperature', 'air_temperature']]
+                morphogenesis_facade_.run(Tair, Tsoil, option_static=True)
 
-                for t_senescwheat in range(t_elongwheat, t_elongwheat + elongwheat_ts, senescwheat_ts):
+                for t_senescence in range(t_morphogenesis, t_morphogenesis + morphogenesis_ts, senescence_ts):
 
-                    # run SenescWheat
-                    senescwheat_facade_.run(forced_max_protein_elements, postflowering_stages=True)
+                    # run Senescence
+                    senescence_facade_.run(forced_max_protein_elements, postflowering_stages=True)
 
                     # Test for fully senesced shoot tissues  #TODO: Make the model to work even if the whole shoot is dead but the roots are alived
-                    if sum(senescwheat_facade_._shared_elements_inputs_outputs_df['green_area']) <= 0.25E-6:
+                    if sum(senescence_facade_._shared_elements_inputs_outputs_df['green_area']) <= 0.25E-6:
                         break
 
-                    for t_growthwheat in range(t_senescwheat, t_senescwheat + senescwheat_ts, growthwheat_ts):
-                        # run GrowthWheat
-                        growthwheat_facade_.run(postflowering_stages=True)
+                    for t_growth in range(t_senescence, t_senescence + senescence_ts, growth_ts):
+                        # run Growth
+                        growth_facade_.run(postflowering_stages=True)
 
-                        for t_farquharwheat in range(t_growthwheat, t_growthwheat + growthwheat_ts, farquharwheat_ts):
+                        for t_gasexchange in range(t_growth, t_growth + growth_ts, gasexchange_ts):
                             # get the meteo of the current step
-                            Tair, ambient_CO2, RH, Ur, PARi = meteo.loc[t_farquharwheat, ['air_temperature', 'ambient_CO2', 'humidity', 'Wind', 'PARi']]
+                            Tair, ambient_CO2, RH, Ur, PARi = meteo.loc[t_gasexchange, ['air_temperature', 'ambient_CO2', 'humidity', 'Wind', 'PARi']]
                             # get PARa for current step
                             aggregated_PARa = calculate_PARa_from_df(g, Eabs_df, PARi, multiple_sources=False)
                             caribu_facade_.update_shared_MTG({'PARa': aggregated_PARa})
                             caribu_facade_.update_shared_dataframes({'PARa': aggregated_PARa})
-                            # run FarquharWheat
-                            farquharwheat_facade_.run(Tair, ambient_CO2, RH, Ur)
+                            # run Gas-Exchange
+                            gasexchange_facade_.run(Tair, ambient_CO2, RH, Ur)
 
-                            for t_cnwheat in range(t_farquharwheat, t_farquharwheat + senescwheat_ts, cnwheat_ts):
-                                Tair, Tsoil = meteo.loc[t_cnwheat, ['air_temperature', 'air_temperature']]
-                                # run CNWheat
-                                print('t cnwheat is {}'.format(t_cnwheat))
-                                cnwheat_facade_.run(Tair=Tair, Tsoil=Tsoil)
+                            for t_cnmetabolism in range(t_gasexchange, t_gasexchange + senescence_ts, cnmetabolism_ts):
+                                Tair, Tsoil = meteo.loc[t_cnmetabolism, ['air_temperature', 'air_temperature']]
+                                # run CN-Metabolism
+                                print('t cnmetabolism is {}'.format(t_cnmetabolism))
+                                cnmetabolism_facade_.run(Tair=Tair, Tsoil=Tsoil)
 
                                 # append the inputs and outputs at current step to global lists
-                                all_simulation_steps.append(t_cnwheat)
+                                all_simulation_steps.append(t_cnmetabolism)
                                 axes_all_data_list.append(shared_axes_inputs_outputs_df.copy())
                                 organs_all_data_list.append(shared_organs_inputs_outputs_df.copy())
                                 elements_all_data_list.append(shared_elements_inputs_outputs_df.copy())
@@ -393,12 +391,12 @@ def generate_graphs():
      postprocessing_df_dict[organs_postprocessing_file_basename],
      postprocessing_df_dict[elements_postprocessing_file_basename],
      postprocessing_df_dict[soils_postprocessing_file_basename]) \
-        = cnwheat_facade.CNWheatFacade.postprocessing(axes_outputs_df=states_df_dict[os.path.basename(AXES_STATES_FILEPATH).split('.')[0]],
-                                                      organs_outputs_df=states_df_dict[os.path.basename(ORGANS_STATES_FILEPATH).split('.')[0]],
-                                                      hiddenzone_outputs_df=None,
-                                                      elements_outputs_df=states_df_dict[os.path.basename(ELEMENTS_STATES_FILEPATH).split('.')[0]],
-                                                      soils_outputs_df=states_df_dict[os.path.basename(SOILS_STATES_FILEPATH).split('.')[0]],
-                                                      delta_t=delta_t)
+        = cnmetabolism_facade.CNMetabolismFacade.postprocessing(axes_outputs_df=states_df_dict[os.path.basename(AXES_STATES_FILEPATH).split('.')[0]],
+                                                                organs_outputs_df=states_df_dict[os.path.basename(ORGANS_STATES_FILEPATH).split('.')[0]],
+                                                                hiddenzone_outputs_df=None,
+                                                                elements_outputs_df=states_df_dict[os.path.basename(ELEMENTS_STATES_FILEPATH).split('.')[0]],
+                                                                soils_outputs_df=states_df_dict[os.path.basename(SOILS_STATES_FILEPATH).split('.')[0]],
+                                                                delta_t=delta_t)
 
     # save the postprocessing to disk
     for postprocessing_file_basename, postprocessing_filepath in ((axes_postprocessing_file_basename, AXES_POSTPROCESSING_FILEPATH),
@@ -423,12 +421,12 @@ def generate_graphs():
         postprocessing_df_dict[postprocessing_file_basename] = postprocessing_df
 
     # Generate graphs
-    cnwheat_facade.CNWheatFacade.graphs(axes_postprocessing_df=postprocessing_df_dict[axes_postprocessing_file_basename],
-                                        hiddenzones_postprocessing_df=None,
-                                        organs_postprocessing_df=postprocessing_df_dict[organs_postprocessing_file_basename],
-                                        elements_postprocessing_df=postprocessing_df_dict[elements_postprocessing_file_basename],
-                                        soils_postprocessing_df=postprocessing_df_dict[soils_postprocessing_file_basename],
-                                        graphs_dirpath=GRAPHS_DIRPATH)
+    cnmetabolism_facade.CNMetabolismFacade.graphs(axes_postprocessing_df=postprocessing_df_dict[axes_postprocessing_file_basename],
+                                                  hiddenzones_postprocessing_df=None,
+                                                  organs_postprocessing_df=postprocessing_df_dict[organs_postprocessing_file_basename],
+                                                  elements_postprocessing_df=postprocessing_df_dict[elements_postprocessing_file_basename],
+                                                  soils_postprocessing_df=postprocessing_df_dict[soils_postprocessing_file_basename],
+                                                  graphs_dirpath=GRAPHS_DIRPATH)
     #
     # x_name = 't'
     # x_label='Time (Hour)'
@@ -450,7 +448,7 @@ def generate_graphs():
     # for org_ph in (['blade'], ['sheath'], ['internode'], ['peduncle', 'ear']):
     #     for variable_name, variable_label in graph_variables_ph_elements.iteritems():
     #         graph_name = variable_name + '_' + '_'.join(org_ph) + '.PNG'
-    #         cnwheat_tools.plot_cnwheat_ouputs(ph_elements_output_df,
+    #         cnmetabolism_tools.plot_cnmetabolism_ouputs(ph_elements_output_df,
     #                       x_name = x_name,
     #                       y_name = variable_name,
     #                       x_label=x_label,
@@ -476,7 +474,7 @@ def generate_graphs():
     # for org in (['roots'], ['grains'], ['phloem']):
     #     for variable_name, variable_label in graph_variables_organs.iteritems():
     #         graph_name = variable_name + '_' + '_'.join(org) + '.PNG'
-    #         cnwheat_tools.plot_cnwheat_ouputs(organs_output_df,
+    #         cnmetabolism_tools.plot_cnmetabolism_ouputs(organs_output_df,
     #                       x_name = x_name,
     #                       y_name = variable_name,
     #                       x_label=x_label,

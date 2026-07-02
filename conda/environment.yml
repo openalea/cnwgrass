@@ -1,4 +1,4 @@
-name: wheatfspm
+name: cnwgrass
 channels:
   - openalea3
   - conda-forge

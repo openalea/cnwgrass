@@ -8,9 +8,10 @@ import getopt
 
 import pandas as pd
 
-from openalea.fspmwheat import fspmwheat_postprocessing
-from openalea.fspmwheat.fspmwheat_runner import run as fspmwheat_runner
+from openalea.cnwgrass.integration.runner import run as runner
+
 from example.Scenarios_monoculms import tools
+from example.Scenarios_monoculms import additional_postprocessing
 from example.Scenarios_monoculms import additional_graphs
 
 
@@ -116,9 +117,9 @@ def run_scenario(scenario_data, inputs_dir_path, outputs_dir_path='outputs'):
             os.mkdir(scenario_postprocessing_dirpath)
 
 
-        # -- RUN main fspmwheat --
+        # -- RUN main integration --
         try:
-            fspmwheat_runner(simulation_length=SIMULATION_LENGTH, forced_start_time=0,
+            runner(simulation_length=SIMULATION_LENGTH, forced_start_time=0,
                       run_simu=RUN_SIMU, run_postprocessing=RUN_POSTPROCESSING,generate_graphs=GENERATE_GRAPHS, run_from_outputs=RUN_FROM_OUTPUTS,
                       show_3Dplant=False, heterogeneous_canopy=True,
                       INPUTS_DIRPATH=INPUTS_DIRPATH,
@@ -133,11 +134,11 @@ def run_scenario(scenario_data, inputs_dir_path, outputs_dir_path='outputs'):
                                                 graph_list=['LAI', 'sum_dry_mass_axis', 'shoot_roots_ratio_axis', 'N_content_shoot_axis', 'Conc_Amino_acids_phloem', 'Conc_Sucrose_phloem', 'leaf_Lmax',
                                                             'green_area_blade'])
             if RUN_POSTPROCESSING:
-                fspmwheat_postprocessing.leaf_traits(scenario_outputs_dirpath, scenario_postprocessing_dirpath)
-                fspmwheat_postprocessing.table_C_usages(scenario_postprocessing_dirpath)
-                fspmwheat_postprocessing.calculate_performance_indices(scenario_outputs_dirpath, scenario_postprocessing_dirpath, os.path.join(INPUTS_DIRPATH, scenario_data.get('METEO_FILENAME')),
+                additional_postprocessing.leaf_traits(scenario_outputs_dirpath, scenario_postprocessing_dirpath)
+                additional_postprocessing.table_C_usages(scenario_postprocessing_dirpath)
+                additional_postprocessing.calculate_performance_indices(scenario_outputs_dirpath, scenario_postprocessing_dirpath, os.path.join(INPUTS_DIRPATH, scenario_data.get('METEO_FILENAME')),
                                                                        scenario_data.get('Plant_Density', 250.))
-                fspmwheat_postprocessing.canopy_dynamics(scenario_postprocessing_dirpath, os.path.join(INPUTS_DIRPATH, scenario_data.get('METEO_FILENAME')),
+                additional_postprocessing.canopy_dynamics(scenario_postprocessing_dirpath, os.path.join(INPUTS_DIRPATH, scenario_data.get('METEO_FILENAME')),
                                                          scenario_data.get('Plant_Density', 250.))
 
         except Exception as ex:
@@ -149,7 +150,7 @@ if __name__ == '__main__':
     # Default argument
     inputs = None
     outputs = None
-    scenario_id_argument = None  # None for multiprocessing or a single scenario ID
+    scenario_id_argument = 1#None  # None for multiprocessing or a single scenario ID
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "i:o:s:d", ["inputs=", "outputs=", "scenario="])

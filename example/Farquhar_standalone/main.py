@@ -2,14 +2,14 @@
 
 import pandas as pd
 
-from openalea.farquharwheat import simulation, converter
+from openalea.cnwgrass.gasexchange import converter, simulation
 
 """
     main
     ~~~~
 
-    An example to show how to initialize and run the model Farquhar-Wheat in a standalone version
-    The example runs Farquhar-Wheat with two different options : either with or without a coupling with a hydraulic model
+    An example to show how to initialize and run the model Gas-Exchange in a standalone version
+    The example runs Gas-Exchange with two different options : either with or without a coupling with a hydraulic model
 """
 
 INPUTS_ELEMENT_FILENAME = 'elements_inputs.csv'
