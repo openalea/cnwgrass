@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from openalea.gasexchange import simulation, converter
+from openalea.cnwgrass.gasexchange import converter, simulation
 
 """
     main

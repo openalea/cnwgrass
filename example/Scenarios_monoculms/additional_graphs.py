@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.image as mpimg
 
-from openalea.morphogenesis import parameters as morphogenesis_parameters
+from openalea.cnwgrass.morphogenesis import parameters as morphogenesis_parameters
 from example.Scenarios_monoculms import tools
 
 # ----- Import scenarios list and description

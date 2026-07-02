@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 import datetime
-import logging
 import os
 import random
 import time
@@ -12,8 +11,7 @@ import numpy as np
 import pandas as pd
 
 from openalea.adel.adel_dynamic import AdelDyn
-from openalea.cnmetabolism import tools as cnmetabolism_tools
-from openalea.integration import cnmetabolism_facade, gasexchange_facade, senescence_facade, growth_facade, caribu_facade, morphogenesis_facade
+from openalea.cnwgrass.integration import cnmetabolism_facade, gasexchange_facade, senescence_facade, growth_facade, caribu_facade, morphogenesis_facade
 
 """
     main
@@ -181,28 +179,28 @@ def main(stop_time, run_simu=True, make_graphs=True):
         senescence_axes_inputs_t0 = pd.read_csv(SENESCENCE_AXES_INPUTS_FILEPATH)
         senescence_elements_inputs_t0 = pd.read_csv(SENESCENCE_ELEMENTS_INPUTS_FILEPATH)
         senescence_facade_ = senescence_facade.SENESCENCEFacade(g,
-                                                                   senescence_ts * hour_to_second_conversion_factor,
-                                                                   senescence_roots_inputs_t0,
-                                                                   senescence_axes_inputs_t0,
-                                                                   senescence_elements_inputs_t0,
-                                                                   shared_organs_inputs_outputs_df,
-                                                                   shared_axes_inputs_outputs_df,
-                                                                   shared_elements_inputs_outputs_df)
+                                                                senescence_ts * hour_to_second_conversion_factor,
+                                                                senescence_roots_inputs_t0,
+                                                                senescence_axes_inputs_t0,
+                                                                senescence_elements_inputs_t0,
+                                                                shared_organs_inputs_outputs_df,
+                                                                shared_axes_inputs_outputs_df,
+                                                                shared_elements_inputs_outputs_df)
         # growth
         growth_hiddenzones_inputs_t0 = pd.read_csv(GROWTH_HIDDENZONE_INPUTS_FILEPATH)
         growth_organ_inputs_t0 = pd.read_csv(GROWTH_ORGANS_INPUTS_FILEPATH)
         growth_root_inputs_t0 = pd.read_csv(GROWTH_ROOTS_INPUTS_FILEPATH)
         growth_axes_inputs_t0 = pd.read_csv(GROWTH_AXES_INPUTS_FILEPATH)
         growth_facade_ = growth_facade.GrowthFacade(g,
-                                                                   growth_ts * hour_to_second_conversion_factor,
-                                                                   growth_hiddenzones_inputs_t0,
-                                                                   growth_organ_inputs_t0,
-                                                                   growth_root_inputs_t0,
-                                                                   growth_axes_inputs_t0,
-                                                                   shared_organs_inputs_outputs_df,
-                                                                   shared_hiddenzones_inputs_outputs_df,
-                                                                   shared_elements_inputs_outputs_df,
-                                                                   shared_axes_inputs_outputs_df)
+                                                    growth_ts * hour_to_second_conversion_factor,
+                                                    growth_hiddenzones_inputs_t0,
+                                                    growth_organ_inputs_t0,
+                                                    growth_root_inputs_t0,
+                                                    growth_axes_inputs_t0,
+                                                    shared_organs_inputs_outputs_df,
+                                                    shared_hiddenzones_inputs_outputs_df,
+                                                    shared_elements_inputs_outputs_df,
+                                                    shared_axes_inputs_outputs_df)
 
         # gasexchange
         gasexchange_elements_inputs_t0 = pd.read_csv(GASEXCHANGE_INPUTS_FILEPATH)
@@ -211,10 +209,10 @@ def main(stop_time, run_simu=True, make_graphs=True):
         update_parameters_gasexchange = {'SurfacicProteins': False, 'NSC_Retroinhibition': False}
 
         gasexchange_facade_ = gasexchange_facade.GasExchangeFacade(g,
-                                                                         gasexchange_elements_inputs_t0,
-                                                                         gasexchange_axes_inputs_t0,
-                                                                         shared_elements_inputs_outputs_df,
-                                                                         update_parameters=update_parameters_gasexchange)
+                                                                   gasexchange_elements_inputs_t0,
+                                                                   gasexchange_axes_inputs_t0,
+                                                                   shared_elements_inputs_outputs_df,
+                                                                   update_parameters=update_parameters_gasexchange)
 
         # morphogenesis # Only for temperature related computations
         morphogenesis_hiddenzones_inputs_t0 = pd.read_csv(MORPHOGENESIS_HZ_INPUTS_FILEPATH)
@@ -222,14 +220,14 @@ def main(stop_time, run_simu=True, make_graphs=True):
         morphogenesis_axes_inputs_t0 = pd.read_csv(MORPHOGENESIS_AXES_INPUTS_FILEPATH)
 
         morphogenesis_facade_ = morphogenesis_facade.MorphogenesisFacade(g,
-                                                                morphogenesis_ts * hour_to_second_conversion_factor,
-                                                                morphogenesis_axes_inputs_t0,
-                                                                morphogenesis_hiddenzones_inputs_t0,
-                                                                morphogenesis_elements_inputs_t0,
-                                                                shared_axes_inputs_outputs_df,
-                                                                shared_hiddenzones_inputs_outputs_df,
-                                                                shared_elements_inputs_outputs_df,
-                                                                adel_wheat, option_static=True)
+                                                                         morphogenesis_ts * hour_to_second_conversion_factor,
+                                                                         morphogenesis_axes_inputs_t0,
+                                                                         morphogenesis_hiddenzones_inputs_t0,
+                                                                         morphogenesis_elements_inputs_t0,
+                                                                         shared_axes_inputs_outputs_df,
+                                                                         shared_hiddenzones_inputs_outputs_df,
+                                                                         shared_elements_inputs_outputs_df,
+                                                                         adel_wheat, option_static=True)
         # cnmetabolism
         cnmetabolism_organs_inputs_t0 = pd.read_csv(CNMETABOLISM_ORGANS_INPUTS_FILEPATH)
         cnmetabolism_hiddenzones_inputs_t0 = pd.read_csv(CNMETABOLISM_HIDDENZONE_INPUTS_FILEPATH)
@@ -239,18 +237,18 @@ def main(stop_time, run_simu=True, make_graphs=True):
                                                'K_NITRATE_EXPORT': 25*1E-6}}
 
         cnmetabolism_facade_ = cnmetabolism_facade.CNMetabolismFacade(g,
-                                                       cnmetabolism_ts * hour_to_second_conversion_factor,
-                                                       CULM_DENSITY,
-                                                       update_cnmetabolism_parameters,
-                                                       cnmetabolism_organs_inputs_t0,
-                                                       cnmetabolism_hiddenzones_inputs_t0,
-                                                       cnmetabolism_elements_inputs_t0,
-                                                       cnmetabolism_soils_inputs_t0,
-                                                       shared_axes_inputs_outputs_df,
-                                                       shared_organs_inputs_outputs_df,
-                                                       shared_hiddenzones_inputs_outputs_df,
-                                                       shared_elements_inputs_outputs_df,
-                                                       shared_soils_inputs_outputs_df)
+                                                                      cnmetabolism_ts * hour_to_second_conversion_factor,
+                                                                      CULM_DENSITY,
+                                                                      update_cnmetabolism_parameters,
+                                                                      cnmetabolism_organs_inputs_t0,
+                                                                      cnmetabolism_hiddenzones_inputs_t0,
+                                                                      cnmetabolism_elements_inputs_t0,
+                                                                      cnmetabolism_soils_inputs_t0,
+                                                                      shared_axes_inputs_outputs_df,
+                                                                      shared_organs_inputs_outputs_df,
+                                                                      shared_hiddenzones_inputs_outputs_df,
+                                                                      shared_elements_inputs_outputs_df,
+                                                                      shared_soils_inputs_outputs_df)
 
         # adel_wheat.update_geometry(g) # NE FONCTIONNE PAS car MTG non compatible (pas de top et base element)
         # adel_wheat.plot(g)
@@ -397,11 +395,11 @@ def generate_graphs():
      postprocessing_df_dict[elements_postprocessing_file_basename],
      postprocessing_df_dict[soils_postprocessing_file_basename]) \
         = cnmetabolism_facade.CNMetabolismFacade.postprocessing(axes_outputs_df=states_df_dict[os.path.basename(AXES_STATES_FILEPATH).split('.')[0]],
-                                                      organs_outputs_df=states_df_dict[os.path.basename(ORGANS_STATES_FILEPATH).split('.')[0]],
-                                                      hiddenzone_outputs_df=None,
-                                                      elements_outputs_df=states_df_dict[os.path.basename(ELEMENTS_STATES_FILEPATH).split('.')[0]],
-                                                      soils_outputs_df=states_df_dict[os.path.basename(SOILS_STATES_FILEPATH).split('.')[0]],
-                                                      delta_t=delta_t)
+                                                                organs_outputs_df=states_df_dict[os.path.basename(ORGANS_STATES_FILEPATH).split('.')[0]],
+                                                                hiddenzone_outputs_df=None,
+                                                                elements_outputs_df=states_df_dict[os.path.basename(ELEMENTS_STATES_FILEPATH).split('.')[0]],
+                                                                soils_outputs_df=states_df_dict[os.path.basename(SOILS_STATES_FILEPATH).split('.')[0]],
+                                                                delta_t=delta_t)
 
     # save the postprocessing to disk
     for postprocessing_file_basename, postprocessing_filepath in ((axes_postprocessing_file_basename, AXES_POSTPROCESSING_FILEPATH),
@@ -427,11 +425,11 @@ def generate_graphs():
 
     # Generate graphs
     cnmetabolism_facade.CNMetabolismFacade.graphs(axes_postprocessing_df=postprocessing_df_dict[axes_postprocessing_file_basename],
-                                        hiddenzones_postprocessing_df=None,
-                                        organs_postprocessing_df=postprocessing_df_dict[organs_postprocessing_file_basename],
-                                        elements_postprocessing_df=postprocessing_df_dict[elements_postprocessing_file_basename],
-                                        soils_postprocessing_df=postprocessing_df_dict[soils_postprocessing_file_basename],
-                                        graphs_dirpath=GRAPHS_DIRPATH)
+                                                  hiddenzones_postprocessing_df=None,
+                                                  organs_postprocessing_df=postprocessing_df_dict[organs_postprocessing_file_basename],
+                                                  elements_postprocessing_df=postprocessing_df_dict[elements_postprocessing_file_basename],
+                                                  soils_postprocessing_df=postprocessing_df_dict[soils_postprocessing_file_basename],
+                                                  graphs_dirpath=GRAPHS_DIRPATH)
     #
     # x_name = 't'
     # x_label='Time (Hour)'

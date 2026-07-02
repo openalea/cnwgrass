@@ -45,7 +45,7 @@ test:
     {% endfor %}
 
   imports:
-    - openalea.integration
+    - openalea.cnwgrass.integration
 
   source_files:
     - test/**

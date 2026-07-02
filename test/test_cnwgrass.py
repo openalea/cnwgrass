@@ -3,13 +3,8 @@ import pandas as pd
 
 from openalea.adel.adel_dynamic import AdelDyn
 from openalea.adel.echap_leaf import echap_leaves
-from openalea.integration import caribu_facade
-from openalea.integration import cnmetabolism_facade
-from openalea.integration import morphogenesis_facade
-from openalea.integration import gasexchange_facade
-from openalea.integration import growth_facade
-from openalea.integration import senescence_facade
-from openalea.integration import hydraulics_facade
+from openalea.cnwgrass.integration import caribu_facade, morphogenesis_facade, growth_facade, senescence_facade, \
+    gasexchange_facade, cnmetabolism_facade, hydraulics_facade
 
 # -- SIMULATION PARAMETERS --
 # Length of the simulation (in hours)
@@ -119,21 +114,21 @@ def test_cnmetabolism():
 
     # Facade initialisation
     cnmetabolism_facade_ = cnmetabolism_facade.CNMetabolismFacade(g,
-                                                   CNMETABOLISM_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
-                                                   PLANT_DENSITY,
-                                                   {},
-                                                   cnmetabolism_axes_initial_state,
-                                                   cnmetabolism_organs_initial_state,
-                                                   cnmetabolism_hiddenzones_initial_state,
-                                                   cnmetabolism_elements_initial_state,
-                                                   cnmetabolism_soils_initial_state,
-                                                   shared_axes_inputs_outputs_df,
-                                                   shared_organs_inputs_outputs_df,
-                                                   shared_hiddenzones_inputs_outputs_df,
-                                                   shared_elements_inputs_outputs_df,
-                                                   shared_soils_inputs_outputs_df,
-                                                   tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5},
-                                                   update_shared_df=UPDATE_SHARED_DF)
+                                                                  CNMETABOLISM_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
+                                                                  PLANT_DENSITY,
+                                                                  {},
+                                                                  cnmetabolism_axes_initial_state,
+                                                                  cnmetabolism_organs_initial_state,
+                                                                  cnmetabolism_hiddenzones_initial_state,
+                                                                  cnmetabolism_elements_initial_state,
+                                                                  cnmetabolism_soils_initial_state,
+                                                                  shared_axes_inputs_outputs_df,
+                                                                  shared_organs_inputs_outputs_df,
+                                                                  shared_hiddenzones_inputs_outputs_df,
+                                                                  shared_elements_inputs_outputs_df,
+                                                                  shared_soils_inputs_outputs_df,
+                                                                  tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5},
+                                                                  update_shared_df=UPDATE_SHARED_DF)
 
     # Run facade
     cnmetabolism_facade_.run(12, 10)
@@ -149,15 +144,15 @@ def test_morphogenesis():
 
     # Facade initialisation
     morphogenesis_facade_ = morphogenesis_facade.MorphogenesisFacade(g,
-                                                            MORPHOGENESIS_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
-                                                            morphogenesis_axes_initial_state,
-                                                            morphogenesis_hiddenzones_initial_state,
-                                                            morphogenesis_elements_initial_state,
-                                                            shared_axes_inputs_outputs_df,
-                                                            shared_hiddenzones_inputs_outputs_df,
-                                                            shared_elements_inputs_outputs_df,
-                                                            adel_wheat, phytoT_df,
-                                                            update_shared_df=UPDATE_SHARED_DF)
+                                                                     MORPHOGENESIS_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
+                                                                     morphogenesis_axes_initial_state,
+                                                                     morphogenesis_hiddenzones_initial_state,
+                                                                     morphogenesis_elements_initial_state,
+                                                                     shared_axes_inputs_outputs_df,
+                                                                     shared_hiddenzones_inputs_outputs_df,
+                                                                     shared_elements_inputs_outputs_df,
+                                                                     adel_wheat, phytoT_df,
+                                                                     update_shared_df=UPDATE_SHARED_DF)
     # Run facade
     morphogenesis_facade_.run(12, 10)
     adel_wheat.update_geometry(g)
@@ -185,11 +180,11 @@ def test_gasexchange():
 
     # Facade initialisation
     gasexchange_facade_ = gasexchange_facade.GasExchangeFacade(g,
-                                                                     gasexchange_elements_initial_state,
-                                                                     gasexchange_axes_initial_state,
-                                                                     shared_elements_inputs_outputs_df,
-                                                                     update_parameters=update_parameters_gasexchange,
-                                                                     update_shared_df=UPDATE_SHARED_DF)
+                                                               gasexchange_elements_initial_state,
+                                                               gasexchange_axes_initial_state,
+                                                               shared_elements_inputs_outputs_df,
+                                                               update_parameters=update_parameters_gasexchange,
+                                                               update_shared_df=UPDATE_SHARED_DF)
 
     # Run facade
     gasexchange_facade_.run(12, 400, 0.8, 1.5)
@@ -203,16 +198,16 @@ def test_growth():
 
     # Facade initialisation
     growth_facade_ = growth_facade.GrowthFacade(g,
-                                                               GROWTH_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
-                                                               growth_hiddenzones_initial_state,
-                                                               growth_elements_initial_state,
-                                                               growth_root_initial_state,
-                                                               growth_axes_initial_state,
-                                                               shared_organs_inputs_outputs_df,
-                                                               shared_hiddenzones_inputs_outputs_df,
-                                                               shared_elements_inputs_outputs_df,
-                                                               shared_axes_inputs_outputs_df,
-                                                               update_shared_df=UPDATE_SHARED_DF)
+                                                GROWTH_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
+                                                growth_hiddenzones_initial_state,
+                                                growth_elements_initial_state,
+                                                growth_root_initial_state,
+                                                growth_axes_initial_state,
+                                                shared_organs_inputs_outputs_df,
+                                                shared_hiddenzones_inputs_outputs_df,
+                                                shared_elements_inputs_outputs_df,
+                                                shared_axes_inputs_outputs_df,
+                                                update_shared_df=UPDATE_SHARED_DF)
         # Run facade
     growth_facade_.run()
 
@@ -236,14 +231,14 @@ def test_senescence():
 
     # Facade initialisation
     senescence_facade_ = senescence_facade.SENESCENCEFacade(g,
-                                                               SENESCENCE_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
-                                                               senescence_roots_initial_state,
-                                                               senescence_axes_initial_state,
-                                                               senescence_elements_initial_state,
-                                                               shared_organs_inputs_outputs_df,
-                                                               shared_axes_inputs_outputs_df,
-                                                               shared_elements_inputs_outputs_df,
-                                                               update_shared_df=UPDATE_SHARED_DF)
+                                                            SENESCENCE_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
+                                                            senescence_roots_initial_state,
+                                                            senescence_axes_initial_state,
+                                                            senescence_elements_initial_state,
+                                                            shared_organs_inputs_outputs_df,
+                                                            shared_axes_inputs_outputs_df,
+                                                            shared_elements_inputs_outputs_df,
+                                                            update_shared_df=UPDATE_SHARED_DF)
     # Run facade
     senescence_facade_.run()
 
@@ -271,19 +266,19 @@ def test_hydraulics():
 
     # Facade initialisation
     hydraulics_facade_ = hydraulics_facade.hydraulicsFacade(g,
-                                                                  hydraulics_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
-                                                                  {},
-                                                                  hydraulics_axes_initial_state,
-                                                                  hydraulics_hiddenzones_initial_state,
-                                                                  hydraulics_elements_initial_state,
-                                                                  hydraulics_organs_initial_state,
-                                                                  hydraulics_soils_initial_state,
-                                                                  shared_axes_inputs_outputs_df,
-                                                                  shared_hiddenzones_inputs_outputs_df,
-                                                                  shared_elements_inputs_outputs_df,
-                                                                  shared_organs_inputs_outputs_df,
-                                                                  shared_soils_inputs_outputs_df,
-                                                                  update_shared_df=UPDATE_SHARED_DF)
+                                                            hydraulics_TIMESTEP * HOUR_TO_SECOND_CONVERSION_FACTOR,
+                                                            {},
+                                                            hydraulics_axes_initial_state,
+                                                            hydraulics_hiddenzones_initial_state,
+                                                            hydraulics_elements_initial_state,
+                                                            hydraulics_organs_initial_state,
+                                                            hydraulics_soils_initial_state,
+                                                            shared_axes_inputs_outputs_df,
+                                                            shared_hiddenzones_inputs_outputs_df,
+                                                            shared_elements_inputs_outputs_df,
+                                                            shared_organs_inputs_outputs_df,
+                                                            shared_soils_inputs_outputs_df,
+                                                            update_shared_df=UPDATE_SHARED_DF)
 
     # Run facade
     hydraulics_facade_.run()

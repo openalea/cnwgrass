@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from openalea.integration.runner import run as runner
+from openalea.cnwgrass.integration.runner import run as runner
 
 """
     main

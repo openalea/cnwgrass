@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-from openalea.cnmetabolism import model as cnmetabolism_model
+from openalea.cnwgrass.cnmetabolism import model as cnmetabolism_model
 
 
 def leaf_traits(scenario_outputs_dirpath, scenario_postprocessing_dirpath):
