@@ -1,7 +1,7 @@
 
 .. _integration:
 
-.. module:: openalea.integration
+.. module:: openalea.cnwgrass.integration
 
 Integration documentation
 ############################

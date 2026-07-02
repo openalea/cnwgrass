@@ -1,4 +1,4 @@
-.. |gasexchange| replace:: :mod:`openalea.gasexchange`
+.. |gasexchange| replace:: :mod:`openalea.cnwgrass.gasexchange`
 
 .. _gasexchange_reference:
 
@@ -11,52 +11,52 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.gasexchange.__init__
+.. currentmodule:: openalea.cnwgrass.gasexchange.__init__
 
 |gasexchange| package
 *********************************************************
 
-.. automodule:: openalea.gasexchange
+.. automodule:: openalea.cnwgrass.gasexchange
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.gasexchange.model` module
+:mod:`openalea.cnwgrass.gasexchange.model` module
 *********************************************************
 
-.. automodule:: openalea.gasexchange.model
+.. automodule:: openalea.cnwgrass.gasexchange.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.gasexchange.simulation` module
+:mod:`openalea.cnwgrass.gasexchange.simulation` module
 *********************************************************
 
-.. automodule:: openalea.gasexchange.simulation
+.. automodule:: openalea.cnwgrass.gasexchange.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.gasexchange.converter` module
+:mod:`openalea.cnwgrass.gasexchange.converter` module
 *********************************************************
 
-.. automodule:: openalea.gasexchange.converter
+.. automodule:: openalea.cnwgrass.gasexchange.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
 
-:mod:`openalea.gasexchange.parameters` module
+:mod:`openalea.cnwgrass.gasexchange.parameters` module
 *********************************************************
 
-.. automodule:: openalea.gasexchange.parameters
+.. automodule:: openalea.cnwgrass.gasexchange.parameters
     :members:
     :undoc-members:
     :show-inheritance:

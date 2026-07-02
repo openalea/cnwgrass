@@ -1,7 +1,7 @@
 
 .. _senescence:
 
-.. module:: openalea.senescence
+.. module:: openalea.cnwgrass.senescence
 
 Senescence documentation
 ############################

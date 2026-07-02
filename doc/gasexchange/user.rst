@@ -68,7 +68,7 @@ Package architecture
 
 Gas-Exchange is a Python package which consists of several Python modules:
 
-* :mod:`openalea.gasexchange.model`: the state and the equations of the model,
-* :mod:`openalea.gasexchange.parameters`: the parameters of the model,
-* :mod:`openalea.gasexchange.simulation`: the simulator (front-end) to run the model,
-* and :mod:`openalea.gasexchange.converter`: functions to convert Gas-Exchange inputs/outputs to/from Pandas dataframes.
+* :mod:`openalea.cnwgrass.gasexchange.model`: the state and the equations of the model,
+* :mod:`openalea.cnwgrass.gasexchange.parameters`: the parameters of the model,
+* :mod:`openalea.cnwgrass.gasexchange.simulation`: the simulator (front-end) to run the model,
+* and :mod:`openalea.cnwgrass.gasexchange.converter`: functions to convert Gas-Exchange inputs/outputs to/from Pandas dataframes.

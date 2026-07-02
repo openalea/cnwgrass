@@ -1,4 +1,4 @@
-.. |senescence| replace:: :mod:`openalea.senescence`
+.. |senescence| replace:: :mod:`openalea.cnwgrass.senescence`
 
 .. _senescence_reference:
 
@@ -11,51 +11,51 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.senescence.__init__
+.. currentmodule:: openalea.cnwgrass.senescence.__init__
 
 |senescence| package
 *********************************************************
 
-.. automodule:: openalea.senescence
+.. automodule:: openalea.cnwgrass.senescence
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.senescence.model` module
+:mod:`openalea.cnwgrass.senescence.model` module
 *********************************************************
 
-.. automodule:: openalea.senescence.model
+.. automodule:: openalea.cnwgrass.senescence.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
-:mod:`openalea.senescence.simulation` module
+:mod:`openalea.cnwgrass.senescence.simulation` module
 *********************************************************
 
-.. automodule:: openalea.senescence.simulation
+.. automodule:: openalea.cnwgrass.senescence.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.senescence.converter` module
+:mod:`openalea.cnwgrass.senescence.converter` module
 *********************************************************
 
-.. automodule:: openalea.senescence.converter
+.. automodule:: openalea.cnwgrass.senescence.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
 
-:mod:`openalea.senescence.parameters` module
+:mod:`openalea.cnwgrass.senescence.parameters` module
 *********************************************************
 
-.. automodule:: openalea.senescence.parameters
+.. automodule:: openalea.cnwgrass.senescence.parameters
     :members:
     :undoc-members:
     :show-inheritance:

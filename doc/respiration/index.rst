@@ -1,7 +1,7 @@
 
 .. _respiration:
 
-.. module:: openalea.respiration
+.. module:: openalea.cnwgrass.respiration
 
 Respiration documentation
 ############################
@@ -33,5 +33,5 @@ Indices and tables
 * :ref:`search`
 
 
-.. |respiration| replace:: :mod:`openalea.respiration`
+.. |respiration| replace:: :mod:`openalea.cnwgrass.respiration`
 

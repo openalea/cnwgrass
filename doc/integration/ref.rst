@@ -1,4 +1,4 @@
-.. |integration| replace:: :mod:`openalea.integration`
+.. |integration| replace:: :mod:`openalea.cnwgrass.integration`
 
 .. _integration_reference:
 
@@ -11,116 +11,116 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.integration.__init__
+.. currentmodule:: openalea.cnwgrass.integration.__init__
 
 |integration| package
 *********************************************************
 
-.. automodule:: openalea.integration
+.. automodule:: openalea.cnwgrass.integration
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.integration.caribu_facade` module
+:mod:`openalea.cnwgrass.integration.caribu_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.caribu_facade
+.. automodule:: openalea.cnwgrass.integration.caribu_facade
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.integration.cnmetabolism_facade` module
+:mod:`openalea.cnwgrass.integration.cnmetabolism_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.cnmetabolism_facade
+.. automodule:: openalea.cnwgrass.integration.cnmetabolism_facade
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.integration.morphogenesis_facade` module
+:mod:`openalea.cnwgrass.integration.morphogenesis_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.morphogenesis_facade
+.. automodule:: openalea.cnwgrass.integration.morphogenesis_facade
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
 
-:mod:`openalea.integration.gasexchange_facade` module
+:mod:`openalea.cnwgrass.integration.gasexchange_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.gasexchange_facade
+.. automodule:: openalea.cnwgrass.integration.gasexchange_facade
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
 
-:mod:`openalea.integration.build_outputs` module
+:mod:`openalea.cnwgrass.integration.build_outputs` module
 *********************************************************
 
-.. automodule:: openalea.integration.build_outputs
+.. automodule:: openalea.cnwgrass.integration.build_outputs
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.integration.integration_postprocessing` module
+:mod:`openalea.cnwgrass.integration.integration_postprocessing` module
 *********************************************************
 
-.. automodule:: openalea.integration.integration_postprocessing
+.. automodule:: openalea.cnwgrass.integration.integration_postprocessing
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.integration.runner` module
+:mod:`openalea.cnwgrass.integration.runner` module
 *********************************************************
 
-.. automodule:: openalea.integration.runner
+.. automodule:: openalea.cnwgrass.integration.runner
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.integration.growth_facade` module
+:mod:`openalea.cnwgrass.integration.growth_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.growth_facade
+.. automodule:: openalea.cnwgrass.integration.growth_facade
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.integration.senescence_facade` module
+:mod:`openalea.cnwgrass.integration.senescence_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.senescence_facade
+.. automodule:: openalea.cnwgrass.integration.senescence_facade
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.integration.tools` module
+:mod:`openalea.cnwgrass.integration.tools` module
 *********************************************************
 
-.. automodule:: openalea.integration.tools
+.. automodule:: openalea.cnwgrass.integration.tools
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.integration.hydraulics_facade` module
+:mod:`openalea.cnwgrass.integration.hydraulics_facade` module
 *********************************************************
 
-.. automodule:: openalea.integration.hydraulics_facade
+.. automodule:: openalea.cnwgrass.integration.hydraulics_facade
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,4 +1,4 @@
-.. |growth| replace:: :mod:`openalea.growth`
+.. |growth| replace:: :mod:`openalea.cnwgrass.growth`
 
 .. _growth_reference:
 
@@ -11,51 +11,51 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.growth.__init__
+.. currentmodule:: openalea.cnwgrass.growth.__init__
 
 |growth| package
 *********************************************************
 
-.. automodule:: openalea.growth
+.. automodule:: openalea.cnwgrass.growth
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.growth.model` module
+:mod:`openalea.cnwgrass.growth.model` module
 *********************************************************
 
-.. automodule:: openalea.growth.model
+.. automodule:: openalea.cnwgrass.growth.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.growth.simulation` module
+:mod:`openalea.cnwgrass.growth.simulation` module
 *********************************************************
 
-.. automodule:: openalea.growth.simulation
+.. automodule:: openalea.cnwgrass.growth.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.growth.converter` module
+:mod:`openalea.cnwgrass.growth.converter` module
 *********************************************************
 
-.. automodule:: openalea.growth.converter
+.. automodule:: openalea.cnwgrass.growth.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.growth.parameters` module
+:mod:`openalea.cnwgrass.growth.parameters` module
 *********************************************************
 
-.. automodule:: openalea.growth.parameters
+.. automodule:: openalea.cnwgrass.growth.parameters
     :members:
     :undoc-members:
     :show-inheritance:

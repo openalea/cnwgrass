@@ -1,4 +1,4 @@
-.. |cnmetabolism| replace:: :mod:`openalea.cnmetabolism`
+.. |cnmetabolism| replace:: :mod:`openalea.cnwgrass.cnmetabolism`
 
 .. _cnmetabolism_reference:
 
@@ -11,70 +11,70 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.cnmetabolism.__init__
+.. currentmodule:: openalea.cnwgrass.cnmetabolism.__init__
 
 |cnmetabolism| package
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism
+.. automodule:: openalea.cnwgrass.cnmetabolism
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.cnmetabolism.simulation` module
+:mod:`openalea.cnwgrass.cnmetabolism.simulation` module
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism.simulation
+.. automodule:: openalea.cnwgrass.cnmetabolism.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.cnmetabolism.model` module
+:mod:`openalea.cnwgrass.cnmetabolism.model` module
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism.model
+.. automodule:: openalea.cnwgrass.cnmetabolism.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.cnmetabolism.parameters` module
+:mod:`openalea.cnwgrass.cnmetabolism.parameters` module
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism.parameters
+.. automodule:: openalea.cnwgrass.cnmetabolism.parameters
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.cnmetabolism.tools` module
+:mod:`openalea.cnwgrass.cnmetabolism.tools` module
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism.tools
+.. automodule:: openalea.cnwgrass.cnmetabolism.tools
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
 
-:mod:`openalea.cnmetabolism.converter` module
+:mod:`openalea.cnwgrass.cnmetabolism.converter` module
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism.converter
+.. automodule:: openalea.cnwgrass.cnmetabolism.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
-:mod:`openalea.cnmetabolism.postprocessing` module
+:mod:`openalea.cnwgrass.cnmetabolism.postprocessing` module
 *********************************************************
 
-.. automodule:: openalea.cnmetabolism.postprocessing
+.. automodule:: openalea.cnwgrass.cnmetabolism.postprocessing
     :members:
     :undoc-members:
     :show-inheritance:

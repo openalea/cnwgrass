@@ -1,7 +1,7 @@
 
 .. _gasexchange:
 
-.. module:: openalea.gasexchange
+.. module:: openalea.cnwgrass.gasexchange
 
 Gas-Exchange documentation
 ############################

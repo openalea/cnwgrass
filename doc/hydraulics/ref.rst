@@ -1,4 +1,4 @@
-.. |hydraulics| replace:: :mod:`openalea.hydraulics`
+.. |hydraulics| replace:: :mod:`openalea.cnwgrass.hydraulics`
 
 .. _hydraulics_reference:
 
@@ -11,70 +11,70 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.hydraulics.__init__
+.. currentmodule:: openalea.cnwgrass.hydraulics.__init__
 
 |hydraulics| package
 *********************************************************
 
-.. automodule:: openalea.hydraulics
+.. automodule:: openalea.cnwgrass.hydraulics
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.hydraulics.simulation` module
+:mod:`openalea.cnwgrass.hydraulics.simulation` module
 *********************************************************
 
-.. automodule:: openalea.hydraulics.simulation
+.. automodule:: openalea.cnwgrass.hydraulics.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.hydraulics.model` module
+:mod:`openalea.cnwgrass.hydraulics.model` module
 *********************************************************
 
-.. automodule:: openalea.hydraulics.model
+.. automodule:: openalea.cnwgrass.hydraulics.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.hydraulics.parameters` module
+:mod:`openalea.cnwgrass.hydraulics.parameters` module
 *********************************************************
 
-.. automodule:: openalea.hydraulics.parameters
+.. automodule:: openalea.cnwgrass.hydraulics.parameters
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.hydraulics.tools` module
+:mod:`openalea.cnwgrass.hydraulics.tools` module
 *********************************************************
 
-.. automodule:: openalea.hydraulics.tools
+.. automodule:: openalea.cnwgrass.hydraulics.tools
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
 
-:mod:`openalea.hydraulics.converter` module
+:mod:`openalea.cnwgrass.hydraulics.converter` module
 *********************************************************
 
-.. automodule:: openalea.hydraulics.converter
+.. automodule:: openalea.cnwgrass.hydraulics.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
-:mod:`openalea.hydraulics.postprocessing` module
+:mod:`openalea.cnwgrass.hydraulics.postprocessing` module
 *********************************************************
 
-.. automodule:: openalea.hydraulics.postprocessing
+.. automodule:: openalea.cnwgrass.hydraulics.postprocessing
     :members:
     :undoc-members:
     :show-inheritance:

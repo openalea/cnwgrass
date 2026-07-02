@@ -1,7 +1,7 @@
 
 .. _cnmetabolism:
 
-.. module:: openalea.cnmetabolism
+.. module:: openalea.cnwgrass.cnmetabolism
 
 CN-Metabolism documentation
 ######################

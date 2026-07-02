@@ -34,12 +34,12 @@ Package architecture
 
 CN-Metabolism is a Python package which consists of several Python modules:
 
-* :mod:`openalea.cnmetabolism.model`: the state and the equations of the model,
-* :mod:`openalea.cnmetabolism.parameters`: the parameters of the model,
-* :mod:`openalea.cnmetabolism.simulation`: the simulator (front-end) to run the model,
-* :mod:`openalea.cnmetabolism.postprocessing`: the post-processing and graph functions,
-* :mod:`openalea.cnmetabolism.tools`: tools to help for the validation of the outputs,
-* and :mod:`openalea.cnmetabolism.converter`: functions to convert CN-Metabolism inputs/outputs to/from Pandas dataframes.
+* :mod:`openalea.cnwgrass.cnmetabolism.model`: the state and the equations of the model,
+* :mod:`openalea.cnwgrass.cnmetabolism.parameters`: the parameters of the model,
+* :mod:`openalea.cnwgrass.cnmetabolism.simulation`: the simulator (front-end) to run the model,
+* :mod:`openalea.cnwgrass.cnmetabolism.postprocessing`: the post-processing and graph functions,
+* :mod:`openalea.cnwgrass.cnmetabolism.tools`: tools to help for the validation of the outputs,
+* and :mod:`openalea.cnwgrass.cnmetabolism.converter`: functions to convert CN-Metabolism inputs/outputs to/from Pandas dataframes.
 
 .. figure:: ./image/architecture.png
    :width: 50%

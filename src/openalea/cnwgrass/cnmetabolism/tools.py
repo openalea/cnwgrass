@@ -50,6 +50,6 @@ def setup_logging(config_filepath='logging.json', level=logging.INFO,
     root_logger.setLevel(level)
 
     cnmetabolism_model_logger = logging.getLogger('cnmetabolism.model')
-    cnmetabolism_model_logger.disabled = not log_model  # set to False to log messages from openalea.cnmetabolism.model
+    cnmetabolism_model_logger.disabled = not log_model  # set to False to log messages from openalea.cnwgrass.cnmetabolism.model
     logging.getLogger('cnmetabolism.compartments').disabled = not log_compartments  # set to False to log the compartments
     logging.getLogger('cnmetabolism.derivatives').disabled = not log_derivatives  # set to False to log the derivatives

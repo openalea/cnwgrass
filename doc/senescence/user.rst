@@ -37,7 +37,7 @@ Package architecture
 
 Senescence is a Python package which consists of several Python modules:
 
-* :mod:`openalea.senescence.model`: the state and the equations of the model,
-* :mod:`openalea.senescence.parameters`: the parameters of the model,
-* :mod:`openalea.senescence.simulation`: the simulator (front-end) to run the model,
-* and :mod:`openalea.senescence.converter`: functions to convert Senescence inputs/outputs to/from Pandas dataframes.
+* :mod:`openalea.cnwgrass.senescence.model`: the state and the equations of the model,
+* :mod:`openalea.cnwgrass.senescence.parameters`: the parameters of the model,
+* :mod:`openalea.cnwgrass.senescence.simulation`: the simulator (front-end) to run the model,
+* and :mod:`openalea.cnwgrass.senescence.converter`: functions to convert Senescence inputs/outputs to/from Pandas dataframes.

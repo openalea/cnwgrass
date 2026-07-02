@@ -39,4 +39,4 @@ Package architecture
 
 Respiration is a Python package which consists of several Python modules:
 
-* :mod:`openalea.respiration.model`: the state and the equations of the model,
+* :mod:`openalea.cnwgrass.respiration.model`: the state and the equations of the model,

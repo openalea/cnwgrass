@@ -31,12 +31,12 @@ Package architecture
 
 Hydraulics is a Python package which consists of several Python modules:
 
-* :mod:`openalea.hydraulics.model`: the state and the equations of the model,
-* :mod:`openalea.hydraulics.parameters`: the parameters of the model,
-* :mod:`openalea.hydraulics.simulation`: the simulator (front-end) to run the model,
-* :mod:`openalea.hydraulics.postprocessing`: the post-processing and graph functions,
-* :mod:`openalea.hydraulics.tools`: tools to help for the validation of the outputs,
-* and :mod:`openalea.hydraulics.converter`: functions to convert Hydraulics inputs/outputs to/from Pandas dataframes.
+* :mod:`openalea.cnwgrass.hydraulics.model`: the state and the equations of the model,
+* :mod:`openalea.cnwgrass.hydraulics.parameters`: the parameters of the model,
+* :mod:`openalea.cnwgrass.hydraulics.simulation`: the simulator (front-end) to run the model,
+* :mod:`openalea.cnwgrass.hydraulics.postprocessing`: the post-processing and graph functions,
+* :mod:`openalea.cnwgrass.hydraulics.tools`: tools to help for the validation of the outputs,
+* and :mod:`openalea.cnwgrass.hydraulics.converter`: functions to convert Hydraulics inputs/outputs to/from Pandas dataframes.
 
 
 Parameters, variables and equations

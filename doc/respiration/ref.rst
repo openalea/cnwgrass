@@ -1,4 +1,4 @@
-.. |respiration| replace:: :mod:`openalea.respiration`
+.. |respiration| replace:: :mod:`openalea.cnwgrass.respiration`
 
 .. _respiration_reference:
 
@@ -11,12 +11,12 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.respiration.__init__
+.. currentmodule:: openalea.cnwgrass.respiration.__init__
 
 |respiration| package
 *********************************************************
 
-.. automodule:: openalea.respiration
+.. automodule:: openalea.cnwgrass.respiration
     :members:
     :undoc-members:
     :show-inheritance:
@@ -26,7 +26,7 @@ describing what they are and what they do.
 :mod:`respiration.model` module
 *********************************************************
 
-.. automodule:: openalea.respiration.model
+.. automodule:: openalea.cnwgrass.respiration.model
     :members:
     :undoc-members:
     :show-inheritance:

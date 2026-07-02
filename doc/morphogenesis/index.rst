@@ -1,7 +1,7 @@
 
 .. _morphogenesis:
 
-.. module:: openalea.morphogenesis
+.. module:: openalea.cnwgrass.morphogenesis
 
 Morphogenesis documentation
 ############################
@@ -15,7 +15,7 @@ Module description
     compartment (encompassing all growing and mature tissues of the growing leaves located inside the pseudostem) and
     any exposed tissues of the growing leaves.
 
-    Two main approaches are available in Morphogenesis depending on the coupling to :mod:`openalea.hydraulics`:
+    Two main approaches are available in Morphogenesis depending on the coupling to :mod:`openalea.cnwgrass.hydraulics`:
 
     * The rates of leaf elongation are totally regulated by the C-N concentration in the hiddenzone and coordination rules between successive leaves.
       Leaf water status is not taking into account.

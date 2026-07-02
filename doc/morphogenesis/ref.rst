@@ -1,4 +1,4 @@
-.. |morphogenesis| replace:: :mod:`openalea.morphogenesis`
+.. |morphogenesis| replace:: :mod:`openalea.cnwgrass.morphogenesis`
 
 .. _morphogenesis_reference:
 
@@ -11,52 +11,52 @@ describing what they are and what they do.
 
 .. contents::
 
-.. currentmodule:: openalea.morphogenesis.__init__
+.. currentmodule:: openalea.cnwgrass.morphogenesis.__init__
 
 |morphogenesis| package
 *********************************************************
 
-.. automodule:: openalea.morphogenesis
+.. automodule:: openalea.cnwgrass.morphogenesis
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
     
 
-:mod:`openalea.morphogenesis.model` module
+:mod:`openalea.cnwgrass.morphogenesis.model` module
 *********************************************************
 
-.. automodule:: openalea.morphogenesis.model
+.. automodule:: openalea.cnwgrass.morphogenesis.model
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
     
-:mod:`openalea.morphogenesis.simulation` module
+:mod:`openalea.cnwgrass.morphogenesis.simulation` module
 *********************************************************
 
-.. automodule:: openalea.morphogenesis.simulation
+.. automodule:: openalea.cnwgrass.morphogenesis.simulation
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis: 
     
 
-:mod:`openalea.morphogenesis.converter` module
+:mod:`openalea.cnwgrass.morphogenesis.converter` module
 *********************************************************
 
-.. automodule:: openalea.morphogenesis.converter
+.. automodule:: openalea.cnwgrass.morphogenesis.converter
     :members:
     :undoc-members:
     :show-inheritance:
     :synopsis:
 
 
-:mod:`openalea.morphogenesis.parameters` module
+:mod:`openalea.cnwgrass.morphogenesis.parameters` module
 *********************************************************
 
-.. automodule:: openalea.morphogenesis.parameters
+.. automodule:: openalea.cnwgrass.morphogenesis.parameters
     :members:
     :undoc-members:
     :show-inheritance:

@@ -28,7 +28,7 @@ Model functioning depends on the desired version:
 
 - When leaf status is taken into account (hydraulics=True)
   Leaf elongation rate in Phase I is co-regulated by metabolite concentration in the hidden zone and water potential of the xylem.
-  Phase II is almost deactivated, as leaf elongation rate is calculated in :mod:`openalea.hydraulics`:
+  Phase II is almost deactivated, as leaf elongation rate is calculated in :mod:`openalea.cnwgrass.hydraulics`:
   In this version, the separation between the lamina and the sheath is only occurring at the end of leaf elongation.
 
 
@@ -36,7 +36,7 @@ At leaf n emergence, its maximal width and surfacic mass are defined according t
 of the hiddenzone averaged during to phyllochrons.
 
 Morphogenesis also simulates some functions of the shoot apical meristem : leaf primordia emission and floral transition
-Morphogenesis has on option to force the final dimensions of each leaves to those defined in :mod:`openalea.morphogenesis.parameters` module
+Morphogenesis has on option to force the final dimensions of each leaves to those defined in :mod:`openalea.cnwgrass.morphogenesis.parameters` module
 
 Inputs of Morphogenesis
 ========================
@@ -60,7 +60,7 @@ Package architecture
 
 Morphogenesis is a Python package which consists of several Python modules:
 
-* :mod:`openalea.morphogenesis.model`: the state and the equations of the model, two classes available (:class:`MorphogenesisModel <openalea.morphogenesis.model.MorphogenesisModel>` and :class:`MorphogenesisModelHydraulics <openalea.morphogenesis.model.MorphogenesisModelHydraulics>`)
-* :mod:`openalea.morphogenesis.parameters`: the parameters of the model, two classes available (:class:`Parameters <openalea.morphogenesis.parameters.Parameters>` and :class:`ParametersHydraulics <openalea.morphogenesis.parameters.ParametersHydraulics>`)
-* :mod:`openalea.morphogenesis.simulation`: the simulator (front-end) to run the model,
-* and :mod:`openalea.morphogenesis.converter`: functions to convert Morphogenesis inputs/outputs to/from Pandas dataframes.
+* :mod:`openalea.cnwgrass.morphogenesis.model`: the state and the equations of the model, two classes available (:class:`MorphogenesisModel <openalea.cnwgrass.morphogenesis.model.MorphogenesisModel>` and :class:`MorphogenesisModelHydraulics <openalea.cnwgrass.morphogenesis.model.MorphogenesisModelHydraulics>`)
+* :mod:`openalea.cnwgrass.morphogenesis.parameters`: the parameters of the model, two classes available (:class:`Parameters <openalea.cnwgrass.morphogenesis.parameters.Parameters>` and :class:`ParametersHydraulics <openalea.cnwgrass.morphogenesis.parameters.ParametersHydraulics>`)
+* :mod:`openalea.cnwgrass.morphogenesis.simulation`: the simulator (front-end) to run the model,
+* and :mod:`openalea.cnwgrass.morphogenesis.converter`: functions to convert Morphogenesis inputs/outputs to/from Pandas dataframes.

@@ -1,7 +1,7 @@
 
 .. _hydraulics:
 
-.. module:: openalea.hydraulics
+.. module:: openalea.cnwgrass.hydraulics
 
 Hydraulics documentation
 ######################
