@@ -69,9 +69,11 @@ class Axis:
     The class :class:`Axis`.
 
     An :class:`axis <Axis>` must have:
+
         * one :class:`root compartment <Roots>`,
         * one :class:`xylem <Xylem>`,
         * at least one :class:`phytomer<Phytomer>`.
+
     """
 
     PARAMETERS = parameters.AXIS_PARAMETERS  #: the internal parameters of the axes
@@ -137,9 +139,11 @@ class Phytomer:
     The class :class:`Phytomer`.
 
     A :class:`phytomer <Phytomer>` must have at least:
+
         * 1 photosynthetic organ: :class:`lamina <Lamina>`, :class:`internode <Internode>`,
                                   or :class:`sheath <Sheath>`.
         * or 1 :class:`hiddenzone <HiddenZone>`.
+
     """
 
     PARAMETERS = parameters.PHYTOMER_PARAMETERS  #: the internal parameters of the phytomers
@@ -294,10 +298,10 @@ class HiddenZone(Organ):
         self.label = label
 
         # state parameters
-        self.fructan = fructan                   #: :math:`\mu mol C
-        self.amino_acids = amino_acids           #: :math:`\mu mol N
-        self.proteins = proteins                 #: :math:`\mu mol N
-        self.sucrose = sucrose                   #: :math:`\mu mol C
+        self.fructan = fructan                   #: :math:`:math:`\\mu mol C``
+        self.amino_acids = amino_acids           #: :math:`:math:`\\mu mol N``
+        self.proteins = proteins                 #: :math:`:math:`\\mu mol N``
+        self.sucrose = sucrose                   #: :math:`:math:`\\mu mol C``
         self.leaf_pseudo_age = leaf_pseudo_age   #: °Cd
         self.leaf_L = leaf_L                     #: m
         self.leaf_is_growing = leaf_is_growing   #: -
@@ -725,12 +729,12 @@ class PhotosyntheticOrganElement:
         self.is_growing = is_growing                            #: -
         self.age = age                                          #: °Cd
         self.Wmax = Wmax                                        #: m
-        self.amino_acids = amino_acids                          #: :math:`\mu mol N
+        self.amino_acids = amino_acids                          #: :math:`:math:`\\mu mol N``
         self.green_area = green_area                            #: m2
         self.mstruct = mstruct                                  #: g
-        self.proteins = proteins                                #: :math:`\mu mol N
-        self.sucrose = sucrose                                  #: :math:`\mu mol C
-        self.fructan = fructan                                  #: :math:`\mu mol C
+        self.proteins = proteins                                #: :math:`:math:`\\mu mol N``
+        self.sucrose = sucrose                                  #: :math:`:math:`\\mu mol C``
+        self.fructan = fructan                                  #: :math:`:math:`\\mu mol C``
         self.Ts = Ts                                            #: °C
         self.temperature = temperature                          #: °C
         self.Tr = Tr                                            #: mmol H20 m-2 s-1

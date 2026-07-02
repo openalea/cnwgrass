@@ -2,6 +2,7 @@
 .. _gasexchange:
 
 .. module:: openalea.cnwgrass.gasexchange
+   :no-index:
 
 Gas-Exchange documentation
 ############################

@@ -2,6 +2,7 @@
 .. _respiration:
 
 .. module:: openalea.cnwgrass.respiration
+   :no-index:
 
 Respiration documentation
 ############################

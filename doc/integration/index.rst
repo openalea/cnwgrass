@@ -2,6 +2,7 @@
 .. _integration:
 
 .. module:: openalea.cnwgrass.integration
+   :no-index:
 
 Integration documentation
 ############################

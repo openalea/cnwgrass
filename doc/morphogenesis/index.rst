@@ -2,6 +2,7 @@
 .. _morphogenesis:
 
 .. module:: openalea.cnwgrass.morphogenesis
+   :no-index:
 
 Morphogenesis documentation
 ############################

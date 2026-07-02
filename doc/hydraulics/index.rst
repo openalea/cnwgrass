@@ -2,6 +2,7 @@
 .. _hydraulics:
 
 .. module:: openalea.cnwgrass.hydraulics
+   :no-index:
 
 Hydraulics documentation
 ######################

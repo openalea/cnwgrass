@@ -2,6 +2,7 @@
 .. _growth:
 
 .. module:: openalea.cnwgrass.growth
+   :no-index:
 
 Growth documentation
 ############################

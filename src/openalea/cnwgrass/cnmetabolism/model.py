@@ -128,6 +128,7 @@ class Axis(object):
     The class :class:`Axis` defines the CN exchanges at axis scale.
 
     An :class:`axis <Axis>` must have:
+
         * one :class:`set of roots <Roots>`,
         * one :class:`phloem <Phloem>`,
         * at least one :class:`phytomer <Phytomer>`,
@@ -195,6 +196,7 @@ class Phytomer(object):
     The class :class:`Phytomer` defines the CN exchanges at phytomer scale.
 
     A :class:`phytomer <Phytomer>` must have at least:
+
         * 1 photosynthetic organ: :class:`chaff <Chaff>`, :class:`peduncle <Peduncle>`,
                                   :class:`lamina <Lamina>`, :class:`internode <Internode>`,
                                   or :class:`sheath <Sheath>`.

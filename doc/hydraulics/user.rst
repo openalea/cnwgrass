@@ -24,7 +24,7 @@ Implementation and architecture
 Software design
 ===============
 
-.. _package_architecture:
+.. _hydraulics_architecture:
 
 Package architecture
 --------------------
@@ -182,7 +182,7 @@ you can try to increase the value of ``ODEINT_MXSTEP`` defined in the body of th
 But you should first enable and check the logs to see if you can settle the problem ahead of the integration. 
 Sometimes, this warning is just due to a local discontinuity which does not affect the whole result of the simulation.   
 
-.. _inputs_and_outputs:
+.. _hydraulics_inputs_and_outputs:
 
 Inputs and outputs
 ******************
@@ -197,7 +197,7 @@ in the inputs folder of your project.
   
 See module :mod:`hydraulics.model` for a documentation on the inputs and outputs of the model.
 
-.. _post_processing:
+.. _hydraulics_post_processing:
 
 Post-processing
 ***************

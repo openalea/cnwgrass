@@ -46,7 +46,8 @@ describing what they are and what they do.
 :mod:`openalea.cnwgrass.cnmetabolism.parameters` module
 *********************************************************
 
-.. automodule:: openalea.cnwgrass.cnmetabolism.parameters
+..
+automodule:: openalea.cnwgrass.cnmetabolism.parameters
     :members:
     :undoc-members:
     :show-inheritance:

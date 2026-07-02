@@ -2,9 +2,10 @@
 .. _cnmetabolism:
 
 .. module:: openalea.cnwgrass.cnmetabolism
+   :no-index:
 
 CN-Metabolism documentation
-######################
+###########################
 
 Module description
 ==================

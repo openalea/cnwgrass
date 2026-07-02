@@ -72,15 +72,6 @@ describing what they are and what they do.
     :show-inheritance:
     :synopsis:
 
-:mod:`openalea.cnwgrass.integration.integration_postprocessing` module
-*********************************************************
-
-.. automodule:: openalea.cnwgrass.integration.integration_postprocessing
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :synopsis:
-
 :mod:`openalea.cnwgrass.integration.runner` module
 *********************************************************
 

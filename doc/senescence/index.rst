@@ -2,6 +2,7 @@
 .. _senescence:
 
 .. module:: openalea.cnwgrass.senescence
+   :no-index:
 
 Senescence documentation
 ############################
