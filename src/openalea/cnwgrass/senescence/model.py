@@ -157,7 +157,7 @@ class SenescenceModel(object):
 
         :param float green_area: Green area of the element (m2)
         :param bool is_growing: flag is the element is still growing
-        :param float mstruct: Strucural mass of the element (g)
+        :param float mstruct: Structural mass of the element (g)
 
         :return: is_over which indicates if the element is fully senescent
         :rtype: bool

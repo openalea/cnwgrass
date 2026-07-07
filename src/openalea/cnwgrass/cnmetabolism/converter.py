@@ -89,9 +89,8 @@ def from_dataframes(axes_inputs=None, organs_inputs=None, hiddenzones_inputs=Non
                 # create a new axis
                 axis = model.Axis(axis_label)
                 axis_attributes_names = [state_var_name for state_var_name in simulation.Simulation.AXES_STATE if hasattr(axis, state_var_name)]
-                axis_row = axes_inputs.loc[axes_inputs.first_valid_index()]
-                axis_attributes_values = axis_row[axis_attributes_names].tolist()
-                axis_attributes = dict(zip(axis_attributes_names, axis_attributes_values))
+                axis_row = axes_inputs.loc[axes_inputs['axis']==axis_label]#axes_inputs.loc[axes_inputs.first_valid_index()]
+                axis_attributes = axis_row[axis_attributes_names].iloc[0].to_dict()
                 axis.__dict__.update(axis_attributes)
                 curr_organs_inputs = organs_inputs[(organs_inputs['plant'] == plant_index) & (organs_inputs['axis'] == axis_label)]
                 for axis_attribute_name, axis_attribute_class in (('roots', model.Roots), ('phloem', model.Phloem), ('grains', model.Grains), ('endosperm', model.Endosperm)):

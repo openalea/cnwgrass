@@ -4,7 +4,7 @@ import pandas as pd
 from openalea.adel.adel_dynamic import AdelDyn
 from openalea.adel.echap_leaf import echap_leaves
 from openalea.cnwgrass.integration import caribu_facade, morphogenesis_facade, growth_facade, senescence_facade, \
-    gasexchange_facade, cnmetabolism_facade, hydraulics_facade
+    gasexchange_facade, cnmetabolism_facade, hydraulics_facade, runner
 
 # -- SIMULATION PARAMETERS --
 # Length of the simulation (in hours)
@@ -282,3 +282,22 @@ def test_hydraulics():
 
     # Run facade
     hydraulics_facade_.run()
+
+def test_integration():
+    simulation_length = 24  # hours
+    METEO_FILENAME = 'meteo.csv'
+
+    runner.run(simulation_length=simulation_length, forced_start_time=0,
+               run_simu=True, run_postprocessing=True, generate_graphs=True, run_from_outputs=False,
+               tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5}, heterogeneous_canopy=True,
+               METEO_FILENAME=METEO_FILENAME)
+
+def test_integration_forced_start_time():
+    """ Test of the forced_start_time option. Previous test needs to be run before in order to generate the outputs"""
+    simulation_length = 24  # hours
+    METEO_FILENAME = 'meteo.csv'
+
+    runner.run(simulation_length=simulation_length, forced_start_time=20,
+               run_simu=True, run_postprocessing=False, generate_graphs=False, run_from_outputs=True,
+               tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5}, heterogeneous_canopy=True,
+               METEO_FILENAME=METEO_FILENAME)
