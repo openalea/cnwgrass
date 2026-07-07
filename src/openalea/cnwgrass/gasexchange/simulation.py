@@ -123,11 +123,14 @@ class Simulation:
             # Cases of Visible Element without geometry property (because too small) don't have photosynthesis calculation neither.
             if element_inputs['height'] is None or np.isnan(element_inputs['height']):
                 Ag, An, Rd, Tr, gsw, Ci = 0., 0., 0., 0., 0., 0.
-
                 Ts = self.inputs['axes'][axis_id]['SAM_temperature']
+
             else:
                 Ts = Ta # Initial value of Ts (°C)
-                Ci = element_inputs['Ci']      #: previous organ internal CO2 concentration (µmol mol-1) todo Ci = parameters.Ci_init_ratio * ambient_CO2 see with Victoria if we keep this
+                if element_inputs['Ci'] is None or np.isnan(element_inputs['Ci']):
+                    Ci = ambient_CO2
+                else:
+                    Ci = element_inputs['Ci']      #: previous organ internal CO2 concentration (µmol mol-1) todo Ci = parameters.Ci_init_ratio * ambient_CO2 see with Victoria if we keep this
                 height_canopy = self.inputs['axes'][axis_id]['height_canopy']
                 water_potential = element_inputs.get('water_potential', None)
 
@@ -143,6 +146,12 @@ class Simulation:
                                                                           element_inputs['proteins'],
                                                                           element_inputs['Nstruct'],
                                                                           element_inputs['green_area'])
+                if surfacic_nitrogen == 0:
+                    element_outputs = {'Ag': 0, 'An': 0, 'Rd': 0,
+                                       'Tr': 0, 'Ts': self.inputs['axes'][axis_id]['SAM_temperature'], 'gs': 0, 'Ci': 0,
+                                       'width': element_inputs['width'], 'height': element_inputs['height']}
+                    self.outputs[element_id] = element_outputs
+                    continue
 
                 surfacic_NSC = model.calculate_surfacic_WSC(element_inputs['sucrose'], element_inputs['starch'], element_inputs['fructan'], element_inputs['green_area'])
 

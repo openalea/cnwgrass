@@ -194,7 +194,6 @@ def run(simulation_length, forced_start_time=0, run_simu=True, run_postprocessin
                                                                         (HIDDENZONES_INITIAL_STATE_FILENAME, HIDDENZONES_OUTPUTS_FILENAME, HIDDENZONES_INDEX_COLUMNS),
                                                                         (ELEMENTS_INITIAL_STATE_FILENAME, ELEMENTS_OUTPUTS_FILENAME, ELEMENTS_INDEX_COLUMNS),
                                                                         (SOILS_INITIAL_STATE_FILENAME, SOILS_OUTPUTS_FILENAME, SOILS_INDEX_COLUMNS)):
-
             previous_outputs_dataframe = pd.read_csv(os.path.join(OUTPUTS_DIRPATH, outputs_filename))
             # Convert NaN to None
             previous_outputs_dataframes[outputs_filename] = previous_outputs_dataframe.where(previous_outputs_dataframe.notnull(), None)
@@ -211,14 +210,6 @@ def run(simulation_length, forced_start_time=0, run_simu=True, run_postprocessin
             idx = new_initial_state.groupby([col for col in index_columns if col != 't'])['t'].transform(max) == new_initial_state['t']
             inputs_dataframes[initial_state_filename] = new_initial_state[idx].drop(['t'], axis=1)
 
-        # Make sure boolean columns have either type bool or float
-        bool_columns = ['is_over', 'is_growing', 'leaf_is_emerged', 'internode_is_visible', 'leaf_is_growing', 'internode_is_growing', 'leaf_is_remobilizing', 'internode_is_remobilizing']
-        for df in [inputs_dataframes[ELEMENTS_INITIAL_STATE_FILENAME], inputs_dataframes[HIDDENZONES_INITIAL_STATE_FILENAME]]:
-            for cln in bool_columns:
-                if cln in df.keys():
-                    df[cln].replace(to_replace='False', value=0.0, inplace=True)
-                    df[cln].replace(to_replace='True', value=1.0, inplace=True)
-                    df[cln] = pd.to_numeric(df[cln])
     else:
         new_start_time = -1
         for inputs_filename in (AXES_INITIAL_STATE_FILENAME,
