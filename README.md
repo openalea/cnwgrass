@@ -4,11 +4,13 @@
 [![OpenAlea CI](https://github.com/openalea/cnwgrass/actions/workflows/openalea_ci.yml/badge.svg?branch=master)](https://github.com/openalea/cnwgrass/actions/workflows/openalea_ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/cnwgrass/badge/?version=latest)](https://cnwgrass.readthedocs.io/en/latest/?badge=latest)
 
-[![Platform](https://anaconda.org/openalea3/openalea.cnwgrass/badges/version.svg)](https://anaconda.org/openalea3/openalea.cnwgrass)
-[![Platform](https://anaconda.org/openalea3/openalea.cnwgrass/badges/platforms.svg)](https://anaconda.org/openalea3/openalea.cnwgrass)
+[![Platform](https://anaconda.org/openalea3/openalea.cnw-grass/badges/version.svg)](https://anaconda.org/openalea3/openalea.cnw-grass)
+[![Platform](https://anaconda.org/openalea3/openalea.cnw-grass/badges/platforms.svg)](https://anaconda.org/openalea3/openalea.cnw-grass)
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
 
-[![Anaconda-Server Badge](https://anaconda.org/openalea3/openalea.cnwgrass/badges/latest_release_relative_date.svg)](https://anaconda.org/openalea3/openalea.cnwgrass)
+[![Anaconda-Server Badge](https://anaconda.org/openalea3/openalea.cnw-grass/badges/latest_release_relative_date.svg)](https://anaconda.org/openalea3/openalea.cnw-grass)
+
+[![Downloads](https://anaconda.org/openalea3/openalea.cnw-grass/badges/downloads.svg)](https://anaconda.org/openalea3/openalea.cnw-grass)
 
 ## About
 
