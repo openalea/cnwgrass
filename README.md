@@ -87,7 +87,7 @@ For general information about OpenAlea installation, see https://openalea.readth
 ### Users
 
 ```shell
-conda create -n cnwgrass openalea.cnwgrass -c conda-forge -c openalea3
+conda create -n cnwgrass openalea.cnw-grass -c conda-forge -c openalea3
 ```
 To activate the environment: `conda activate cnwgrass`
 
