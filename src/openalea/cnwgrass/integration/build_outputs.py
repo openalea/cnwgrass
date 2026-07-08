@@ -83,11 +83,13 @@ class BuildOutputs(object):
             # Axis scale
             for mtg_axis_vid in self._shared_mtg.components_iter(mtg_plant_vid):
                 mtg_axis_label = self._shared_mtg.label(mtg_axis_vid)
+                if isinstance(mtg_axis_label, bytes):
+                    mtg_axis_label = mtg_axis_label.decode('utf-8')
                 mtg_axis_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)
                 axis_id = (mtg_plant_index, mtg_axis_label)
                 axis_dict = {}
 
-                if mtg_axis_properties.get('nb_leaves') is None:
+                if '.' in mtg_axis_label: # todo: temporary, used to filter secondary tillers
                     continue
                 for axis_run_variable in AXES_VARIABLES:
                     if axis_run_variable in mtg_axis_properties:

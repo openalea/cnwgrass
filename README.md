@@ -73,12 +73,12 @@ Full documentation of each submodule is available at https://cnwgrass.readthedoc
 ## Prerequisites
 *CNW-Grass* has the following dependencies, which are automatically installed (see [Installing](#installing)):
 
-    * [openalea.MTG](https://github.com/openalea/mtg)
-    * [openalea.Plantgl](https://github.com/openalea/plantgl)
-    * [openalea.Lpy](https://github.com/openalea/lpy)
-    * [openalea.Caribu](https://github.com/openalea/caribu) 
-    * [openalea.Adel](https://github.com/openalea/adel)
-    * [openalea.Astk](https://github.com/openalea/astk)
+* [openalea.MTG](https://github.com/openalea/mtg)
+* [openalea.Plantgl](https://github.com/openalea/plantgl)
+* [openalea.Lpy](https://github.com/openalea/lpy)
+* [openalea.Caribu](https://github.com/openalea/caribu) 
+* [openalea.Adel](https://github.com/openalea/adel)
+* [openalea.Astk](https://github.com/openalea/astk)
     
 ## Installing
 For general information about OpenAlea installation, see https://openalea.readthedocs.io/en/latest/install.html 
