@@ -41,7 +41,7 @@ class WheatFSPM(Model):
     Unloading_Sucrose_phloem: float = declare(default=0.1, unit="umol.h-1", unit_comment="of C",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")
-    Unloading_Amino_Acids_phloem: float = declare(default=0.1, unit="umol.h-1", unit_comment="of C",
+    Unloading_Amino_Acids_phloem: float = declare(default=0.1, unit="umol.h-1", unit_comment="of N",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")
     sucrose: float = declare(default=0., unit="umol of C", unit_comment="amount in equivalent C",
@@ -389,10 +389,12 @@ class WheatFSPM(Model):
     def sync_shoot_inputs_with_shoot_mtg(self):
         for name in self.inputs:
             if name == "Unloading_Sucrose_phloem":
-                self.cn_wheat_root_props["Unloading_Sucrose"] = self.props[name][1]
+                print(self.props['mstruct'][1])
+                print('result', self.cn_wheat_root_props['Unloading_Sucrose'])
+                self.cn_wheat_root_props["Unloading_Sucrose"] = self.props[name][1] / self.props['mstruct'][1]
 
             elif name == "Unloading_Amino_Acids_phloem":
-                self.cn_wheat_root_props["Unloading_Amino_Acids"] = self.props[name][1]
+                self.cn_wheat_root_props["Unloading_Amino_Acids"] = self.props[name][1] / self.props['mstruct'][1]
 
             else:
                 self.cn_wheat_root_props[name] = self.props[name][1]
@@ -452,14 +454,15 @@ class WheatFSPM(Model):
         PARi = self.meteo.loc[self.time_step_in_hours, ['PARi']].iloc[0]
         DOY = self.meteo.loc[self.time_step_in_hours, ['DOY']].iloc[0]
         hour = self.meteo.loc[self.time_step_in_hours, ['hour']].iloc[0]
-        PARi_next_hours = self.meteo.loc[range(self.time_step_in_hours, self.time_step_in_hours + self.CARIBU_TIMESTEP), ['PARi']].sum().values[0]
-
-        if (self.time_step_in_hours % self.CARIBU_TIMESTEP == 0) and (PARi_next_hours > 0):
-            run_caribu = True
-        else:
-            run_caribu = False
 
         if self.computing_light_interception:
+            PARi_next_hours = self.meteo.loc[range(self.time_step_in_hours, self.time_step_in_hours + self.CARIBU_TIMESTEP), ['PARi']].sum().values[0]
+
+            if (self.time_step_in_hours % self.CARIBU_TIMESTEP == 0) and (PARi_next_hours > 0):
+                run_caribu = True
+            else:
+                run_caribu = False
+
             self.caribu_facade_.run(run_caribu, energy=PARi, DOY=DOY, hourTU=hour, latitude=48.85, sun_sky_option='sky', heterogeneous_canopy=self.heterogeneous_canopy, plant_density=self.PLANT_DENSITY[1])
 
         for t_senescwheat in range(self.time_step_in_hours, self.time_step_in_hours + self.SENESCWHEAT_TIMESTEP, self.SENESCWHEAT_TIMESTEP):
@@ -584,7 +587,7 @@ class WheatFSPM(Model):
 
 
 
-def scenario_utility(INPUTS_DIRPATH = "inputs", OUTPUTS_DIRPATH = "outputs", METEO_FILENAME = "meteo_Ljutovac2002.csv", PLANT_DENSITY = {1:250},
+def scenario_utility(time_step_in_seconds: int = 3600, INPUTS_DIRPATH = "inputs", OUTPUTS_DIRPATH = "outputs", METEO_FILENAME = "meteo_Ljutovac2002.csv", PLANT_DENSITY = {1:250},
                      forced_start_time = 0, tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5}, N_fertilizations = {2016: 357143, 2520: 1000000},
                      stored_times = None, option_static = False, show_3Dplant = False, run_from_outputs = False, heterogeneous_canopy = True, update_parameters_all_models = None,
                      isolated_roots = False, cnwheat_roots = True):
@@ -681,7 +684,18 @@ def scenario_utility(INPUTS_DIRPATH = "inputs", OUTPUTS_DIRPATH = "outputs", MET
     # Start time of the simulation
     START_TIME = max(0, new_start_time)
     scenario["START_TIME"] = START_TIME
+
+    # Pass a unified time-step
     
+    # TODO constrained to interger for now, and using float, so bellow hour time stepping breaks both for loops and input dataframe accessions
+    time_step_in_hours = int(time_step_in_seconds / 3600)
+    scenario["CARIBU_TIMESTEP"] = time_step_in_hours
+    scenario["FARQUHARWHEAT_TIMESTEP"] = time_step_in_hours
+    scenario["ELONGWHEAT_TIMESTEP"] = time_step_in_hours
+    scenario["GROWTHWHEAT_TIMESTEP"] = time_step_in_hours
+    scenario["CNWHEAT_TIMESTEP"] = time_step_in_hours
+    scenario["SENESCWHEAT_TIMESTEP"] = time_step_in_hours
+
     scenario["inputs_dataframes"] = inputs_dataframes
 
     ### OPTIONS ###

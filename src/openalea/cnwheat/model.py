@@ -1524,7 +1524,7 @@ class PhotosyntheticOrganElement(object):
 
         :param float amino_acids: Amount of amino acids (�mol` N)
         :param float T_effect_Vmax: Correction to apply to enzyme activity
-
+ 
         :return: Protein synthesis (�mol` N h-1 g-1 mstruct)
         :rtype: float
         """

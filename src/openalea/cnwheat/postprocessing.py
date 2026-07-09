@@ -1157,12 +1157,23 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             NS_roots = (1 - sum_mstruct_roots / sum_dry_mass_roots) * 100
             NS = (1 - sum_mstruct / sum_dry_mass) * 100
 
-            # C_respired_shoot
-            #hz_df_MS['Respi_growth_tillers'] = hz_df_MS['Respi_growth'].fillna(0) * hz_df_MS['nb_replications'].fillna(1)
-            #C_respired_shoot = pp_axes_df.sum_respi_shoot.fillna(0.) + hz_df_MS.groupby(AXES_T_INDEXES, as_index=False)['Respi_growth_tillers'].sum().Respi_growth_tillers
+            # C_respired_shoot : maintenance respiration of elements (sum_respi) + maintenance (R_residual) and growth
+            # (Respi_growth) respiration of hidden zones + growth respiration of grains, when present
+            elt_df_MS['sum_respi_tillers'] = elt_df_MS['sum_respi'].fillna(0) * elt_df_MS['nb_replications']
+            hz_df_MS['Respi_growth_tillers'] = hz_df_MS['Respi_growth'].fillna(0) * hz_df_MS['nb_replications']
+            hz_df_MS['R_residual_tillers'] = hz_df_MS['R_residual'].fillna(0) * hz_df_MS['nb_replications']
+            grains_df_MS = organs_df[(organs_df['organ'] == 'grains') & (organs_df['axis'] == 'MS')].copy()
+            grains_df_MS['Respi_growth_total'] = grains_df_MS['R_grain_growth_struct'].fillna(0) + grains_df_MS['R_grain_growth_starch'].fillna(0)
 
-            # C_respired_roots
-            #C_respired_roots = pp_axes_df.sum_respi_roots.fillna(0.) + organs_df[(organs_df['organ'] == 'roots')]['Respi_growth'].reset_index(drop=True)
+            C_respired_shoot = elt_df_MS.groupby(AXES_T_INDEXES)['sum_respi_tillers'].agg('sum') \
+                .add(hz_df_MS.groupby(AXES_T_INDEXES)['Respi_growth_tillers'].agg('sum'), fill_value=0) \
+                .add(hz_df_MS.groupby(AXES_T_INDEXES)['R_residual_tillers'].agg('sum'), fill_value=0) \
+                .add(grains_df_MS.groupby(AXES_T_INDEXES)['Respi_growth_total'].agg('sum'), fill_value=0)
+
+            # C_respired_roots : maintenance respiration (sum_respi) + growth respiration (Respi_growth) of roots
+            roots_df_MS = organs_df[(organs_df['organ'] == 'roots') & (organs_df['axis'] == 'MS')].copy()
+            roots_df_MS['C_respired_roots_total'] = roots_df_MS['sum_respi'].fillna(0) + roots_df_MS['Respi_growth'].fillna(0)
+            C_respired_roots = roots_df_MS.groupby(AXES_T_INDEXES)['C_respired_roots_total'].agg('sum')
 
             # Add to axes df
             pp_axes_df.sort_values(AXES_T_INDEXES, inplace=True)  # Make sure axes_df is sorted
@@ -1200,8 +1211,8 @@ def postprocessing(plants_df=None, axes_df=None, metamers_df=None, hiddenzones_d
             pp_axes_df.loc[:, 'mstruct_shoot'] = sum_mstruct_shoot.values
             pp_axes_df.loc[:, 'mstruct_laminae'] = sum_mstruct_laminae.values
             pp_axes_df.loc[:, 'mstruct_stem'] = sum_mstruct_stem.values
-            # pp_axes_df.loc[:, 'C_respired_shoot'] = C_respired_shoot
-            # pp_axes_df.loc[:, 'C_respired_roots'] = C_respired_roots
+            pp_axes_df.loc[:, 'C_respired_shoot'] = C_respired_shoot.values
+            pp_axes_df.loc[:, 'C_respired_roots'] = C_respired_roots.values
             pp_axes_df.loc[:, 'WSC_g'] = WSC_g_plant.values
             pp_axes_df.loc[:, 'Cont_WSC_DM'] = pp_axes_df['WSC_g'] / pp_axes_df['sum_dry_mass'] * 100
             pp_axes_df.loc[:, 'Cont_WSC_DM_shoot'] = sum_WSC_g_shoot.values / sum_dry_mass_shoot.values * 100

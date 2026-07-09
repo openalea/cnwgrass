@@ -260,7 +260,7 @@ class Simulation(object):
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at hidden zone scale
     HIDDENZONE_INTERMEDIATE_VARIABLES = ['nb_replications']
     #: the fluxes exchanged between the compartments at hidden zone scale
-    HIDDENZONE_FLUXES = ['D_Fructan', 'D_Proteins', 'S_Fructan', 'S_Proteins', 'Unloading_Amino_Acids', 'Unloading_Sucrose']
+    HIDDENZONE_FLUXES = ['D_Fructan', 'D_Proteins', 'S_Fructan', 'S_Proteins', 'Unloading_Amino_Acids', 'Unloading_Sucrose', 'R_residual']
     #: the variables computed by integrating values of hidden zone components parameters/variables recursively
     HIDDENZONE_INTEGRATIVE_VARIABLES = []
     #: all the variables computed during a run step of the simulation at plnat scale
