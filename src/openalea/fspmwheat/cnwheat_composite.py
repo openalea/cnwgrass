@@ -38,15 +38,12 @@ class WheatFSPM(Model):
     Export_Amino_Acids: float = declare(default=0., unit="umol.h-1", unit_comment="of N",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")
-    Unloading_Sucrose_phloem: float = declare(default=0.1, unit="umol.h-1", unit_comment="of C",
-                                        min_value="", max_value="", description="", value_comment="", references="", DOI="",
-                                        variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")
-    Unloading_Amino_Acids_phloem: float = declare(default=0.1, unit="umol.h-1", unit_comment="of N",
-                                        min_value="", max_value="", description="", value_comment="", references="", DOI="",
-                                        variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")
-    sucrose: float = declare(default=0., unit="umol of C", unit_comment="amount in equivalent C",
+    sucrose_phloem_outside_solve: float = declare(default=10., unit="µmol of C", unit_comment="amount in equivalent C",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_carbon", state_variable_type="extensive", edit_by="user")
+    amino_acids_phloem_outside_solve: float = declare(default=1., unit="µmol of N", unit_comment="amount in equivalent N",
+                                        min_value="", max_value="", description="", value_comment="", references="", DOI="",
+                                        variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")                         
     cytokinins: float = declare(default=0., unit="AU", unit_comment="",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_nitrogen", state_variable_type="extensive", edit_by="user")
@@ -65,12 +62,6 @@ class WheatFSPM(Model):
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="state_variable", by="model_shoot", state_variable_type="extensive", edit_by="user")
     amino_acids_phloem: float = declare(default=1, unit="µmol", unit_comment="of N", 
-                                        min_value="", max_value="", description="", value_comment="", references="", DOI="",
-                                        variable_type="state_variable", by="model_shoot", state_variable_type="extensive", edit_by="user")
-    Unloading_Sucrose: float = declare(default=30., unit="umol.h-1", unit_comment="of equivalent C mol? sucrose",
-                                        min_value="", max_value="", description="", value_comment="", references="", DOI="",
-                                        variable_type="state_variable", by="model_shoot", state_variable_type="extensive", edit_by="user")
-    Unloading_Amino_Acids: float = declare(default=1., unit="umol.h-1", unit_comment="of amino acids", 
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="state_variable", by="model_shoot", state_variable_type="extensive", edit_by="user")
     Export_cytokinins: float = declare(default=0., unit="AU.h-1", unit_comment="of cytokinins",
@@ -347,8 +338,6 @@ class WheatFSPM(Model):
         self.cn_wheat_root_props = self.g.get_vertex_property(2)["roots"]
 
         # TODO : Temporary
-        self.cn_wheat_root_props["Unloading_Sucrose"] = self.props["Unloading_Sucrose"][1]
-        self.cn_wheat_root_props["Unloading_Amino_Acids"] = self.props["Unloading_Amino_Acids"][1]
         self.g.properties()["Total_Transpiration"][2] = self.props["Total_Transpiration"][1]
 
         self.g.get_vertex_property(2)['phloem']['sucrose'] = self.props["sucrose_phloem"][1]
@@ -388,14 +377,10 @@ class WheatFSPM(Model):
 
     def sync_shoot_inputs_with_shoot_mtg(self):
         for name in self.inputs:
-            if name == "Unloading_Sucrose_phloem":
-                print(self.props['mstruct'][1])
-                print('result', self.cn_wheat_root_props['Unloading_Sucrose'])
-                self.cn_wheat_root_props["Unloading_Sucrose"] = self.props[name][1] / self.props['mstruct'][1]
-
-            elif name == "Unloading_Amino_Acids_phloem":
-                self.cn_wheat_root_props["Unloading_Amino_Acids"] = self.props[name][1] / self.props['mstruct'][1]
-
+            if name == 'sucrose_phloem_outside_solve':
+                self.g.get_vertex_property(2)['phloem']['sucrose'] == self.props[name][1]
+            elif name == 'amino_acids_phloem_outside_solve':
+                self.g.get_vertex_property(2)['phloem']['amino_acids'] == self.props[name][1]
             else:
                 self.cn_wheat_root_props[name] = self.props[name][1]
 
