@@ -582,7 +582,7 @@ class Simulation(object):
                     axis.xylem.water_potential = (axis.xylem.shoot_root_xylem_conductance * axis.xylem.root_xylem_water_potential
                                                   + self.sum_organs_kr_psi) / (
                                                     axis.xylem.shoot_root_xylem_conductance + self.sum_organs_kr)
-                    print("result", axis.xylem.root_xylem_water_potential, axis.xylem.shoot_root_xylem_conductance, axis.xylem.water_potential, self.sum_organs_kr, self.sum_organs_kr_psi / self.sum_organs_kr)
+                    # print("result", axis.xylem.root_xylem_water_potential, axis.xylem.shoot_root_xylem_conductance, axis.xylem.water_potential, self.sum_organs_kr, self.sum_organs_kr_psi / self.sum_organs_kr)
 
         self.nfev_total += sol.nfev
 
