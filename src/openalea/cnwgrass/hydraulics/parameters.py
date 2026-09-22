@@ -73,7 +73,7 @@ class AxisInitCompartments(object):
     """
     def __init__(self):
         # state parameters
-        self.SAM_temperature = 12  #: initial temperature of shoot apical meristem (°C)
+        self.SAM_temperature = 12  #: initial temperature of shoot apical meristem (ï¿½C)
 
 #: The instance of class :class:`hydraulics.parameters.PhytomerInitCompartments` for current process
 AXIS_INIT_COMPARTMENTS = AxisInitCompartments()
@@ -127,16 +127,16 @@ class HiddenZoneParameters(OrganParameters):
         self.phi_initial = {'x': 13E-09, 'y': 10E-09, 'z': 34E-06}  #: Initial dimension-specific cell wall extensibility in relation to non-reversible dimensional changes (MPa-1 s-1)
 
         # Length
-        self.tend = 2160000  #: end of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tmax = 1473120  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tbase = -822960  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.tend = 2160000  #: end of leaf elongation in automate growth (s at 12ï¿½c); fitted from adapted data from Fournier 2005
+        self.tmax = 1473120  #: time at which leaf elongation rate is maximal in automate growth (s at 12ï¿½c); fitted from adapted data from Fournier 2005
+        self.tbase = -822960  #: beginning of leaf elongation in automate growth (s at 12ï¿½c); fitted from adapted data from Fournier 2005
 
         # Parameters for temperature responses
-        self.Temp_Tref = 12  # Arbitrary reference temperature (°C)
+        self.Temp_Tref = 12  # Arbitrary reference temperature (ï¿½C)
         self.Temp_Ea_R = 8900  # Parameter Ea/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
         self.Temp_DS_R = 68.432  # Parameter deltaS/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (dimensionless)
         self.Temp_DH_R = 20735.5  # Parameter deltaH/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
-        self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(°C)
+        self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(ï¿½C)
 
         # Maximal leaf length
         self.leaf_Lmax_MAX = 0.45  #: Maximum leaf_Lmax (m) (Gauthier et al., 2021)
@@ -150,7 +150,8 @@ class HiddenZoneParameters(OrganParameters):
         self.RATIO_MSTRUCT_DM = 0.8     #: Ratio mstruct/dry matter (dimensionless). From growth model.
         self.SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
         self.OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
-        self.GAMMA = 0.2    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
+        # self.GAMMA = 0.2    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
+        self.GAMMA = 0.11
 
         self.Sa = 260     #: (mol m-3)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
         self.Sb = 0.9      #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
@@ -171,9 +172,9 @@ class HiddenZoneInitCompartments(object):
     def __init__(self):
         self.Tr = 0     #: mmol H20 m-2 s-1
         self.green_area = 0     #: m2
-        self.temperature = 8  #: °C
-        self.hiddenzone_age = 0  #: °Cd
-        self.leaf_pseudo_age = -1  #: °Cd
+        self.temperature = 8  #: ï¿½C
+        self.hiddenzone_age = 0  #: ï¿½Cd
+        self.leaf_pseudo_age = -1  #: ï¿½Cd
         self.amino_acids = 0.000075  #: :math:`:math:`\\mu mol N``
         self.proteins = 0.0011  #: :math:`:math:`\\mu mol N``
         self.sucrose = 0.000384  #: :math:`:math:`\\mu mol C``
@@ -280,14 +281,14 @@ class PhotosyntheticOrganElementInitCompartments(object):
     def __init__(self):
         # state parameters
         self.is_growing = None                       #: -
-        self.age = None                       #: °Cd
-        self.Wmax = None                       #: °Cd
+        self.age = None                       #: ï¿½Cd
+        self.Wmax = None                       #: ï¿½Cd
         self.amino_acids = 0                 #: :math:`:math:`\\mu mol N``
         self.proteins = 0                   #: :math:`:math:`\\mu mol N``
         self.sucrose = 0                    #: :math:`:math:`\\mu mol C``
         self.fructan = 0    #: :math:`:math:`\\mu mol C``
-        self.temperature = 0                #: °C
-        self.Ts = 12                         #: °C
+        self.temperature = 0                #: ï¿½C
+        self.Ts = 12                         #: ï¿½C
         self.green_area = 1E-4               #: initial value of green_area (m2)
         self.Tr = 0                          #: mmol H20 m-2 s-1
         self.mstruct = 0                     #: g
@@ -395,8 +396,8 @@ class SoilParameters(object):
     """
     def __init__(self):
         self.AWC = 50  # Available Water Capacity (g)
-        self.Soil_a = 15.906  #: Mpa - Parameter for soil water function (adapté pour sol limono-argileux profond, Grignon)
-        self.Soil_b = 18.902  #: % - Parameter for soil water function (adapté pour sol limono-argileux profond, Grignon)
+        self.Soil_a = 15.906  #: Mpa - Parameter for soil water function (adaptï¿½ pour sol limono-argileux profond, Grignon)
+        self.Soil_b = 18.902  #: % - Parameter for soil water function (adaptï¿½ pour sol limono-argileux profond, Grignon)
 
 #: The instance of class :class:`cnmetabolism.parameters.SoilParameters` for current process
 SOIL_PARAMETERS = SoilParameters()

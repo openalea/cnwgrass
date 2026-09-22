@@ -150,7 +150,7 @@ class Simulation(object):
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ORGANS_STATE = ORGANS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.Organ, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ORGANS_INTERMEDIATE_VARIABLES = ['water_potential', 'root_xylem_water_potential', 'shoot_root_xylem_conductance']
+    ORGANS_INTERMEDIATE_VARIABLES = ['water_potential', 'root_to_shoot_xylem_water_flow', 'old_root_to_shoot_xylem_water_flow']
     #: the fluxes exchanged between the compartments at organ scale
     ORGANS_FLUXES = []
     #: the variables computed by integrating values of xylem components parameters/variables recursively
@@ -350,6 +350,8 @@ class Simulation(object):
             self.interpolation_functions = {}  #: functions to interpolate the forcing
 
         self.nfev_total = 0  #: cumulative number of RHS function evaluations
+
+        self.old_root_to_shoot_xylem_water_flow = 0.
 
     def initialize(self, population, soils):
         """
@@ -577,12 +579,12 @@ class Simulation(object):
         else:
             sol = solve_ivp(fun=self._calculate_shoot_derivatives, t_span=self.time_grid, y0=self.initial_conditions,
                             method='LSODA', t_eval=np.array([self.time_step]), dense_output=False)
-            for plant in self.population.plants:
-                for axis in plant.axes:
-                    axis.xylem.water_potential = (axis.xylem.shoot_root_xylem_conductance * axis.xylem.root_xylem_water_potential
-                                                  + self.sum_organs_kr_psi) / (
-                                                    axis.xylem.shoot_root_xylem_conductance + self.sum_organs_kr)
-                    # print("result", axis.xylem.root_xylem_water_potential, axis.xylem.shoot_root_xylem_conductance, axis.xylem.water_potential, self.sum_organs_kr, self.sum_organs_kr_psi / self.sum_organs_kr)
+
+            # alpha_relaxation_flux = 1.
+            # for plant in self.population.plants:
+            #     for axis in plant.axes:
+            #         axis.xylem.root_to_shoot_xylem_water_flow = alpha_relaxation_flux * axis.xylem.root_to_shoot_xylem_water_flow + (1. - alpha_relaxation_flux) * self.old_root_to_shoot_xylem_water_flow
+            #         self.old_root_to_shoot_xylem_water_flow = axis.xylem.root_to_shoot_xylem_water_flow
 
         self.nfev_total += sol.nfev
 
@@ -1104,12 +1106,10 @@ class Simulation(object):
 
         y_derivatives = np.zeros_like(y)
 
-        sum_organs_kr = 0.
-        sum_organs_kr_psi = 0.
-
         #: Water flux with xylem and organs
         for plant in self.population.plants:
             for axis in plant.axes:
+                sum_organs_water_influx = 0. # WARNING, for now only loops on one axis with the use of nb_replications
                 for phytomer in axis.phytomers:
                     # Hidden zone
                     hiddenzone = phytomer.hiddenzone
@@ -1163,8 +1163,7 @@ class Simulation(object):
                         hiddenzone.water_outflow = 0    #: No water flow between hiddenzone and element
 
                         # Positionned here to capture the last computation of the last loop
-                        sum_organs_kr += hiddenzone.nb_replications / hiddenzone.resistance
-                        sum_organs_kr_psi += hiddenzone.nb_replications * hiddenzone.water_potential / hiddenzone.resistance
+                        sum_organs_water_influx += hiddenzone.nb_replications * hiddenzone.water_influx
 
                     # Photosynthetic Organ Elements
                     # for organ in (phytomer.lamina, phytomer.internode, phytomer.sheath):
@@ -1222,8 +1221,9 @@ class Simulation(object):
                             #: Water fluxes with xylem
                             element.water_influx = element.calculate_water_flux(element.water_potential, axis.xylem.water_potential, element.resistance, self.delta_t)
 
-                            sum_organs_kr += element.nb_replications / element.resistance # TODO check replication for elements
-                            sum_organs_kr_psi += element.nb_replications * element.water_potential / element.resistance
+                            sum_organs_water_influx += element.nb_replications * element.water_influx
+
+                axis.xylem.root_to_shoot_xylem_water_flow = sum_organs_water_influx
 
         #: compute the derivative of each compartment of element
         for plant in self.population.plants:
@@ -1338,9 +1338,6 @@ class Simulation(object):
                             #: Dimensions volume of element
                             element.organ_volume = element.calculate_organ_volume(element.organ_dimensions)
                             element.WC_mstruct = element.water_content / (element.water_content + element.mstruct) * 100
-
-        self.sum_organs_kr = sum_organs_kr
-        self.sum_organs_kr_psi = sum_organs_kr_psi
 
         derivatives_logger = logging.getLogger('hydraulics.derivatives')
         if logger.isEnabledFor(logging.DEBUG) and derivatives_logger.isEnabledFor(logging.DEBUG):

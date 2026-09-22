@@ -55,15 +55,12 @@ class CNW_Grass(Model):
     mstruct: float = declare(default=0., unit="g", unit_comment="", 
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_carbon", state_variable_type="extensive", edit_by="user")
-    root_xylem_water_potential: float = declare(default=-0.1, unit="MPa", unit_comment="",
-                                        min_value="", max_value="", description="", value_comment="", references="", DOI="",
-                                        variable_type="input", by="root_water", state_variable_type="extensive", edit_by="user")
-    shoot_root_xylem_conductance: float = declare(default=1e-2, unit="g.MPa-1.s-1", unit_comment="of water",
+    xylem_water_potential: float = declare(default=-0.6, unit="MPa", unit_comment="input shoot xylem uniform total water potential (hydrostatic + osmotic)",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="input", by="root_water", state_variable_type="extensive", edit_by="user")
 
     # State variables condidered as outputs to bellowground models
-    xylem_water_potential: float = declare(default=-0.1, unit="MPa", unit_comment="",
+    root_to_shoot_xylem_water_flow: float = declare(default=0., unit="g H2O . time_step-1", unit_comment="",
                                         min_value="", max_value="", description="", value_comment="", references="", DOI="",
                                         variable_type="state_variable", by="model_shoot", state_variable_type="extensive", edit_by="user")
     mstruct_axis: float = declare(default=0.05, unit="g", unit_comment="of axis structural mass", 
@@ -500,8 +497,7 @@ class CNW_Grass(Model):
         # TODO GB : Temporary inputs initialization at Component's prescribed value
         self.cnw_grass_root_props["Unloading_Sucrose"] = self.props["Unloading_Sucrose"][1]
         self.cnw_grass_root_props["Unloading_Amino_Acids"] = self.props["Unloading_Amino_Acids"][1]
-        self.g.get_vertex_property(2)['xylem']['root_xylem_water_potential'] = self.props["root_xylem_water_potential"][1]
-        self.g.get_vertex_property(2)['xylem']['shoot_root_xylem_conductance'] = self.props["shoot_root_xylem_conductance"][1]
+        self.g.get_vertex_property(2)['xylem']['water_potential'] = self.props["xylem_water_potential"][1]
 
         if self.synchronize_adventitious_emergence:
             # Specific initialization for already emerged leaves at the begining of the simulation
@@ -536,7 +532,7 @@ class CNW_Grass(Model):
         self.g.get_vertex_property(2)['phloem']['amino_acids'] = self.props["amino_acids_phloem"][1]
         self.g.get_vertex_property(2)['phloem']['Unloading_Sucrose_shoot_organs'] = 30.
         self.g.get_vertex_property(2)['phloem']['Unloading_Amino_Acids_shoot_organs'] = 1.
-        self.g.get_vertex_property(2)['xylem']['water_potential'] = self.props["xylem_water_potential"][1]
+        self.g.get_vertex_property(2)['xylem']['root_to_shoot_xylem_water_flow'] = self.props["root_to_shoot_xylem_water_flow"][1]
 
         self.sync_shoot_outputs_with_root_mtg()
         
@@ -550,9 +546,8 @@ class CNW_Grass(Model):
             elif name == "Unloading_Amino_Acids_phloem":
                 self.cnw_grass_root_props["Unloading_Amino_Acids"] = self.props[name][1] / self.props['mstruct'][1]
 
-            elif name in ('root_xylem_water_potential', 'shoot_root_xylem_conductance'):
-                self.g.get_vertex_property(2)['xylem'][name] = self.props[name][1]
-                # print("received", name, self.g.get_vertex_property(2)['xylem'][name])
+            elif name == "xylem_water_potential":
+                self.g.get_vertex_property(2)['xylem']["water_potential"] = self.props[name][1]
 
             else:
                 self.cnw_grass_root_props[name] = self.props[name][1]
@@ -561,9 +556,8 @@ class CNW_Grass(Model):
         # Link this specific data structure to self for variables exchange, only for outputs that will be read by other models  here.
         # Note : here eval is necessary to ensure intended lambda function definition
         for name in self.state_variables:
-            if name == "xylem_water_potential":
-                self.props[name].update({1: self.g.get_vertex_property(2)['xylem']['water_potential']})
-                # print("sent potential", self.props[name][1])
+            if name == "root_to_shoot_xylem_water_flow":
+                self.props[name].update({1: self.g.get_vertex_property(2)['xylem']['root_to_shoot_xylem_water_flow']})
 
             elif name == "mstruct_axis":
                 self.props[name].update({1: self.g.get_vertex_property(2)['mstruct']})
@@ -740,7 +734,7 @@ class CNW_Grass(Model):
 def scenario_utility(time_step_in_seconds: int = 3600, INPUTS_DIRPATH = "inputs", OUTPUTS_DIRPATH = "outputs", METEO_FILENAME = "meteo_Ljutovac2002.csv", plant_density = {1:250},
                      forced_start_time = 0, tillers_replications={'T1': 0.5, 'T2': 0.5, 'T3': 0.5, 'T4': 0.5}, N_fertilizations = {2016: 357143, 2520: 1000000},
                      stored_times = None, option_static = False, single_plant = False, show_3Dplant = False, run_from_outputs = False, heterogeneous_canopy = True, update_parameters_all_models = None,
-                     isolated_roots = False, cnwgrass_roots = True, hydraulics = False):
+                     isolated_roots = False, cnwgrass_roots = True, hydraulics = False, stomatal_model_name = 'BWB'):
     scenario = {}
 
     ### DIRS ###
@@ -854,6 +848,7 @@ def scenario_utility(time_step_in_seconds: int = 3600, INPUTS_DIRPATH = "inputs"
     scenario["isolated_roots"] = isolated_roots
     scenario["cnwgrass_roots"] = cnwgrass_roots
     scenario["hydraulics"] = hydraulics
+    scenario["stomatal_model_name"] = stomatal_model_name
 
 
     return scenario

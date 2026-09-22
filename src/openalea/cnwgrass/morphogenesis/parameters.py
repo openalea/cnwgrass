@@ -17,35 +17,35 @@ class Parameters(object):
         # --- SAM
         # -------------------------------------------------------------------------------------------------------------------
         # Parameters for temperature responses
-        self.Temp_Tref = 12  # Arbitrary reference temperature (°C)
+        self.Temp_Tref = 12  # Arbitrary reference temperature (ï¿½C)
         self.Temp_Ea_R = 8900  # Parameter Ea/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
         self.Temp_DS_R = 68.432  # Parameter deltaS/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (dimensionless)
         self.Temp_DH_R = 20735.5  # Parameter deltaH/R in Eyring equation from Johnson and Lewin (1946) - Parameter value fitted from Kemp and Blacklow (1982) (K)
-        self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(°C)
+        self.Temp_Ttransition = 9  # Below this temperature f = linear function of temperature instead of Arrhenius-like(ï¿½C)
 
         # Development
-        self.PLASTOCHRONE = 70 / self.Temp_Tref * 24 * 3600  #76.1/12*24*3600    #: Leaf plastochron (s at 12°C) calculated from Ljutovac 2002 with primordia of 5E-5 m (76 dd) ; Malvoisin 35dd associated with init 3E-5 m
+        self.PLASTOCHRONE = 70 / self.Temp_Tref * 24 * 3600  #76.1/12*24*3600    #: Leaf plastochron (s at 12ï¿½C) calculated from Ljutovac 2002 with primordia of 5E-5 m (76 dd) ; Malvoisin 35dd associated with init 3E-5 m
         self._delta_TT_GA = None
         self.max_nb_leaves = 11  #: Max number of leaves per axis
 
         # -------------------------------------------------------------------------------------------------------------------
         # --- Leaves
         # -------------------------------------------------------------------------------------------------------------------
-        self.conc_sucrose_offset = 240  #: sucrose concentration under which no leaf and internode growth occurs (µmol of C g-1 mstruct) - same for root growth, see growth
+        self.conc_sucrose_offset = 240  #: sucrose concentration under which no leaf and internode growth occurs (ï¿½mol of C g-1 mstruct) - same for root growth, see growth
 
         # Exponential elongation
         self.RERmax_Ljutovac_fit = {2: 2.55e-06, 3: 1.85e-06, 4: 1.7e-06, 5: 1.6e-06, 6: 1.5e-06, 7: 1.5e-06,
                                     8: 1.5e-06, 9: 1.5e-06, 10: 1.4e-06,
-                                    11: 1.4e-06}  # Optimal RERmax (s-1 at 12°C) calibrated from Ljutovac (2002)
-        # { 5 : 0.00000279 , 6 : 0.00000176 , 7 : 0.00000162 , 8 : 0.00000144 , 9 : 0.00000144 , 10 : 0.00000144 , 11 : 0.00000142 } # Observed RER on data of Ljutovac 2002 RER (s-1 at 12°C)
-        #RERmax = {2: 2.1e-06, 3: 2.5e-06, 4: 2.68e-06, 5: 2.65e-06, 6: 2.65e-06, 7: 2.65e-06, 8: 2.5e-06, 9: 2.3e-06, 10: 2.2e-06, 11: 2.2e-06}  # RERmax (s-1 at 12°C) fitted for simulations accounting for metabolic regulation
-        # self.RERmax = {2: 2.e-06, 3: 2.33e-06, 4: 2.19e-06, 5: 2.19e-06, 6: 2.25e-06, 7: 2.15e-06, 8: 2.1e-06, 9: 1.9e-06, 10: 1.75e-06, 11: 1.7e-06}  # RERmax (s-1 at 12°C) fitted for simulations accounting for metabolic regulation
+                                    11: 1.4e-06}  # Optimal RERmax (s-1 at 12ï¿½C) calibrated from Ljutovac (2002)
+        # { 5 : 0.00000279 , 6 : 0.00000176 , 7 : 0.00000162 , 8 : 0.00000144 , 9 : 0.00000144 , 10 : 0.00000144 , 11 : 0.00000142 } # Observed RER on data of Ljutovac 2002 RER (s-1 at 12ï¿½C)
+        #RERmax = {2: 2.1e-06, 3: 2.5e-06, 4: 2.68e-06, 5: 2.65e-06, 6: 2.65e-06, 7: 2.65e-06, 8: 2.5e-06, 9: 2.3e-06, 10: 2.2e-06, 11: 2.2e-06}  # RERmax (s-1 at 12ï¿½C) fitted for simulations accounting for metabolic regulation
+        # self.RERmax = {2: 2.e-06, 3: 2.33e-06, 4: 2.19e-06, 5: 2.19e-06, 6: 2.25e-06, 7: 2.15e-06, 8: 2.1e-06, 9: 1.9e-06, 10: 1.75e-06, 11: 1.7e-06}  # RERmax (s-1 at 12ï¿½C) fitted for simulations accounting for metabolic regulation
         self.RERmax = {2: 1.85e-06, 3: 2.57e-06, 4: 2.33e-06, 5: 2.22e-06, 6: 2.18e-06, 7: 2.05e-06, 8: 1.9e-06,
                        9: 1.75e-06, 10: 1.7e-06,
-                       11: 1.7e-06}  # RERmax (s-1 at 12°C) fitted for simulations accounting for metabolic regulation
+                       11: 1.7e-06}  # RERmax (s-1 at 12ï¿½C) fitted for simulations accounting for metabolic regulation
 
-        self.RER_Kc = 100  #: affinity coefficient of RER to C (µmol g-1)
-        self.RER_Kn = 15  #: affinity coefficient of RER to N (µmol g-1)
+        self.RER_Kc = 100  #: affinity coefficient of RER to C (ï¿½mol g-1)
+        self.RER_Kn = 15  #: affinity coefficient of RER to N (ï¿½mol g-1)
 
         # Automate elongation
         #- Parameters for leaf 1 and 2
@@ -53,15 +53,15 @@ class Parameters(object):
         self.tm_init = 150 * 3600 * 24 / 12
         self.tb_init = -35 * 3600 * 24 / 12
         # - Following leaves
-        self.te = 300 * 3600 * 24 / self.Temp_Tref  #: end of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tm = 204.6 * 3600 * 24 / self.Temp_Tref  #: time at which leaf elongation rate is maximal in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
-        self.tb = -114.3 * 3600 * 24 / self.Temp_Tref  #: beginning of leaf elongation in automate growth (s at 12°c); fitted from adapted data from Fournier 2005
+        self.te = 300 * 3600 * 24 / self.Temp_Tref  #: end of leaf elongation in automate growth (s at 12ï¿½c); fitted from adapted data from Fournier 2005
+        self.tm = 204.6 * 3600 * 24 / self.Temp_Tref  #: time at which leaf elongation rate is maximal in automate growth (s at 12ï¿½c); fitted from adapted data from Fournier 2005
+        self.tb = -114.3 * 3600 * 24 / self.Temp_Tref  #: beginning of leaf elongation in automate growth (s at 12ï¿½c); fitted from adapted data from Fournier 2005
         # NB : Previous fit on adapted data from Fournier 2005 in phyllochronic time te = 271, tm=176, tb=-25
         self.leaf_Lmax_MAX = 0.45  #: Maximum leaf_Lmax (m)
 
         self.leaf_pseudo_age_Vmax = 1.2  #: Maximal regulation of leaf length after emergence by CN status (dimensionless)
-        self.leaf_pseudo_age_Kc = 150  #: affinity coefficient to C (µmol g-1)
-        self.leaf_pseudo_age_Kn = 4  #: affinity coefficient to N (µmol g-1)
+        self.leaf_pseudo_age_Kc = 150  #: affinity coefficient to C (ï¿½mol g-1)
+        self.leaf_pseudo_age_Kn = 4  #: affinity coefficient to N (ï¿½mol g-1)
 
         # Leaf maximal width
         #- If optimal growth used
@@ -84,7 +84,7 @@ class Parameters(object):
         self.leaf_SSLW_MIN = 5.
         self.leaf_SSLW_MAX = 45.
         self.leaf_SSLW_a = 47.50516  # g m-2
-        self.leaf_SSLW_b = 2927.944  # µmol C g-1
+        self.leaf_SSLW_b = 2927.944  # ï¿½mol C g-1
 
         self.leaf_LSSW_dict = {1: 0.06, 2: 0.08, 3: 0.08, 4: 0.18, 5: 0.17, 6: 0.21, 7: 0.24, 8: 0.4, 9: 0.5, 10: 0.55,
                                11: 0.65}  # Manip NEMA 05/06 Soissons N+ (from data of J. Bertheloot, 2004)
@@ -115,10 +115,10 @@ class Parameters(object):
         # -------------------------------------------------------------------------------------------------------------------
         # Exponential elongation
         # self.RERmax_dict_IN = {1: 2.4E-06, 2: 2.4E-06, 3: 1.85E-06, 4: 3.E-08, 5: 3.7E-06, 6: 3.3E-06, 7: 3.E-06,
-        #                        8: 2.E-06, 9: 2.E-06, 10: 2.5E-06, 11: 2.5E-06, 12: 1.5E-06}  #: s-1 at 12°C FIT jan 20
-        self.RERmax_dict_IN = {1: 2.4E-06, 2: 2.4E-06, 3: 2.4E-06, 4: 2.4E-06, 5: 2.6E-06, 6: 2.6E-06, 7: 2.3E-06, 8: 1.9E-06, 9: 1.91E-06, 10: 1.9E-06, 11: 1.76E-06, 12: 1.5E-06}  #: s-1 at 12°C FIT jan 20
+        #                        8: 2.E-06, 9: 2.E-06, 10: 2.5E-06, 11: 2.5E-06, 12: 1.5E-06}  #: s-1 at 12ï¿½C FIT jan 20
+        self.RERmax_dict_IN = {1: 2.4E-06, 2: 2.4E-06, 3: 2.4E-06, 4: 2.4E-06, 5: 2.6E-06, 6: 2.6E-06, 7: 2.3E-06, 8: 1.9E-06, 9: 1.91E-06, 10: 1.9E-06, 11: 1.76E-06, 12: 1.5E-06}  #: s-1 at 12ï¿½C FIT jan 20
 
-        # { 3 : 2.48E-06 ,4 : 2.48E-06 ,5 : 2.48E-06 , 6 : 2.48E-06 , 7 : 2.48E-06 , 8 : 2.48E-06 , 9 : 2.48E-06 , 10 : 1.9E-06 , 11 : 1.6E-06 }#: s-1 at 12°C
+        # { 3 : 2.48E-06 ,4 : 2.48E-06 ,5 : 2.48E-06 , 6 : 2.48E-06 , 7 : 2.48E-06 , 8 : 2.48E-06 , 9 : 2.48E-06 , 10 : 1.9E-06 , 11 : 1.6E-06 }#: s-1 at 12ï¿½C
         # estimate from Ljutovac 2002 over the period until leaf ligulation i.e. wider than in the model.
         # Because i) not enough data if we consider only up to previous leaf ligulation, ii) same exponential like period
 
@@ -153,7 +153,7 @@ class Parameters(object):
         if self._delta_TT_GA is not None:
             return self._delta_TT_GA
         else:
-            return self.PLASTOCHRONE * 5  #: Thermal time between floral transition of SAM and Gibberelin production expressed as a function of plastochron (s at 12°C) ; Malvoisin's data give 7 plastochrons
+            return self.PLASTOCHRONE * 5  #: Thermal time between floral transition of SAM and Gibberelin production expressed as a function of plastochron (s at 12ï¿½C) ; Malvoisin's data give 7 plastochrons
 
     @delta_TT_GA.setter
     def delta_TT_GA(self, value):
@@ -165,13 +165,15 @@ class ParametersHydraulics(Parameters):
     def __init__(self):
         super().__init__()
         self.PLASTOCHRONE = 76.1 / self.Temp_Tref * 24 * 3600
-        self.RERmax = {1: 2.4E-06, 2: 2.4E-06, 3: 1.85E-06, 4: 3.E-08, 5: 3.45e-06, 6: 2.3e-06, 7: 2.2e-06, 8: 2.1e-06, 9: 2.0e-06, 10: 1.85e-06, 11: 1.76e-06}  # RERmax (s-1 at 12°C) fitted for simulations accounting for metabolic regulation
+        self.RERmax = {1: 2.4E-06, 2: 2.4E-06, 3: 1.85E-06, 4: 3.E-08, 5: 3.45e-06, 6: 2.3e-06, 7: 2.2e-06, 8: 2.1e-06, 9: 2.0e-06, 10: 1.85e-06, 11: 1.76e-06}  # RERmax (s-1 at 12ï¿½C) fitted for simulations accounting for metabolic regulation
         self.n = 4  #: Shape parameter of the xylem water potential function in RER (-)
-        self.psi_ref = -0.185  #: Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
+        # self.psi_ref = -0.185  # Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
+        self.psi_ref = -1.  #: Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
         self.lamina_Lmax_dict = {3: 0.09896253, 4: 0.10463127, 5: 0.10867923, 6: 0.1352669, 7: 0.16634665,
                                  8: 0.19288286,
                                  9: 0.25080917, 10: 0.28677033, 11: 0.3}  #: Maximum lamina length (m)
-        self.GAMMA = 0.2  #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
+        # self.GAMMA = 0.2  #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
+        self.GAMMA = 0.11
 
 
 def parameters_factory(hydraulics=False):
@@ -227,18 +229,18 @@ class HiddenZoneInit(object):
         self.ratio_DZ = 1.0
 
         # Default values used for RER calculation in morphogenesis
-        self.sucrose = 5E-6  #: µmol C
-        self.amino_acids = 4E-6  #: µmol N
-        self.fructan = 0  #: µmol C - about 10% DM
+        self.sucrose = 5E-6  #: ï¿½mol C
+        self.amino_acids = 4E-6  #: ï¿½mol N
+        self.fructan = 0  #: ï¿½mol C - about 10% DM
         self.leaf_enclosed_mstruct = 1.26E-07  #: g
         self.internode_enclosed_mstruct = 0  #: g
         self.mstruct = self.leaf_enclosed_mstruct + self.internode_enclosed_mstruct  #: g
         self.leaf_enclosed_Nstruct = self.leaf_enclosed_mstruct * 0.005  #: g, parameter value in Growth
         self.internode_enclosed_Nstruct = self.internode_enclosed_mstruct * 0.0322  #: g, parameter value in Growth
         self.Nstruct = self.leaf_enclosed_Nstruct + self.internode_enclosed_Nstruct  #: g
-        self.proteins = 2.6E-03  #: µmol N - about 9% N
+        self.proteins = 2.6E-03  #: ï¿½mol N - about 9% N
         self.conc_cytokinins = 150  #: AU / g mstruct
-        self.mean_conc_sucrose = 0  #: µmol C / g mstruct
+        self.mean_conc_sucrose = 0  #: ï¿½mol C / g mstruct
 
 
 class HiddenZoneInitHydraulics(HiddenZoneInit):
@@ -267,14 +269,14 @@ class ElementInit(object):
         self.green_area = 0  #: m2
         self.age = 0  #: Thermal Time
         self.age_teq = 0  #: s
-        self.max_proteins = 0  #: µmol N
+        self.max_proteins = 0  #: ï¿½mol N
         self.Nresidual = 0  #: g
-        self.sucrose = 0  #: µmol C
-        self.amino_acids = 0  #: µmol N
-        self.nitrates = 0  #: µmol N
-        self.fructan = 0  #: µmol C
-        self.starch = 0  #: µmol C
-        self.proteins = 0  #: µmol N
+        self.sucrose = 0  #: ï¿½mol C
+        self.amino_acids = 0  #: ï¿½mol N
+        self.nitrates = 0  #: ï¿½mol N
+        self.fructan = 0  #: ï¿½mol C
+        self.starch = 0  #: ï¿½mol C
+        self.proteins = 0  #: ï¿½mol N
         self.mstruct = 0  #: g
         self.senesced_mstruct = 0  #: g
         self.max_mstruct = 0  #: g

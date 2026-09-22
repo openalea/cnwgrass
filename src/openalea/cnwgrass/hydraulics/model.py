@@ -248,8 +248,8 @@ class Xylem(Organ):
 
         # state parameters
         self.water_potential = water_potential    #: MPa
-        self.root_xylem_water_potential = water_potential    #: MPa first initialized for 0 gradient
-        self.shoot_root_xylem_conductance = 1e-2   # g.MPa-1.s-1
+        self.root_to_shoot_xylem_water_flow = 0.
+        self.old_root_to_shoot_xylem_water_flow = 0.
 
         # integrative variables
         self.delta_t = 3600     #: the delta t of the simulation (in seconds)
@@ -394,11 +394,18 @@ class HiddenZone(Organ):
         sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
         amino_acids = (amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO
         fructan = (fructan * 1E-6) / parameters.NB_C_SUCROSE
-        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
+        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE) if volume > 0. else 0.
 
         #: Effective concentration of solutes
-        conc_solutes_eff = HiddenZone.PARAMETERS.Sa / (HiddenZone.PARAMETERS.Sb + exp(HiddenZone.PARAMETERS.Sc *
-                            conc_solutes / HiddenZone.PARAMETERS.Sd))
+        try:
+            conc_solutes_eff = HiddenZone.PARAMETERS.Sa / (HiddenZone.PARAMETERS.Sb + exp(HiddenZone.PARAMETERS.Sc *
+                                conc_solutes / HiddenZone.PARAMETERS.Sd))
+        except OverflowError:
+            print("DEBUG calculate_osmotic_water_potential OverflowError (HiddenZone):")
+            print(f"  volume={volume!r}, temperature={temperature!r}")
+            print(f"  converted sucrose={sucrose!r}, amino_acids={amino_acids!r}, fructan={fructan!r}")
+            print(f"  conc_solutes={conc_solutes!r}, Sc/Sd*conc_solutes={HiddenZone.PARAMETERS.Sc * conc_solutes / HiddenZone.PARAMETERS.Sd!r}")
+            raise
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -441,6 +448,7 @@ class HiddenZone(Organ):
 
         """
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_hz * (hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']))
+        # resistance = 0.5 * (hiddenzone_dimensions['thickness'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['length']))
         return resistance
 
     @staticmethod
@@ -566,7 +574,7 @@ class HiddenZone(Organ):
         plastic_component = (phi['x'] + phi['y'] + phi['z'])   #: Plastic irreversible growth
 
         delta_turgor_water_potential = ((1 / (
-                    parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
+                    parameters.RHO_WATER * max(organ_volume, 1e-11) * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
@@ -796,6 +804,7 @@ class PhotosyntheticOrganElement:
         """
         #: Coussement et al. (2018)
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
+        # resistance = 0.5 * (organ_dimensions['thickness'] / (organ_dimensions['width'] * organ_dimensions['length']))
 
         return resistance
 
@@ -863,11 +872,18 @@ class PhotosyntheticOrganElement:
         sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
         amino_acids = (amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO
         fructan = (fructan * 1E-6) / parameters.NB_C_SUCROSE
-        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
+        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE) if volume > 0. else 0.
 
         #: Effective concentration of solutes
-        conc_solutes_eff = PhotosyntheticOrganElement.PARAMETERS.Sa / (PhotosyntheticOrganElement.PARAMETERS.Sb + exp(PhotosyntheticOrganElement.PARAMETERS.Sc *
-                            conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd))
+        try:
+            conc_solutes_eff = PhotosyntheticOrganElement.PARAMETERS.Sa / (PhotosyntheticOrganElement.PARAMETERS.Sb + exp(PhotosyntheticOrganElement.PARAMETERS.Sc *
+                                conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd))
+        except OverflowError:
+            print("DEBUG calculate_osmotic_water_potential OverflowError (PhotosyntheticOrganElement):")
+            print(f"  volume={volume!r}, temperature={temperature!r}")
+            print(f"  converted sucrose={sucrose!r}, amino_acids={amino_acids!r}, fructan={fructan!r}")
+            print(f"  conc_solutes={conc_solutes!r}, Sc/Sd*conc_solutes={PhotosyntheticOrganElement.PARAMETERS.Sc * conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd!r}")
+            raise
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -927,7 +943,7 @@ class PhotosyntheticOrganElement:
         elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
         plastic_component = 0   #: Plastic irreversible growth (MPa)
         delta_turgor_water_potential = ((1 / (
-                    parameters.RHO_WATER * volume * parameters.VSTORAGE)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
+                    parameters.RHO_WATER * max(volume, 1e-11)  * parameters.VSTORAGE)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
