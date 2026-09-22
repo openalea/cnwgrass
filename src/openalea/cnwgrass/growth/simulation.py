@@ -262,13 +262,13 @@ class Simulation(object):
                 curr_hiddenzone_outputs['AA_consumption_mstruct'] = self.model.calculate_s_Nstruct_amino_acids((delta_leaf_enclosed_Nstruct + delta_internode_enclosed_Nstruct),
                                                                                                           delta_lamina_Nstruct,
                                                                                                           delta_sheath_Nstruct,
-                                                                                                          delta_internode_Nstruct)  #: Consumption of amino acids due to mstruct growth (�mol N)
+                                                                                                          delta_internode_Nstruct)  #: Consumption of amino acids due to mstruct growth (µmol N)
                 curr_hiddenzone_outputs['sucrose_consumption_mstruct'] = self.model.calculate_s_mstruct_sucrose((delta_leaf_enclosed_mstruct + delta_internode_enclosed_mstruct),
                                                                                                            delta_lamina_mstruct,
                                                                                                            delta_sheath_mstruct,
                                                                                                            curr_hiddenzone_outputs[
-                                                                                                               'AA_consumption_mstruct'])  #: Consumption of sucrose due to mstruct growth (�mol C)
-                curr_hiddenzone_outputs['Respi_growth'] = RespirationModel.R_growth(curr_hiddenzone_outputs['sucrose_consumption_mstruct'])  #: Respiration growth (�mol C)
+                                                                                                               'AA_consumption_mstruct'])  #: Consumption of sucrose due to mstruct growth (µmol C)
+                curr_hiddenzone_outputs['Respi_growth'] = RespirationModel.R_growth(curr_hiddenzone_outputs['sucrose_consumption_mstruct'])  #: Respiration growth (µmol C)
 
                 # -- Update of hiddenzone outputs
                 curr_hiddenzone_outputs['leaf_enclosed_mstruct'] += delta_leaf_enclosed_mstruct

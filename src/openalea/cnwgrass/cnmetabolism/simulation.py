@@ -61,17 +61,17 @@ class Simulation(object):
         This model must define a class implementing these functions:
         * R_Nnit_upt(U_Nnit, sucrose): Nitrate uptake respiration.
             * Parameters:
-                - `U_Nnit` (:class:`float`) - uptake of N nitrates (�mol` N)
-                - `sucrose` (:class:`float`) -  amount of C sucrose in organ (�mol` C)
-            * Returns: _R_Nnit_upt (�mol` C respired)
+                - `U_Nnit` (:class:`float`) - uptake of N nitrates (µmol N)
+                - `sucrose` (:class:`float`) -  amount of C sucrose in organ (µmol C)
+            * Returns: _R_Nnit_upt (µmol C respired)
             * Returns Type: :class:`float`
 
         * R_phloem(sucrose_loading, sucrose, mstruct): Phloem loading respiration
             * Parameters:
-                - `sucrose_loading` (:class:`float`) -  Loading flux from the C substrate pool to phloem (�mol` C g-1 mstruct)
-                - `sucrose` (:class:`float`) -  amount of C sucrose in organ (�mol` C)
+                - `sucrose_loading` (:class:`float`) -  Loading flux from the C substrate pool to phloem (µmol C g-1 mstruct)
+                - `sucrose` (:class:`float`) -  amount of C sucrose in organ (µmol C)
                 - `mstruct` (:class:`float`) -  structural dry mass of organ (g)
-            * Returns: _R_phloem (�mol` C respired)
+            * Returns: _R_phloem (µmol C respired)
             * Returns Type: :class:`float`
 
         * R_Nnit_red(s_amino_acids, sucrose, mstruct, root=False): Nitrate reduction-linked respiration
@@ -79,30 +79,30 @@ class Simulation(object):
           and reducing power obtained directly from photosynthesis (rather than C substrate)
 
             * Parameters:
-                - `s_amino_acids` (:class:`float`) - consumption of N for the synthesis of amino acids (�mol` N g-1 mstruct)
+                - `s_amino_acids` (:class:`float`) - consumption of N for the synthesis of amino acids (µmol N g-1 mstruct)
                   (in the present version, this is used to approximate nitrate reduction needed in the original model of Thornley and Cannell, 2000)
-                - `sucrose` (:class:`float`) -  amount of C sucrose in organ (�mol` C)
+                - `sucrose` (:class:`float`) -  amount of C sucrose in organ (µmol C)
                 - `mstruct` (:class:`float`) -  structural dry mass of organ (g)
                 - `root` (:class:`bool`) - specifies if the nitrate reduction-linked respiration is computed for shoot (False) or root (True) tissues.
-            * Returns: _R_Nnit_upt (�mol` C respired)
+            * Returns: _R_Nnit_upt (µmol C respired)
             * Returns Type: :class:`float`
 
         * R_residual(sucrose, mstruct, Ntot, delta_t, Ts): Residual maintenance respiration (cost from protein turn-over, cell ion gradients, futile cycles...)
             * Parameters:
-                - `sucrose` (:class:`float`) - amount of C sucrose (�mol` C)
+                - `sucrose` (:class:`float`) - amount of C sucrose (µmol C)
                 - `mstruct` (:class:`float`) - structural dry mass of organ (g)
-                - `Ntot` (:class:`float`) - total N in organ (�mol` N)
+                - `Ntot` (:class:`float`) - total N in organ (µmol N)
                 - `delta_t` (:class:`float`) - timestep (s)
-                - `Ts` (:class:`float`) - organ temperature (�C)
-            * Returns: _R_residual (�mol` C respired)
+                - `Ts` (:class:`float`) - organ temperature (°C)
+            * Returns: _R_residual (µmol C respired)
             * Returns Type: :class:`float`
 
         * R_grain_growth(mstruct_growth, starch_filling, mstruct): Grain growth respiration
             * Parameters:
-                - `mstruct_growth` (:class:`float`) - gross growth of grain structure (�mol` C added in grain structure)
-                - `starch_filling` (:class:`float`) - gross growth of grain starch (�mol` C added in grain starch g-1 mstruct)
+                - `mstruct_growth` (:class:`float`) - gross growth of grain structure (µmol C added in grain structure)
+                - `starch_filling` (:class:`float`) - gross growth of grain starch (µmol C added in grain starch g-1 mstruct)
                 - `mstruct` (:class:`float`) -  structural dry mass of organ (g)
-            * Returns: R_grain_growth (�mol` C respired)
+            * Returns: R_grain_growth (µmol C respired)
             * Returns Type: :class:`float`
 
     :param int delta_t: the delta t of the simulation (in seconds) ; default is `1`.
@@ -456,7 +456,7 @@ class Simulation(object):
 
         :param model.Population population: a population of plants.
         :param dict soils: the soil associated to each axis. `soils` must be a dictionary with the same structure as :attr:`soils`
-        :param float Tsoil: soil temperature (�C)
+        :param float Tsoil: soil temperature (°C)
         """
 
         logger = logging.getLogger(__name__)

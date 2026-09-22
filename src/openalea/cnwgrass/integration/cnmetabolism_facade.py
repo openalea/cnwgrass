@@ -138,8 +138,8 @@ class CNMetabolismFacade(object):
         Run the model and update the MTG and the dataframes shared between all models.
 
         :param update_shared_df:
-        :param float Tair: air temperature (�C)
-        :param float Tsoil: soil temperature (�C)
+        :param float Tair: air temperature (°C)
+        :param float Tsoil: soil temperature (°C)
         :param bool update_shared_df: if 'True', update the shared dataframes at this time step.
         """
 
@@ -225,8 +225,8 @@ class CNMetabolismFacade(object):
         """
         Initialize the inputs of the model from the MTG shared between all models and the soils.
 
-        :param float Tair: air temperature (�C)
-        :param float Tsoil: soil temperature (�C)
+        :param float Tair: air temperature (°C)
+        :param float Tsoil: soil temperature (°C)
         """
 
         # Convert number of replications per tiller into number of replications per cohort

@@ -165,7 +165,7 @@ class Simulation(object):
             # hiddenzone initiation
             for i in range(0, init_leaf):
                 # Initialise hiddenzone
-                hiddenzone_id = axis_id + tuple([1 + i + curr_axis_outputs['nb_leaves'] - init_leaf])  # TODO: peut etre simplifi� tant que 'calculate_SAM_status' renvoie 1 erreur si init_leaf>1
+                hiddenzone_id = axis_id + tuple([1 + i + curr_axis_outputs['nb_leaves'] - init_leaf])  # TODO: peut etre simplifié tant que 'calculate_SAM_status' renvoie 1 erreur si init_leaf>1
                 new_hiddenzone = self.hiddenzone_init.__dict__.copy()
                 self.outputs['hiddenzone'][hiddenzone_id] = new_hiddenzone
 
