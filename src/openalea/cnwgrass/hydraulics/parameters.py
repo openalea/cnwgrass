@@ -151,7 +151,7 @@ class HiddenZoneParameters(OrganParameters):
         self.SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
         self.OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
         # self.GAMMA = 0.2    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
-        self.GAMMA = 0.11
+        self.GAMMA = 0.15
 
         self.Sa = 260     #: (mol m-3)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
         self.Sb = 0.9      #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential

@@ -173,7 +173,7 @@ class ParametersHydraulics(Parameters):
                                  8: 0.19288286,
                                  9: 0.25080917, 10: 0.28677033, 11: 0.3}  #: Maximum lamina length (m)
         # self.GAMMA = 0.2  #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
-        self.GAMMA = 0.11
+        self.GAMMA = 0.15
 
 
 def parameters_factory(hydraulics=False):

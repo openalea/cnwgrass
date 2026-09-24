@@ -580,11 +580,11 @@ class Simulation(object):
             sol = solve_ivp(fun=self._calculate_shoot_derivatives, t_span=self.time_grid, y0=self.initial_conditions,
                             method='LSODA', t_eval=np.array([self.time_step]), dense_output=False)
 
-            # alpha_relaxation_flux = 1.
-            # for plant in self.population.plants:
-            #     for axis in plant.axes:
-            #         axis.xylem.root_to_shoot_xylem_water_flow = alpha_relaxation_flux * axis.xylem.root_to_shoot_xylem_water_flow + (1. - alpha_relaxation_flux) * self.old_root_to_shoot_xylem_water_flow
-            #         self.old_root_to_shoot_xylem_water_flow = axis.xylem.root_to_shoot_xylem_water_flow
+            alpha_relaxation_flux = 1.
+            for plant in self.population.plants:
+                for axis in plant.axes:
+                    axis.xylem.root_to_shoot_xylem_water_flow = alpha_relaxation_flux * axis.xylem.root_to_shoot_xylem_water_flow + (1. - alpha_relaxation_flux) * self.old_root_to_shoot_xylem_water_flow
+                    self.old_root_to_shoot_xylem_water_flow = axis.xylem.root_to_shoot_xylem_water_flow
 
         self.nfev_total += sol.nfev
 
