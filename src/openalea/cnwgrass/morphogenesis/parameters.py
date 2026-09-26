@@ -167,13 +167,13 @@ class ParametersHydraulics(Parameters):
         self.PLASTOCHRONE = 76.1 / self.Temp_Tref * 24 * 3600
         self.RERmax = {1: 2.4E-06, 2: 2.4E-06, 3: 1.85E-06, 4: 3.E-08, 5: 3.45e-06, 6: 2.3e-06, 7: 2.2e-06, 8: 2.1e-06, 9: 2.0e-06, 10: 1.85e-06, 11: 1.76e-06}  # RERmax (s-1 at 12°C) fitted for simulations accounting for metabolic regulation
         self.n = 4  #: Shape parameter of the xylem water potential function in RER (-)
-        # self.psi_ref = -0.185  # Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
-        self.psi_ref = -1.  #: Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
+        self.psi_ref = -0.185  # Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
+        # self.psi_ref = -1.  #: Critical leaf water potential threshold at which RER is reduced by 50% (Mpa) (adapted from Boyer, 1968)
         self.lamina_Lmax_dict = {3: 0.09896253, 4: 0.10463127, 5: 0.10867923, 6: 0.1352669, 7: 0.16634665,
                                  8: 0.19288286,
                                  9: 0.25080917, 10: 0.28677033, 11: 0.3}  #: Maximum lamina length (m)
         # self.GAMMA = 0.2  #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
-        self.GAMMA = 0.15
+        self.GAMMA = 0.16
 
 
 def parameters_factory(hydraulics=False):
