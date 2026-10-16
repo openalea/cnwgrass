@@ -10,6 +10,7 @@ from openalea.cnwgrass.integration import tools
 
 import numpy as np
 import math
+from scipy.sparse import lil_matrix
 
 """
     integration.cnmetabolism_facade
@@ -80,7 +81,9 @@ class CNMetabolismFacade(object):
                  shared_soils_inputs_outputs_df,
                  tillers_replications=None,
                  external_soil_model=False,
-                 update_shared_df=True):
+                 update_shared_df=True,
+                 isolated_roots=False,
+                 cnwgrass_roots=True):
         """
         :param openalea.mtg.mtg.MTG shared_mtg: The MTG shared between all models.
         :param int delta_t: The delta between two runs, in seconds.
@@ -106,7 +109,7 @@ class CNMetabolismFacade(object):
         self.tillers_replications = tillers_replications
         self.external_soil_model = external_soil_model
 
-        self._simulation = cnmetabolism_simulation.Simulation(respiration_model=respiration_model, delta_t=delta_t, culm_density=culm_density, external_soil_model=external_soil_model)
+        self._simulation = cnmetabolism_simulation.Simulation(respiration_model=respiration_model, delta_t=delta_t, culm_density=culm_density, external_soil_model=external_soil_model, isolated_roots=isolated_roots, cnwgrass_roots=cnwgrass_roots)
 
         self.population, self.soils = cnmetabolism_converter.from_dataframes(model_axes_inputs_df, model_organs_inputs_df, model_hiddenzones_inputs_df, model_elements_inputs_df, model_soils_inputs_df)
 
@@ -128,17 +131,20 @@ class CNMetabolismFacade(object):
                                            cnmetabolism_elements_data_df=model_elements_inputs_df,
                                            cnmetabolism_soils_data_df=model_soils_inputs_df)
 
+        self.isolated_roots = isolated_roots
+
     def run(self, Tair, Tsoil, update_shared_df=None):
         """
         Run the model and update the MTG and the dataframes shared between all models.
 
         :param update_shared_df:
-        :param float Tair: air temperature (°C)
-        :param float Tsoil: soil temperature (°C)
+        :param float Tair: air temperature (Â°C)
+        :param float Tsoil: soil temperature (Â°C)
         :param bool update_shared_df: if 'True', update the shared dataframes at this time step.
         """
 
         self._initialize_model(Tair=Tair, Tsoil=Tsoil)
+        self._initialize_indices_and_sparcity()
         self._simulation.run()
         self._update_shared_MTG()
 
@@ -219,8 +225,8 @@ class CNMetabolismFacade(object):
         """
         Initialize the inputs of the model from the MTG shared between all models and the soils.
 
-        :param float Tair: air temperature (°C)
-        :param float Tsoil: soil temperature (°C)
+        :param float Tair: air temperature (Â°C)
+        :param float Tsoil: soil temperature (Â°C)
         """
 
         # Convert number of replications per tiller into number of replications per cohort
@@ -269,7 +275,10 @@ class CNMetabolismFacade(object):
                     cnmetabolism_organ = cnmetabolism_organ_class(mtg_organ_label)
                     if mtg_organ_label in mtg_axis_properties:
                         mtg_organ_properties = mtg_axis_properties[mtg_organ_label]
-                        cnmetabolism_organ_data_names = set(cnmetabolism_simulation.Simulation.ORGANS_STATE).intersection(cnmetabolism_organ.__dict__)
+                        access_mtg_names = cnmetabolism_simulation.Simulation.ORGANS_STATE
+                        if cnmetabolism_organ_class == cnmetabolism_model.Roots and self.isolated_roots:
+                            access_mtg_names += cnmetabolism_simulation.Simulation.ORGANS_FLUXES[:3] + ["Unloading_Sucrose", "Unloading_Amino_Acids"]
+                        cnmetabolism_organ_data_names = set(access_mtg_names).intersection(cnmetabolism_organ.__dict__)
                         if set(mtg_organ_properties).issuperset(cnmetabolism_organ_data_names):
                             cnmetabolism_organ_data_dict = {}
                             for cnmetabolism_organ_data_name in cnmetabolism_organ_data_names:
@@ -416,6 +425,113 @@ class CNMetabolismFacade(object):
                 self.population.plants.append(cnmetabolism_plant)
 
         self._simulation.initialize(self.population, self.soils, Tsoil=Tsoil)
+
+    def _initialize_indices_and_sparcity(self):
+        """
+        TODO
+        """
+        n = len(self._simulation.initial_conditions)
+        S = lil_matrix((n, n), dtype=bool)
+        # diagonal always present
+        S.setdiag(True)
+
+        icm = self._simulation.initial_conditions_mapping
+        for plant in self._simulation.population.plants:
+            for axis in plant.axes:
+                axis._phloem_contributors = [axis.roots]
+                for variable in ('sucrose', 'amino_acids'):
+                    setattr(axis.phloem, f"_i_{variable}", icm[axis.phloem][variable])
+
+                # Phloem indices
+                i_ph_suc = axis.phloem._i_sucrose
+                i_ph_aa = axis.phloem._i_amino_acids
+
+                # phloem sucrose row depends on phloem sucrose (diag already) and MAY depend on phloem AA via unloading logic, over-approx for safety, could be removed
+                S[i_ph_suc, i_ph_aa] = True
+                S[i_ph_aa,  i_ph_suc] = True
+
+                # Collect per-axis element/HZ columns we must connect
+                E_suc_cols, E_aa_cols = [], []
+                HZ_suc_cols, HZ_aa_cols = [], []
+                
+                if axis.endosperm is not None:
+                    for variable in ('moistening', 'starch', 'proteins'):
+                        setattr(axis.endosperm, f"_i_{variable}", icm[axis.endosperm][variable])
+                
+                # TODO include endosperm in jacobian sparcity matrix
+
+                for phytomer in axis.phytomers:
+                    hiddenzone = phytomer.hiddenzone
+                    if hiddenzone is not None:
+                        if hiddenzone.mstruct > 0:
+                            hz_idxs = []
+                            for variable in ('sucrose', 'fructan', 'amino_acids', 'proteins'):
+                                setattr(hiddenzone, f"_i_{variable}", icm[hiddenzone][variable])
+                                hz_idxs.append(icm[hiddenzone][variable])
+                            for i in hz_idxs:
+                                S.rows[i].extend(hz_idxs); S.data[i].extend([True]*len(hz_idxs))
+                                # hidden zone depends on phloem unloading
+                                S[i, i_ph_suc] = True; S[i, i_ph_aa] = True
+                            HZ_suc_cols.append(icm[hiddenzone]['sucrose'])
+                            HZ_aa_cols.append(icm[hiddenzone]['amino_acids'])
+
+                            axis._phloem_contributors.append(hiddenzone)
+                    
+                    for organ in (phytomer.chaff, phytomer.peduncle, phytomer.lamina, phytomer.internode, phytomer.sheath):
+                            if organ is not None:
+                                for element in (organ.exposed_element, organ.enclosed_element):
+                                    if element is not None and element.green_area > 0.25E-6 and element.mstruct > 0.0: # Ignored here as element could change status during solver iteration
+                                    # if element is not None:
+                                        elt_idxs = []
+                                        for variable in ('starch', 'sucrose', 'triosesP', 'fructan', 'nitrates', 'amino_acids', 'proteins', 'cytokinins'):
+                                            setattr(element, f"_i_{variable}", icm[element][variable])
+                                            elt_idxs.append(icm[element][variable])
+                                        for i in elt_idxs:
+                                            S.rows[i].extend(elt_idxs); S.data[i].extend([True]*len(elt_idxs))
+                                            # element loads/unloads vs phloem
+                                            S[i, i_ph_suc] = True; S[i, i_ph_aa] = True
+
+                                        i_e_suc = icm[element]['sucrose']
+                                        i_e_aa = icm[element]['amino_acids']
+                                        # Since roots are not computed by CN-Wheat here, nitrates and cytokinins act as constants
+                                        # i_e_nit = icm[element]['nitrates']
+                                        # i_e_cyt = icm[element]['cytokinins']
+                                        E_suc_cols.append(i_e_suc)
+                                        E_aa_cols.append(i_e_aa)
+
+                                        # Element rows depend on HZ pools (growing/export case)
+                                        if hiddenzone is not None:
+                                            S[i_e_suc, icm[hiddenzone]['sucrose']]       = True
+                                            S[i_e_aa,  icm[hiddenzone]['amino_acids']]   = True
+
+                                        if not element.is_growing:
+                                            axis._phloem_contributors.append(element)
+
+                # Couplings that are easy to forget (make these dense):
+                #    a) HZ rows depend on element loadings â†’ HZ rows depend on element sucrose/AA
+                for i in HZ_suc_cols:
+                    S.rows[i].extend(E_suc_cols); S.data[i].extend([True]*len(E_suc_cols))
+                for i in HZ_aa_cols:
+                    S.rows[i].extend(E_aa_cols); S.data[i].extend([True]*len(E_aa_cols))
+
+                #    b) Phloem rows depend on HZ unloading AND element loading
+                S.rows[i_ph_suc].extend(E_suc_cols + HZ_suc_cols); S.data[i_ph_suc].extend([True]*(len(E_suc_cols) + len(HZ_suc_cols)))
+                S.rows[i_ph_aa].extend(E_aa_cols  + HZ_aa_cols); S.data[i_ph_aa].extend([True]*(len(E_aa_cols) + len(HZ_aa_cols)))
+
+                # NOTE: likely not to happen in Wheat-BRIDGES simulations for now
+                if axis.grains is not None:
+                    grain_idxs = []
+                    for variable in ('structure','starch','proteins','age_from_flowering'):
+                        setattr(axis.grains, f"_i_{variable}", icm[axis.grains][variable])
+                        grain_idxs.append(icm[axis.grains][variable])
+                    for i in grain_idxs:
+                        S.rows[i].extend(grain_idxs); S.data[i].extend([True]*len(grain_idxs))
+                        S[i, i_ph_suc] = True; S[i, i_ph_aa] = True
+                    # grains contribute to phloem via AA (if any)
+                    S[i_ph_aa, icm[axis.grains]['proteins']] = True  # harmless over-approx
+
+        self._simulation._jac_sparsity_shoot = S.tocsr()
+
 
     def _update_shared_MTG(self):
         """

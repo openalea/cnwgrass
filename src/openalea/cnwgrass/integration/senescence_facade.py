@@ -45,7 +45,8 @@ class SENESCENCEFacade(object):
                  shared_axes_inputs_outputs_df,
                  shared_elements_inputs_outputs_df,
                  update_parameters=None,
-                 update_shared_df=True):
+                 update_shared_df=True,
+                 cnwgrass_roots=True):
 
         """
         :param openalea.mtg.mtg.MTG shared_mtg: The MTG shared between all models.
@@ -61,8 +62,8 @@ class SENESCENCEFacade(object):
         """
 
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
-
-        self._simulation = simulation.Simulation(delta_t=delta_t, update_parameters=update_parameters)  #: the simulator to use to run the model
+        self.cnwgrass_roots = cnwgrass_roots
+        self._simulation = simulation.Simulation(delta_t=delta_t, update_parameters=update_parameters, cnwgrass_roots=cnwgrass_roots)  #: the simulator to use to run the model
 
         all_senescence_inputs_dict = converter.from_dataframes(model_roots_inputs_df, model_axes_inputs_df, model_elements_inputs_df)
         self._update_shared_MTG(all_senescence_inputs_dict['roots'], all_senescence_inputs_dict['axes'], all_senescence_inputs_dict['elements'])
@@ -180,21 +181,23 @@ class SENESCENCEFacade(object):
                     continue
 
                 # update the axis property in the MTG
-                axis_id = (mtg_plant_index, mtg_axis_label)
 
-                if axis_id in senescence_axes_data_dict:
-                    senescence_axis_data_dict = senescence_axes_data_dict[axis_id]
-                    for axis_data_name, axis_data_value in senescence_axis_data_dict.items():
-                        self._shared_mtg.property(axis_data_name)[mtg_axis_vid] = axis_data_value
+                if self.cnwgrass_roots:
+                    axis_id = (mtg_plant_index, mtg_axis_label)
 
-                # update the roots in the MTG
-                if axis_id not in senescence_roots_data_dict:
-                    continue
-                if 'roots' not in self._shared_mtg.get_vertex_property(mtg_axis_vid):
-                    self._shared_mtg.property('roots')[mtg_axis_vid] = {}
-                mtg_roots_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)['roots']
-                for roots_data_name, roots_data_value in senescence_roots_data_dict.items():
-                    self._shared_mtg.property(roots_data_name)[mtg_axis_vid] = roots_data_value
+                    if axis_id in senescence_axes_data_dict:
+                        senescence_axis_data_dict = senescence_axes_data_dict[axis_id]
+                        for axis_data_name, axis_data_value in senescence_axis_data_dict.items():
+                            self._shared_mtg.property(axis_data_name)[mtg_axis_vid] = axis_data_value
+
+                    # update the roots in the MTG
+                    if axis_id not in senescence_roots_data_dict:
+                        continue
+                    if 'roots' not in self._shared_mtg.get_vertex_property(mtg_axis_vid):
+                        self._shared_mtg.property('roots')[mtg_axis_vid] = {}
+                    mtg_roots_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)['roots']
+                    for roots_data_name, roots_data_value in senescence_roots_data_dict.items():
+                        self._shared_mtg.property(roots_data_name)[mtg_axis_vid] = roots_data_value
 
                 for mtg_metamer_vid in self._shared_mtg.components_iter(mtg_axis_vid):
                     mtg_metamer_index = int(self._shared_mtg.index(mtg_metamer_vid))
@@ -214,7 +217,7 @@ class SENESCENCEFacade(object):
                                 self._shared_mtg.property(senescence_element_data_name)[mtg_element_vid] = senescence_element_data_value
                                 # Temporaire avant de trouver une solution pour :
                                 # 1) piloter la senescence des feuilles par green_area plutot que par senesced_length,
-                                # 2) updater les organes à partir des éléments et non l'inverse.
+                                # 2) updater les organes Ã  partir des Ã©lÃ©ments et non l'inverse.
                                 if senescence_element_data_name == 'senesced_length_element' and mtg_element_label in ['LeafElement1', 'StemElement']:
                                     self._shared_mtg.property('senesced_length')[mtg_organ_vid] = np.nan_to_num(self._shared_mtg.property(senescence_element_data_name).get(mtg_element_vid, 0.))
 

@@ -164,7 +164,7 @@ class Phytomer:
         self.hiddenzone = hiddenzone  #: the hidden zone
         if cohorts is None:
             cohorts = []
-        self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
+        self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait Ãªtre portÃ© Ã  l'Ã©chelle de la plante uniquement mais je ne vois pas comment faire mieux
         self.cohorts_replications = cohorts_replications  #: dictionary of number of replications per cohort rank
 
         # integrative variables
@@ -248,6 +248,8 @@ class Xylem(Organ):
 
         # state parameters
         self.water_potential = water_potential    #: MPa
+        self.root_to_shoot_xylem_water_flow = 0.
+        self.old_root_to_shoot_xylem_water_flow = 0.
 
         # integrative variables
         self.delta_t = 3600     #: the delta t of the simulation (in seconds)
@@ -260,7 +262,7 @@ class Xylem(Organ):
 
         :param float soil_water_potential: MPa
         :param float total_water_influx: g H2O
-        :param float Growth: g H2O
+        :param float Growth: g H2O  
         :param float delta_t: time step of the simulation (s)
 
         :return: Total water potential (MPa)
@@ -292,7 +294,7 @@ class HiddenZone(Organ):
 
         if cohorts is None:
             cohorts = []
-        self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
+        self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait Ãªtre portÃ© Ã  l'Ã©chelle de la plante uniquement mais je ne vois pas comment faire mieux
         self.cohorts_replications = cohorts_replications  #: dictionary of number of replications per cohort rank
         self.index = index
         self.label = label
@@ -302,12 +304,12 @@ class HiddenZone(Organ):
         self.amino_acids = amino_acids           #: :math:`:math:`\\mu mol N``
         self.proteins = proteins                 #: :math:`:math:`\\mu mol N``
         self.sucrose = sucrose                   #: :math:`:math:`\\mu mol C``
-        self.leaf_pseudo_age = leaf_pseudo_age   #: °Cd
+        self.leaf_pseudo_age = leaf_pseudo_age   #: Â°Cd
         self.leaf_L = leaf_L                     #: m
         self.leaf_is_growing = leaf_is_growing   #: -
         self.mstruct = mstruct                   #: g
         self.leaf_enclosed_mstruct = leaf_enclosed_mstruct                   #: g
-        self.hiddenzone_age = hiddenzone_age                          #: °Cd
+        self.hiddenzone_age = hiddenzone_age                          #: Â°Cd
         self.length = min(leaf_L, leaf_pseudostem_length)       #: m
         self.leaf_pseudostem_length = leaf_pseudostem_length    #: m
         self.lamina_Lmax = lamina_Lmax  #: m
@@ -377,11 +379,11 @@ class HiddenZone(Organ):
     def calculate_osmotic_water_potential(fructan, sucrose, amino_acids, volume, temperature):
         """ Osmotic water potential of the organ calculated according to metabolites
 
-        :param float fructan: µmol C under the form of fructan
-        :param float sucrose: µmol C under the form of sucrose
-        :param float amino_acids: µmol N under the form of amino acids
+        :param float fructan: Âµmol C under the form of fructan
+        :param float sucrose: Âµmol C under the form of sucrose
+        :param float amino_acids: Âµmol N under the form of amino acids
         :param float volume: (g H2O)
-        :param float temperature: hidden zone temperature, approximated by SAM temperature (°C)
+        :param float temperature: hidden zone temperature, approximated by SAM temperature (Â°C)
 
         :return: Osmotic water potential (MPa)
         :rtype: float
@@ -392,11 +394,18 @@ class HiddenZone(Organ):
         sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
         amino_acids = (amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO
         fructan = (fructan * 1E-6) / parameters.NB_C_SUCROSE
-        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
+        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE) if volume > 0. else 0.
 
         #: Effective concentration of solutes
-        conc_solutes_eff = HiddenZone.PARAMETERS.Sa / (HiddenZone.PARAMETERS.Sb + exp(HiddenZone.PARAMETERS.Sc *
-                            conc_solutes / HiddenZone.PARAMETERS.Sd))
+        try:
+            conc_solutes_eff = HiddenZone.PARAMETERS.Sa / (HiddenZone.PARAMETERS.Sb + exp(HiddenZone.PARAMETERS.Sc *
+                                conc_solutes / HiddenZone.PARAMETERS.Sd))
+        except OverflowError:
+            print("DEBUG calculate_osmotic_water_potential OverflowError (HiddenZone):")
+            print(f"  volume={volume!r}, temperature={temperature!r}")
+            print(f"  converted sucrose={sucrose!r}, amino_acids={amino_acids!r}, fructan={fructan!r}")
+            print(f"  conc_solutes={conc_solutes!r}, Sc/Sd*conc_solutes={HiddenZone.PARAMETERS.Sc * conc_solutes / HiddenZone.PARAMETERS.Sd!r}")
+            raise
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -439,6 +448,7 @@ class HiddenZone(Organ):
 
         """
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_hz * (hiddenzone_dimensions['length'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['thickness']))
+        # resistance = 0.5 * (hiddenzone_dimensions['thickness'] / (hiddenzone_dimensions['width'] * hiddenzone_dimensions['length']))
         return resistance
 
     @staticmethod
@@ -514,7 +524,7 @@ class HiddenZone(Organ):
         From Coussement et al. (2018)
         With temperature effect on leaf_pseudo_age and on maximum extensibility.
 
-        :param float age: hidden zone age (°Cd)
+        :param float age: hidden zone age (Â°Cd)
         :param float delta_teq: temperature-compensated time (s)
         :param float delta_t: time step of the simulation (s)
 
@@ -564,7 +574,7 @@ class HiddenZone(Organ):
         plastic_component = (phi['x'] + phi['y'] + phi['z'])   #: Plastic irreversible growth
 
         delta_turgor_water_potential = ((1 / (
-                    parameters.RHO_WATER * organ_volume * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
+                    parameters.RHO_WATER * max(organ_volume, 1e-11) * parameters.VSTORAGE)) * delta_water_content - plastic_component * (max(turgor_water_potential, HiddenZone.PARAMETERS.GAMMA) - HiddenZone.PARAMETERS.GAMMA)) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 
@@ -720,14 +730,14 @@ class PhotosyntheticOrganElement:
 
         self.label = label                                      #: the label of the element
         self.index = index
-        if cohorts is None:  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
+        if cohorts is None:  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait Ãªtre portÃ© Ã  l'Ã©chelle de la plante uniquement mais je ne vois pas comment faire mieux
             cohorts = []
-        self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait être porté à l'échelle de la plante uniquement mais je ne vois pas comment faire mieux
+        self.cohorts = cohorts  #: list of cohort values - Hack to treat tillering cases : TEMPORARY. Devrait Ãªtre portÃ© Ã  l'Ã©chelle de la plante uniquement mais je ne vois pas comment faire mieux
         self.cohorts_replications = cohorts_replications  #: dictionary of number of replications per cohort rank
 
         # state parameters
         self.is_growing = is_growing                            #: -
-        self.age = age                                          #: °Cd
+        self.age = age                                          #: Â°Cd
         self.Wmax = Wmax                                        #: m
         self.amino_acids = amino_acids                          #: :math:`:math:`\\mu mol N``
         self.green_area = green_area                            #: m2
@@ -735,8 +745,8 @@ class PhotosyntheticOrganElement:
         self.proteins = proteins                                #: :math:`:math:`\\mu mol N``
         self.sucrose = sucrose                                  #: :math:`:math:`\\mu mol C``
         self.fructan = fructan                                  #: :math:`:math:`\\mu mol C``
-        self.Ts = Ts                                            #: °C
-        self.temperature = temperature                          #: °C
+        self.Ts = Ts                                            #: Â°C
+        self.temperature = temperature                          #: Â°C
         self.Tr = Tr                                            #: mmol H20 m-2 s-1
         self.thickness = thickness                              #: m
         self.width = width                                      #: m
@@ -794,6 +804,7 @@ class PhotosyntheticOrganElement:
         """
         #: Coussement et al. (2018)
         resistance = 0.5 * Xylem.PARAMETERS.R_xylem_organ * organ_dimensions['length'] / (organ_dimensions['width'] * organ_dimensions['thickness'])
+        # resistance = 0.5 * (organ_dimensions['thickness'] / (organ_dimensions['width'] * organ_dimensions['length']))
 
         return resistance
 
@@ -845,11 +856,11 @@ class PhotosyntheticOrganElement:
     def calculate_osmotic_water_potential(sucrose, amino_acids, volume, temperature, fructan):
         """ Osmotic water potential of the hiddenzone calculated according to metabolites
 
-        :param float sucrose: µmol C under the form of sucrose
-        :param float amino_acids: µmol N under the form of amino acids
+        :param float sucrose: Âµmol C under the form of sucrose
+        :param float amino_acids: Âµmol N under the form of amino acids
         :param float volume: (m3)
-        :param float temperature: air temperature (°C)
-        :param float fructan: µmol C under the form of fructan
+        :param float temperature: air temperature (Â°C)
+        :param float fructan: Âµmol C under the form of fructan
 
         :return: Osmotic water potential (MPa)
         :rtype: float
@@ -861,11 +872,18 @@ class PhotosyntheticOrganElement:
         sucrose = (sucrose * 1E-6) / parameters.NB_C_SUCROSE
         amino_acids = (amino_acids * 1E-6) / parameters.AMINO_ACIDS_N_RATIO
         fructan = (fructan * 1E-6) / parameters.NB_C_SUCROSE
-        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE)
+        conc_solutes = (fructan + sucrose + amino_acids) / (volume * parameters.VSTORAGE) if volume > 0. else 0.
 
         #: Effective concentration of solutes
-        conc_solutes_eff = PhotosyntheticOrganElement.PARAMETERS.Sa / (PhotosyntheticOrganElement.PARAMETERS.Sb + exp(PhotosyntheticOrganElement.PARAMETERS.Sc *
-                            conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd))
+        try:
+            conc_solutes_eff = PhotosyntheticOrganElement.PARAMETERS.Sa / (PhotosyntheticOrganElement.PARAMETERS.Sb + exp(PhotosyntheticOrganElement.PARAMETERS.Sc *
+                                conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd))
+        except OverflowError:
+            print("DEBUG calculate_osmotic_water_potential OverflowError (PhotosyntheticOrganElement):")
+            print(f"  volume={volume!r}, temperature={temperature!r}")
+            print(f"  converted sucrose={sucrose!r}, amino_acids={amino_acids!r}, fructan={fructan!r}")
+            print(f"  conc_solutes={conc_solutes!r}, Sc/Sd*conc_solutes={PhotosyntheticOrganElement.PARAMETERS.Sc * conc_solutes / PhotosyntheticOrganElement.PARAMETERS.Sd!r}")
+            raise
 
         osmotic_water_potential = - parameters.R * temperature_K * conc_solutes_eff / parameters.RHO_WATER
 
@@ -925,7 +943,7 @@ class PhotosyntheticOrganElement:
         elastic_component = (epsilon_z * epsilon_x * epsilon_y) / (epsilon_z * epsilon_x + epsilon_z * epsilon_y + epsilon_x * epsilon_y)  #: Elastic reversible growth (MPa)
         plastic_component = 0   #: Plastic irreversible growth (MPa)
         delta_turgor_water_potential = ((1 / (
-                    parameters.RHO_WATER * volume * parameters.VSTORAGE)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
+                    parameters.RHO_WATER * max(volume, 1e-11)  * parameters.VSTORAGE)) * delta_water_content - plastic_component) * elastic_component  #: (MPa)
 
         return delta_turgor_water_potential
 

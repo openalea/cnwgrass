@@ -96,6 +96,28 @@ class Simulation(object):
         self.inputs.clear()
         self.inputs.update(inputs)
 
+    def _internode_turgor_factor(self, hiddenzone_id, all_hiddenzone_inputs):
+        """
+        Turgor limitation of internode elongation (-), see calculate_deltaL_preE / preE_turgor_growth_factor.
+
+        The turgor of a hidden zone is only computed by the hydraulics model while its leaf grows (leaf_is_growing and
+        leaf_pseudo_age >= 0); afterwards the stored value is frozen. When it is not available, the turgor of the closest hidden zone
+        above on the same axis whose leaf is still growing is used, as the stem growing zones share the same xylem supply.
+        Without any available turgor (or without hydraulics), elongation is not limited (factor 1, previous behaviour).
+        """
+        if not self.hydraulics:
+            return 1.
+        axis_id, phytomer_id = hiddenzone_id[:2], hiddenzone_id[2]
+        rank = phytomer_id
+        while True:
+            hz_id = tuple(list(axis_id) + [rank])
+            if hz_id not in all_hiddenzone_inputs:
+                return 1.
+            hz = all_hiddenzone_inputs[hz_id]
+            if hz.get('leaf_is_growing') and hz.get('leaf_pseudo_age', -1) >= 0 and hz.get('turgor_water_potential') is not None:
+                return self.model.preE_turgor_growth_factor(hz['turgor_water_potential'])
+            rank += 1
+
     def run(self, Tair, Tsoil, Zsowing=0.025):
         """
         Run the simulation.
@@ -165,7 +187,7 @@ class Simulation(object):
             # hiddenzone initiation
             for i in range(0, init_leaf):
                 # Initialise hiddenzone
-                hiddenzone_id = axis_id + tuple([1 + i + curr_axis_outputs['nb_leaves'] - init_leaf])  # TODO: peut etre simplifié tant que 'calculate_SAM_status' renvoie 1 erreur si init_leaf>1
+                hiddenzone_id = axis_id + tuple([1 + i + curr_axis_outputs['nb_leaves'] - init_leaf])  # TODO: peut etre simplifiÃ© tant que 'calculate_SAM_status' renvoie 1 erreur si init_leaf>1
                 new_hiddenzone = self.hiddenzone_init.__dict__.copy()
                 self.outputs['hiddenzone'][hiddenzone_id] = new_hiddenzone
 
@@ -349,9 +371,18 @@ class Simulation(object):
                                                                    hiddenzone_inputs['mstruct'],
                                                                    curr_axis_outputs['delta_teq'], phytomer_id,
                                                                    self.optimal_growth_option,
-                                                                   xylem_water_potential)
+                                                                   xylem_water_potential,
+                                                                   hz_turgor_water_potential if self.hydraulics else None)
 
                         leaf_L = hiddenzone_inputs['leaf_L'] + delta_leaf_L
+
+                        # NOTE (stalled emergence fix): a hidden leaf grows inside the sheath tube of the previous leaf and cannot become
+                        # longer than it before the latter emerges. Safety bound that only acts if the previous leaf stalls (the leaf is
+                        # never shortened). It does not delay the emergence of the previous leaf, which only depends on its own length.
+                        if self.hydraulics and prev_hiddenzone_inputs is not None:
+                            max_leaf_L = self.model.parameters.max_preE_leaf_L_ratio * prev_hiddenzone_inputs['leaf_L']
+                            leaf_L = max(hiddenzone_inputs['leaf_L'], min(leaf_L, max_leaf_L))
+                            delta_leaf_L = leaf_L - hiddenzone_inputs['leaf_L']
                         curr_hiddenzone_outputs['ratio_DZ'] = 1
 
                     else:  #: After the emergence of the previous leaf.
@@ -387,7 +418,6 @@ class Simulation(object):
                             #  TODO: besoin correction pour savoir a quel pas de temps exact??
                             curr_hiddenzone_outputs['leaf_is_emerged'] = self.model.calculate_leaf_emergence(hiddenzone_inputs['leaf_L'], leaf_pseudostem_length)
                             if curr_hiddenzone_outputs['leaf_is_emerged']:  # Initialise lamina outputs
-                                print('leaf emergence', hiddenzone_id)
                                 new_lamina = self.element_init.__dict__.copy()
                                 self.outputs['elements'][lamina_id] = new_lamina
 
@@ -635,11 +665,20 @@ class Simulation(object):
                     else:
                         prev_leaf_ligulated = False
 
+                    # NOTE (water stress fix): internode elongation used to ignore water status (and is not represented in the hydraulics
+                    # model), so under drought the stem kept elongating while turgor-limited leaves stopped. Hidden zones were pushed up
+                    # through the sheath tube of stalled leaves until the pseudostem length reached 0, which made 1 to 4 mm leaves "emerge"
+                    # and gave a zero hidden zone length, a zero hydraulic resistance and a NaN in the hydraulics solver. The internode
+                    # growing zone lies in the same hidden zone as the leaf growing zone and is limited by the same turgor (same
+                    # Lockhart-type factor as pre-emergence leaf elongation, 1 when turgor is unknown or without hydraulics).
+                    internode_turgor_factor = self._internode_turgor_factor(hiddenzone_id, all_hiddenzone_inputs)
+
                     #: Before ligulation of the leaf on the previous phytomer. Exponential-like elong. cf. Kirby 1988, Malvoisin 1984 II
                     if not prev_leaf_ligulated:
                         delta_internode_L = self.model.calculate_delta_internode_L_preL(phytomer_id, curr_hiddenzone_outputs['sucrose'], curr_hiddenzone_outputs['internode_L'],
                                                                                    curr_hiddenzone_outputs['amino_acids'], curr_hiddenzone_outputs['mstruct'],
                                                                                    curr_axis_outputs['delta_teq'])
+                        delta_internode_L *= internode_turgor_factor
                         internode_L = curr_hiddenzone_outputs['internode_L'] + delta_internode_L  # TODO: Check internode_L is not too large (in the case of long delta_t)
 
                         curr_hiddenzone_outputs['internode_L'] = internode_L
@@ -653,7 +692,10 @@ class Simulation(object):
                     #: After ligulation of the leaf on the previous phytomer.
                     else:
                         prev_internode_pseudo_age = curr_hiddenzone_outputs['internode_pseudo_age']
-                        internode_pseudo_age = self.model.calculate_internode_pseudo_age(prev_internode_pseudo_age, curr_axis_outputs['delta_teq'])
+                        # NOTE (water stress fix): the internode pseudo age (which drives the Beta-function elongation and the end of elongation)
+                        # only progresses when turgor allows irreversible expansion, as leaf_pseudo_age does. Elongation is delayed, while the
+                        # final internode length (internode_Lmax_lig) is unchanged.
+                        internode_pseudo_age = self.model.calculate_internode_pseudo_age(prev_internode_pseudo_age, curr_axis_outputs['delta_teq'] * internode_turgor_factor)
 
                         curr_hiddenzone_outputs['internode_pseudo_age'] = internode_pseudo_age
                         curr_hiddenzone_outputs['delta_internode_pseudo_age'] = internode_pseudo_age - curr_hiddenzone_outputs['internode_pseudo_age']

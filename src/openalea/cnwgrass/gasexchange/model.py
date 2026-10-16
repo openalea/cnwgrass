@@ -27,7 +27,7 @@ def organ_temperature(w, z, Zh, Ur, PAR, gsw, Ta, Ts, RH, organ_name):
     :param float z: organ height from soil (m)
     :param float Zh: canopy height (m)
     :param float Ur: wind speed (m s-1) at the reference height (zr), e.g. top of the canopy + 2m (in the case of wheat, Ur can be approximated as the wind speed at 2m from soil)
-    :param float PAR: absorbed PAR (µmol m-2 s-1)
+    :param float PAR: absorbed PAR (Âµmol m-2 s-1)
     :param float gsw: stomatal conductance to water vapour (mol m-2 s-1)
     :param float Ta: air temperature (degree C)
     :param float Ts: organ temperature (degree C). Ts = Ta at the first iteration of the numeric resolution
@@ -97,17 +97,17 @@ def stomatal_conductance_BWB(Ag, An, surfacic_nitrogen, ambient_CO2, RH):
     """
     Ball, Woodrow, and Berry model of stomatal conductance (1987)
 
-    :param float Ag: gross assimilation rate (µmol m-2 s-1)
-    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ag: gross assimilation rate (Âµmol m-2 s-1)
+    :param float An: net assimilation rate (Âµmol m-2 s-1)
     :param float surfacic_nitrogen: surfacic nitrogen content(g m-2) including or not structural nitrogen depending on parameter.MODEL_VERSION
-    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float ambient_CO2: Air CO2 (Âµmol mol-1)
     :param float RH: Relative humidity (decimal fraction)
 
     :return: gsw (mol m-2 s-1)
     :rtype: float
     """
 
-    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (Âµmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
     m = parameters.PARAM_N['delta1'] * surfacic_nitrogen ** parameters.PARAM_N['delta2']  #: Scaling factor dependence to surfacic_nitrogen (dimensionless). This function is maintained
     # although I'm not convinced that it should be taken into account
     gsw = (parameters.GSMIN + m * ((Ag * RH) / Cs))  #: Stomatal conductance to water vapour (mol m-2 s-1), from Braune et al. (2009), Muller et al. (2005): using Ag rather than An.
@@ -118,10 +118,10 @@ def stomatal_conductance_Leuning(Ag, An, Ta, ambient_CO2, RH):
     """
     Leuning model of stomatal conductance to water (1995)
 
-    :param float Ag: gross assimilation rate (µmol m-2 s-1)
-    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ag: gross assimilation rate (Âµmol m-2 s-1)
+    :param float An: net assimilation rate (Âµmol m-2 s-1)
     :param float Ta: air temperature (degree C)
-    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float ambient_CO2: Air CO2 (Âµmol mol-1)
     :param float RH: Relative humidity (decimal fraction)
 
     :return: gsw (mol m-2 s-1)
@@ -132,7 +132,7 @@ def stomatal_conductance_Leuning(Ag, An, Ta, ambient_CO2, RH):
     V = RH * es_Ta  #: Vapour pressure of the air (kPa)
     VPDa = es_Ta - V
     fw = 1 / (1 + VPDa / parameters.D0)
-    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (Âµmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
     gamma = parameters.GAMMA0 * (1 + parameters.GAMMA1 * (Ta - parameters.T_ref) + parameters.GAMMA2 * ((Ta - parameters.T_ref) * (Ta - parameters.T_ref)))
     gsw = parameters.GSMIN + (1.6 * parameters.m * Ag * fw) / (Cs - gamma)
 
@@ -143,10 +143,10 @@ def stomatal_conductance_Tuzet(Ag, An, Ta, ambient_CO2, water_potential):
     """
     Tuzet model of stomatal conductance to water (2003)
 
-    :param float Ag: gross assimilation rate (µmol m-2 s-1)
-    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ag: gross assimilation rate (Âµmol m-2 s-1)
+    :param float An: net assimilation rate (Âµmol m-2 s-1)
     :param float Ta: air temperature (degree C)
-    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float ambient_CO2: Air CO2 (Âµmol mol-1)
     :param float water_potential: water potential of the organ (Mpa)
 
     :return: gsw (mol m-2 s-1)
@@ -154,7 +154,7 @@ def stomatal_conductance_Tuzet(Ag, An, Ta, ambient_CO2, water_potential):
     """
 
     fw = 1 / (1 + (water_potential / parameters.water_potential_ref) ** parameters.n)
-    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (Âµmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
     gamma = parameters.GAMMA0 * (1 + parameters.GAMMA1 * (Ta - parameters.T_ref) + parameters.GAMMA2 * ((Ta - parameters.T_ref) * (Ta - parameters.T_ref)))
     gsw = parameters.GSMIN + (1.6 * parameters.m * Ag * fw) / (Cs - gamma)
 
@@ -165,10 +165,10 @@ def stomatal_conductance_hydraulics(Ag, An, Ta, ambient_CO2, RH, water_potential
     """
     Model of stomatal conductance to water coupling Tuzet and Leuning
 
-    :param float Ag: gross assimilation rate (µmol m-2 s-1)
-    :param float An: net assimilation rate (µmol m-2 s-1)
+    :param float Ag: gross assimilation rate (Âµmol m-2 s-1)
+    :param float An: net assimilation rate (Âµmol m-2 s-1)
     :param float Ta: air temperature (degree C)
-    :param float ambient_CO2: Air CO2 (µmol mol-1)
+    :param float ambient_CO2: Air CO2 (Âµmol mol-1)
     :param float RH: Relative humidity (decimal fraction)
     :param float water_potential: water potential of the organ (Mpa)
 
@@ -182,7 +182,7 @@ def stomatal_conductance_hydraulics(Ag, An, Ta, ambient_CO2, RH, water_potential
     VPDa = es_Ta - V
     fvpd = 1 / (1 + VPDa / parameters.D0)
 
-    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (µmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
+    Cs = ambient_CO2 - An * (parameters.K_Cs / parameters.GB)  #: CO2 concentration at organ surface (Âµmol mol-1 or Pa). From Prieto et al. (2012). GB in mol m-2 s-1
     gamma = parameters.GAMMA0 * (1 + parameters.GAMMA1 * (Ta - parameters.T_ref) + parameters.GAMMA2 * ((Ta - parameters.T_ref) * (Ta - parameters.T_ref)))
 
     gsw = parameters.GSMIN + (1.6 * parameters.m * Ag * fvpd * fpsi) / (Cs - gamma)
@@ -201,15 +201,15 @@ def calculate_Ci(ambient_CO2, An, gsw):
     """
     Calculates the internal CO2 concentration (Ci)
 
-    :param float ambient_CO2: air CO2 (µmol mol-1)
-    :param float An: net assimilation rate of CO2 (µmol m-2 s-1)
+    :param float ambient_CO2: air CO2 (Âµmol mol-1)
+    :param float An: net assimilation rate of CO2 (Âµmol m-2 s-1)
     :param float gsw: stomatal conductance to water vapour (mol m-2 s-1)
 
-    :return: Ci (µmol mol-1)
+    :return: Ci (Âµmol mol-1)
     :rtype: float
     """
-    Ci = ambient_CO2 - An * ((parameters.gsw_gs_CO2 / gsw) + (parameters.Ci_A / parameters.GB))  #: Intercellular concentration of CO2 (µmol mol-1)
-    # gsw and GB in mol m-2 s-1 so that (An * ((1.6/gs) + (1.37/parameters.GB)) is thus in µmol mol-1 as ambient_CO2
+    Ci = ambient_CO2 - An * ((parameters.gsw_gs_CO2 / gsw) + (parameters.Ci_A / parameters.GB))  #: Intercellular concentration of CO2 (Âµmol mol-1)
+    # gsw and GB in mol m-2 s-1 so that (An * ((1.6/gs) + (1.37/parameters.GB)) is thus in Âµmol mol-1 as ambient_CO2
 
     return Ci
 
@@ -248,7 +248,7 @@ def _inhibition_by_NSC(NSC):
     """
     Calculates the relative diminution of Ag due to inhibition by NSC. Adapted from Azcon-Bieto 1983
 
-    :param float NSC: Surfacic content of water-soluble carbohydrates  (µmol C m-2)
+    :param float NSC: Surfacic content of water-soluble carbohydrates  (Âµmol C m-2)
 
     :return: Relative diminution (dimensionless)
     :rtype: float
@@ -265,14 +265,14 @@ def calculate_photosynthesis(PAR, surfacic_nitrogen, NSC_Retroinhibition, surfac
     Computes photosynthesis rate following Farquhar's model with regulation by organ temperature and nitrogen content.
     In this version, most of the parameters are derived from Braune et al. (2009) on barley and Evers et al. (2010) for N dependencies.
 
-    :param float PAR: PAR absorbed (µmol m-2 s-1)
+    :param float PAR: PAR absorbed (Âµmol m-2 s-1)
     :param float surfacic_nitrogen: surfacic nitrogen content(g m-2) including or not structural nitrogen depending on parameter.MODEL_VERSION
     :param bool NSC_Retroinhibition: if True, Ag is inhibited by surfacic NSC (Non-Structural Carbohydrates).
-    :param float surfacic_NSC: surfacic content of NSC (Non-Structural Carbohydrates) (µmol C m-2).
+    :param float surfacic_NSC: surfacic content of NSC (Non-Structural Carbohydrates) (Âµmol C m-2).
     :param float Ts: organ temperature (degree C)
-    :param float Ci: internal CO2 (µmol mol-1), Ci = 0.7*CO2air for the first iteration
+    :param float Ci: internal CO2 (Âµmol mol-1), Ci = 0.7*CO2air for the first iteration
 
-    :return: Ag (µmol m-2 s-1), An (µmol m-2 s-1), Rd (µmol m-2 s-1)
+    :return: Ag (Âµmol m-2 s-1), An (Âµmol m-2 s-1), Rd (Âµmol m-2 s-1)
     :rtype: (float, float, float)
     """
 
@@ -284,34 +284,34 @@ def calculate_photosynthesis(PAR, surfacic_nitrogen, NSC_Retroinhibition, surfac
     #: RuBisCO-limited carboxylation rate
     Sna_Vcmax25 = parameters.PARAM_N['S_surfacic_nitrogen']['Vc_max25']
     surfacic_nitrogen_min_Vcmax25 = parameters.PARAM_N['surfacic_nitrogen_min']['Vc_max25']
-    Vc_max25 = Sna_Vcmax25 * (surfacic_nitrogen - surfacic_nitrogen_min_Vcmax25)  #: Relation between Vc_max25 and surfacic_nonstructural_nitrogen (µmol m-2 s-1)
-    Vc_max = _f_temperature('Vc_max', Vc_max25, Ts)  #: Relation between Vc_max and temperature (µmol m-2 s-1)
-    Ac = (Vc_max * (Ci - Gamma)) / (Ci + Kc * (1 + parameters.O2 / Ko))  #: Rate of assimilation under Vc_max limitation (µmol m-2 s-1)
+    Vc_max25 = Sna_Vcmax25 * (surfacic_nitrogen - surfacic_nitrogen_min_Vcmax25)  #: Relation between Vc_max25 and surfacic_nonstructural_nitrogen (Âµmol m-2 s-1)
+    Vc_max = _f_temperature('Vc_max', Vc_max25, Ts)  #: Relation between Vc_max and temperature (Âµmol m-2 s-1)
+    Ac = (Vc_max * (Ci - Gamma)) / (Ci + Kc * (1 + parameters.O2 / Ko))  #: Rate of assimilation under Vc_max limitation (Âµmol m-2 s-1)
 
     #: RuBP regeneration-limited carboxylation rate via electron transport
     ALPHA = parameters.PARAM_N['S_surfacic_nitrogen']['alpha'] * surfacic_nitrogen + parameters.PARAM_N['beta']  #: Relation between ALPHA and surfacic_nitrogen (mol e- mol-1 photon)
     Sna_Jmax25 = parameters.PARAM_N['S_surfacic_nitrogen']['Jmax25']
     surfacic_nitrogen_min_Jmax25 = parameters.PARAM_N['surfacic_nitrogen_min']['Jmax25']
-    Jmax25 = Sna_Jmax25 * (surfacic_nitrogen - surfacic_nitrogen_min_Jmax25)  #: Relation between Jmax25 and surfacic_nitrogen (µmol m-2 s-1)
-    Jmax = _f_temperature('Jmax', Jmax25, Ts)  #: Relation between Jmax and temperature (µmol m-2 s-1)
+    Jmax25 = Sna_Jmax25 * (surfacic_nitrogen - surfacic_nitrogen_min_Jmax25)  #: Relation between Jmax25 and surfacic_nitrogen (Âµmol m-2 s-1)
+    Jmax = _f_temperature('Jmax', Jmax25, Ts)  #: Relation between Jmax and temperature (Âµmol m-2 s-1)
 
     J = ((Jmax + ALPHA * PAR) - sqrt((Jmax + ALPHA * PAR) ** parameters.J_expo - parameters.J_A * parameters.THETA * ALPHA * PAR * Jmax)) / (
-            parameters.J_B * parameters.THETA)  #: Electron transport rate (Muller et al. (2005), Evers et al. (2010)) (µmol m-2 s-1)
-    Aj = (J * (Ci - Gamma)) / (parameters.Aj_A * Ci + parameters.Aj_B * Gamma)  #: Rate of assimilation under RuBP regeneration limitation (µmol m-2 s-1)
+            parameters.J_B * parameters.THETA)  #: Electron transport rate (Muller et al. (2005), Evers et al. (2010)) (Âµmol m-2 s-1)
+    Aj = (J * (Ci - Gamma)) / (parameters.Aj_A * Ci + parameters.Aj_B * Gamma)  #: Rate of assimilation under RuBP regeneration limitation (Âµmol m-2 s-1)
 
     #: Triose phosphate utilisation-limited carboxylation rate --- NOT USED, calculated just for information
     Sna_TPU25 = parameters.PARAM_N['S_surfacic_nitrogen']['TPU25']
     surfacic_nitrogen_min_TPU25 = parameters.PARAM_N['surfacic_nitrogen_min']['TPU25']
-    TPU25 = Sna_TPU25 * (surfacic_nitrogen - surfacic_nitrogen_min_TPU25)  #: Relation between TPU25 and surfacic_nitrogen (µmol m-2 s-1)
-    TPU = _f_temperature('TPU', TPU25, Ts)  #: Relation between TPU and temperature (µmol m-2 s-1)
-    Vomax = (Vc_max * Ko * Gamma) / (parameters.Vomax_A * Kc * parameters.O2)  #: Maximum rate of Vo (µmol m-2 s-1) (µmol m-2 s-1)
-    Vo = (Vomax * parameters.O2) / (parameters.O2 + Ko * (1 + Ci / Kc))  #: Rate of oxygenation of RuBP (µmol m-2 s-1)
-    Ap = (1 - Gamma / Ci) * (parameters.Ap_A * TPU + Vo)  #: Rate of assimilation under TPU limitation (µmol m-2 s-1).
+    TPU25 = Sna_TPU25 * (surfacic_nitrogen - surfacic_nitrogen_min_TPU25)  #: Relation between TPU25 and surfacic_nitrogen (Âµmol m-2 s-1)
+    TPU = _f_temperature('TPU', TPU25, Ts)  #: Relation between TPU and temperature (Âµmol m-2 s-1)
+    Vomax = (Vc_max * Ko * Gamma) / (parameters.Vomax_A * Kc * parameters.O2)  #: Maximum rate of Vo (Âµmol m-2 s-1) (Âµmol m-2 s-1)
+    Vo = (Vomax * parameters.O2) / (parameters.O2 + Ko * (1 + Ci / Kc))  #: Rate of oxygenation of RuBP (Âµmol m-2 s-1)
+    Ap = (1 - Gamma / Ci) * (parameters.Ap_A * TPU + Vo)  #: Rate of assimilation under TPU limitation (Âµmol m-2 s-1).
     # I think there was a mistake in the paper of Braune et al. (2009) where they wrote Ap = (1-Gamma/Ci)*(3*TPU) + Vo
     # A more recent expression of Ap was given by S. v Caemmerer in her book (2000): AP = (3TPU * (Ci-Gamma))/(Ci-(1+3alpha)*Gamma),
     # where 0 < alpha > 1 is the fraction of glycolate carbon not returned to the chloroplast, but I couldn't find any estimation of alpha for wheat
 
-    #: Gross assimilation rate (µmol m-2 s-1)
+    #: Gross assimilation rate (Âµmol m-2 s-1)
     if NSC_Retroinhibition:
         Ag = min(Ac, Aj) * (1 - _inhibition_by_NSC(surfacic_NSC))
     else:
@@ -319,11 +319,11 @@ def calculate_photosynthesis(PAR, surfacic_nitrogen, NSC_Retroinhibition, surfac
 
     #: Mitochondrial respiration rate of organ in light Rd (processes other than photorespiration)
     Rdark25 = parameters.PARAM_N['S_surfacic_nitrogen']['Rdark25'] * (surfacic_nitrogen - parameters.PARAM_N['surfacic_nitrogen_min'][
-        'Rdark25'])  #: Relation between Rdark25 (respiration in obscurity at 25 degree C) and surfacic_nitrogen (µmol m-2 s-1)
-    Rdark = _f_temperature('Rdark', Rdark25, Ts)  #: Relation between Rdark and temperature (µmol m-2 s-1)
-    Rd = Rdark * (parameters.Rd_A + (1 - parameters.Rd_A) * parameters.Rd_B ** (PAR / parameters.Rd_C))  # Found in Muller et al. (2005), eq. 19 (µmol m-2 s-1)
+        'Rdark25'])  #: Relation between Rdark25 (respiration in obscurity at 25 degree C) and surfacic_nitrogen (Âµmol m-2 s-1)
+    Rdark = _f_temperature('Rdark', Rdark25, Ts)  #: Relation between Rdark and temperature (Âµmol m-2 s-1)
+    Rd = Rdark * (parameters.Rd_A + (1 - parameters.Rd_A) * parameters.Rd_B ** (PAR / parameters.Rd_C))  # Found in Muller et al. (2005), eq. 19 (Âµmol m-2 s-1)
 
-    #: Net C assimilation (µmol m-2 s-1)
+    #: Net C assimilation (Âµmol m-2 s-1)
     if Ag <= 0:  # Occurs when Ci is lower than Gamma or when (surfacic_nitrogen - surfacic_nitrogen_min)<0, in these cases there is no net assimilation (Farquhar, 1980; Caemmerer, 2000)
         Ag, An = 0, 0
     else:
@@ -335,9 +335,9 @@ def calculate_photosynthesis(PAR, surfacic_nitrogen, NSC_Retroinhibition, surfac
 def calculate_surfacic_nitrogen(nitrates, amino_acids, proteins, Nstruct, green_area):
     """Surfacic content of nitrogen
 
-    :param float nitrates: amount of nitrates (µmol N)
-    :param float amino_acids: amount of amino_acids (µmol N)
-    :param float proteins: amount of proteins (µmol N)
+    :param float nitrates: amount of nitrates (Âµmol N)
+    :param float amino_acids: amount of amino_acids (Âµmol N)
+    :param float proteins: amount of proteins (Âµmol N)
     :param float Nstruct: structural N (g)
     :param float green_area: green area (m-2)
 
@@ -351,9 +351,9 @@ def calculate_surfacic_nitrogen(nitrates, amino_acids, proteins, Nstruct, green_
 def calculate_surfacic_nonstructural_nitrogen(nitrates, amino_acids, proteins, green_area):
     """Surfacic content of non-structural nitrogen
 
-    :param float nitrates: amount of nitrates (µmol N)
-    :param float amino_acids: amount of amino_acids (µmol N)
-    :param float proteins: amount of proteins (µmol N)
+    :param float nitrates: amount of nitrates (Âµmol N)
+    :param float amino_acids: amount of amino_acids (Âµmol N)
+    :param float proteins: amount of proteins (Âµmol N)
     :param float green_area: green area (m-2)
 
     :return: Surfacic non-structural nitrogen (g m-2)
@@ -366,7 +366,7 @@ def calculate_surfacic_nonstructural_nitrogen(nitrates, amino_acids, proteins, g
 def calculate_surfacic_photosynthetic_proteins(proteins, green_area):
     """Surfacic content of photosynthetic proteins
 
-    :param float proteins: amount of proteins (µmol N)
+    :param float proteins: amount of proteins (Âµmol N)
     :param float green_area: green area (m-2)
 
     :return: Surfacic non-structural nitrogen (g m-2)
@@ -379,7 +379,7 @@ def calculate_surfacic_photosynthetic_proteins(proteins, green_area):
 def calculate_surfacic_nonstructural_nitrogen_Farquhar(surfacic_photosynthetic_proteins):
     """Estimate of non structural SLN used in Farquhar
 
-    :param float surfacic_photosynthetic_proteins: surfacic proteins content (µmol N m-2)
+    :param float surfacic_photosynthetic_proteins: surfacic proteins content (Âµmol N m-2)
 
     :return: Surfacic non-structural nitrogen (g m-2)
     :rtype: float
@@ -390,12 +390,12 @@ def calculate_surfacic_nonstructural_nitrogen_Farquhar(surfacic_photosynthetic_p
 def calculate_surfacic_WSC(sucrose, starch, fructan, green_area):
     """Surfacic content of water soluble carbohydrates  # TODO: rename because starch is not water-soluble.
 
-    :param float sucrose: amount of sucrose (µmol C)
-    :param float starch: amount of starch (µmol C)
-    :param float fructan: amount of fructan (µmol C)
+    :param float sucrose: amount of sucrose (Âµmol C)
+    :param float starch: amount of starch (Âµmol C)
+    :param float fructan: amount of fructan (Âµmol C)
     :param float green_area: green area (m-2)
 
-    :return: Surfacic content of water soluble carbohydrates  (µmol C m-2)
+    :return: Surfacic content of water soluble carbohydrates  (Âµmol C m-2)
     :rtype: float
     """
     return (sucrose + starch + fructan) / green_area

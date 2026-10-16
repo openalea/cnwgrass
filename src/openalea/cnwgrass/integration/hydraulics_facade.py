@@ -74,7 +74,9 @@ class hydraulicsFacade(object):
                  shared_elements_inputs_outputs_df,
                  shared_organs_inputs_outputs_df,
                  shared_soils_inputs_outputs_df,
-                 update_shared_df=True):
+                 update_shared_df=True,
+                 isolated_roots=False,
+                 cnwgrass_roots=True):
         """
                 :param openalea.mtg.mtg.MTG shared_mtg: The MTG shared between all models.
                 :param int delta_t: The delta between two runs, in seconds.
@@ -92,7 +94,7 @@ class hydraulicsFacade(object):
         
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
 
-        self._simulation = hydraulics_simulation.Simulation(delta_t=delta_t)
+        self._simulation = hydraulics_simulation.Simulation(delta_t=delta_t, isolated_roots=isolated_roots, cnwgrass_roots=cnwgrass_roots)
 
         self.population, self.soils = hydraulics_converter.from_dataframes(model_axes_inputs_df, model_hiddenzones_inputs_df, model_elements_inputs_df, model_organs_inputs_df, model_soils_inputs_df)
 
@@ -114,6 +116,8 @@ class hydraulicsFacade(object):
                                            hydraulics_elements_data_df=model_elements_inputs_df,
                                            hydraulics_organs_data_df=model_organs_inputs_df,
                                            hydraulics_soils_data_df=model_soils_inputs_df)
+
+        self.isolated_roots = isolated_roots
 
     def run(self, update_shared_df=False):
 
@@ -227,7 +231,10 @@ class hydraulicsFacade(object):
                     mtg_axis_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)
                     if mtg_organ_label in mtg_axis_properties:
                         mtg_organ_properties = mtg_axis_properties[mtg_organ_label]
-                        hydraulics_organ_data_names = set(hydraulics_simulation.Simulation.ORGANS_STATE).intersection(hydraulics_organ.__dict__)
+                        access_mtg_names = hydraulics_simulation.Simulation.ORGANS_STATE
+                        if hydraulics_organ_class == hydraulics_model.Xylem and self.isolated_roots:
+                            access_mtg_names += ['water_potential', 'root_xylem_water_potential', 'shoot_root_xylem_conductance']
+                        hydraulics_organ_data_names = set(access_mtg_names).intersection(hydraulics_organ.__dict__)
                         if set(mtg_organ_properties).issuperset(hydraulics_organ_data_names):
                             hydraulics_organ_data_dict = {}
                             for hydraulics_organ_data_name in hydraulics_organ_data_names:
