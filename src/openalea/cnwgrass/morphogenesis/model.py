@@ -929,8 +929,11 @@ class MorphogenesisModelHydraulics(MorphogenesisModel):
 
 
     def calculate_deltaL_preE(self, sucrose, leaf_L, amino_acids, mstruct, delta_teq, leaf_rank, optimal_growth_option,
-                              xylem_water_potential=0.):
+                              xylem_water_potential=0., turgor_water_potential=None):
         """ Delta of leaf length over delta_t as a function of sucrose and amino acids, from initiation to the emergence of the previous leaf.
+
+        NOTE (stalled emergence fix): elongation is also limited by the hidden zone turgor, as after the emergence of the previous
+        leaf (see preE_turgor_growth_factor), so that a stalled leaf also stalls the leaves it encloses.
 
         :param float sucrose: Amount of sucrose (µmol C)
         :param float leaf_L: Total leaf length (m)
@@ -959,10 +962,28 @@ class MorphogenesisModelHydraulics(MorphogenesisModel):
                         xylem_water_potential / self.parameters.psi_ref) ** self.parameters.n)  # Sigmoidal function of xylem water potential control of RER
             delta_leaf_L = delta_teq * leaf_L * RER_max / ((1 + self.parameters.RER_Kc / conc_sucrose_effective) * (
                         1 + self.parameters.RER_Kn / conc_amino_acids)) * regul_water
+            delta_leaf_L *= self.preE_turgor_growth_factor(turgor_water_potential)
         else:
             delta_leaf_L = 0
 
         return delta_leaf_L
+
+    def preE_turgor_growth_factor(self, turgor_water_potential):
+        """ Lockhart-type limitation of pre-emergence elongation by the hidden zone turgor (-).
+        0 at or below the yield threshold GAMMA (no irreversible expansion), increasing linearly to 1 at GAMMA + preE_turgor_ramp.
+
+        Emergence is not blocked by this factor: when elongation stops, sucrose and amino acids keep being unloaded in the
+        hidden zone while their consumption by growth stops, so its osmotic potential decreases and its turgor rises again above
+        GAMMA (this negative feedback requires the hidden zone volume to be conserved, see hydraulics simulation).
+
+        :param float turgor_water_potential: turgor water potential of the hidden zone (MPa), None if not provided by hydraulics
+
+        :return: growth factor (-)
+        :rtype: float
+        """
+        if turgor_water_potential is None:
+            return 1.
+        return min(1., max(0., (turgor_water_potential - self.parameters.GAMMA) / self.parameters.preE_turgor_ramp))
 
     def calculate_leaf_pseudo_age(self, leaf_pseudo_age, delta_teq, turgor_water_potential=0):
         """ Pseudo age of the leaf since beginning of automate elongation (s)

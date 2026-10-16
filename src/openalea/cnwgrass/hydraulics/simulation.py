@@ -816,7 +816,7 @@ class Simulation(object):
                         # Update of leaf_Lmax
                         hiddenzone.leaf_Lmax = hiddenzone.leaf_L
 
-                        if hiddenzone.leaf_pseudo_age == 0:  #: First time after previous leaf emergence
+                        if hiddenzone.leaf_pseudo_age == 0:  #: Before the start of turgor-driven growth (dimensions from morphogenesis)
                             #: Width and thickness
                             thickness_ratio = parameters.HIDDEN_ZONE_PARAMETERS.TL_ratio
                             width_ratio = parameters.HIDDEN_ZONE_PARAMETERS.WL_ratio
@@ -824,18 +824,24 @@ class Simulation(object):
                             hiddenzone.width = hiddenzone.leaf_L * width_ratio
                             hiddenzone.thickness = hiddenzone.leaf_L * thickness_ratio
                             hiddenzone.leaf_Wmax = hiddenzone.width
+                            #: Length (NOTE: now computed before the volume, which used the length of the previous step)
+                            hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
 
-                            #: Volume & water content as function of dimensions
-                            hiddenzone.volume = hiddenzone.length * hiddenzone.width * hiddenzone.thickness
-                            hiddenzone.water_content = hiddenzone.volume * parameters.RHO_WATER
+                            # NOTE (stalled emergence fix): the water content used to be recomputed from the dimensions at every call
+                            # (volume = length * width * thickness, i.e. proportional to leaf_L^3), which created or destroyed water without
+                            # any flux. While leaf_pseudo_age stays at 0 (turgor <= GAMMA), this reached grams of water (28.8 g at the
+                            # emergence of the previous leaf in a GAMMA = 0.17 run), diluted the solutes so that turgor could never exceed
+                            # GAMMA again, and destabilized the shoot water balance. The water content is now a state variable, and the
+                            # volume given by the dimensions is only a target filled by a water influx from the xylem (see below).
+                            hiddenzone.target_water_content = hiddenzone.length * hiddenzone.width * hiddenzone.thickness * parameters.RHO_WATER
+                            hiddenzone.water_content = max(y[self.initial_conditions_mapping[hiddenzone]['water_content']], 0.)
+                            hiddenzone.volume = hiddenzone.calculate_volume(max(hiddenzone.water_content, 1e-12))
                             #: Osmotic water potential
                             hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
-                            #: Total water potential
+                            #: Total water potential (in equilibrium with the xylem, as before)
                             hiddenzone.water_potential = axis.xylem.water_potential
                             #: Turgor water potential
                             hiddenzone.turgor_water_potential = hiddenzone.water_potential - hiddenzone.osmotic_water_potential
-                            #: Length
-                            hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
                         elif hiddenzone.leaf_pseudo_age > 0:    #: After previous leaf emergence
                             #: Turgor water potential
                             hiddenzone.turgor_water_potential = y[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']]
@@ -856,6 +862,13 @@ class Simulation(object):
                         hiddenzone.resistance = hiddenzone.calculate_resistance(hiddenzone_dimensions)
                         #: Flows with xylem
                         hiddenzone.water_influx = hiddenzone.calculate_water_flux(hiddenzone.water_potential, axis.xylem.water_potential, hiddenzone.resistance, self.delta_t)
+                        if hiddenzone.leaf_pseudo_age == 0:
+                            # NOTE (stalled emergence fix): water needed to reach the volume set by the dimensions is drawn from the xylem.
+                            # Its rate is at most the flux allowed by the hydraulic resistance under the full osmotic gradient (zero turgor),
+                            # and it relaxes the deficit within one time step. Water is never created and the zone never shrinks here.
+                            max_influx = max(hiddenzone.calculate_water_flux(hiddenzone.osmotic_water_potential, axis.xylem.water_potential, hiddenzone.resistance, self.delta_t), 0.)
+                            water_deficit = max(hiddenzone.target_water_content - hiddenzone.water_content, 0.)
+                            hiddenzone.water_influx = min(max_influx, water_deficit / self.time_step)
                         hiddenzone.water_outflow = 0    #: No water flow between hiddenzone and element
 
 
@@ -969,6 +982,12 @@ class Simulation(object):
                             hiddenzone.leaf_Wmax += delta_hiddenzone_dimensions_plastic['width']
                             hiddenzone.organ_volume = hiddenzone.calculate_organ_volume(hiddenzone_dimensions)
                             hiddenzone.WC_mstruct = hiddenzone.water_content / (hiddenzone.water_content + hiddenzone.mstruct) * 100
+
+                        elif hiddenzone.leaf_pseudo_age == 0:  #: Before the start of turgor-driven growth
+                            # NOTE (stalled emergence fix): only the water content evolves, through the influx computed above.
+                            # Dimensions are driven by morphogenesis (no plastic or elastic deformation in this phase, as before).
+                            y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = delta_water_content_hz
+                            continue
 
                         else:  #: Before previous leaf emergence
                             continue
@@ -1120,7 +1139,7 @@ class Simulation(object):
                         # Update of leaf_Lmax
                         hiddenzone.leaf_Lmax = hiddenzone.leaf_L
 
-                        if hiddenzone.leaf_pseudo_age == 0:  #: First time after previous leaf emergence
+                        if hiddenzone.leaf_pseudo_age == 0:  #: Before the start of turgor-driven growth (dimensions from morphogenesis)
                             #: Width and thickness
                             thickness_ratio = parameters.HIDDEN_ZONE_PARAMETERS.TL_ratio
                             width_ratio = parameters.HIDDEN_ZONE_PARAMETERS.WL_ratio
@@ -1128,18 +1147,24 @@ class Simulation(object):
                             hiddenzone.width = hiddenzone.leaf_L * width_ratio
                             hiddenzone.thickness = hiddenzone.leaf_L * thickness_ratio
                             hiddenzone.leaf_Wmax = hiddenzone.width
+                            #: Length (NOTE: now computed before the volume, which used the length of the previous step)
+                            hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
 
-                            #: Volume & water content as function of dimensions
-                            hiddenzone.volume = hiddenzone.length * hiddenzone.width * hiddenzone.thickness
-                            hiddenzone.water_content = hiddenzone.volume * parameters.RHO_WATER
+                            # NOTE (stalled emergence fix): the water content used to be recomputed from the dimensions at every call
+                            # (volume = length * width * thickness, i.e. proportional to leaf_L^3), which created or destroyed water without
+                            # any flux. While leaf_pseudo_age stays at 0 (turgor <= GAMMA), this reached grams of water (28.8 g at the
+                            # emergence of the previous leaf in a GAMMA = 0.17 run), diluted the solutes so that turgor could never exceed
+                            # GAMMA again, and destabilized the shoot water balance. The water content is now a state variable, and the
+                            # volume given by the dimensions is only a target filled by a water influx from the xylem (see below).
+                            hiddenzone.target_water_content = hiddenzone.length * hiddenzone.width * hiddenzone.thickness * parameters.RHO_WATER
+                            hiddenzone.water_content = max(y[self.initial_conditions_mapping[hiddenzone]['water_content']], 0.)
+                            hiddenzone.volume = hiddenzone.calculate_volume(max(hiddenzone.water_content, 1e-12))
                             #: Osmotic water potential
                             hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
-                            #: Total water potential
+                            #: Total water potential (in equilibrium with the xylem, as before)
                             hiddenzone.water_potential = axis.xylem.water_potential
                             #: Turgor water potential
                             hiddenzone.turgor_water_potential = hiddenzone.water_potential - hiddenzone.osmotic_water_potential
-                            #: Length
-                            hiddenzone.length = hiddenzone.calculate_hiddenzone_length(hiddenzone.leaf_L, hiddenzone.leaf_pseudostem_length)
                         elif hiddenzone.leaf_pseudo_age > 0:    #: After previous leaf emergence
                             #: Turgor water potential
                             hiddenzone.turgor_water_potential = y[self.initial_conditions_mapping[hiddenzone]['turgor_water_potential']]
@@ -1160,6 +1185,13 @@ class Simulation(object):
                         hiddenzone.resistance = hiddenzone.calculate_resistance(hiddenzone_dimensions)
                         #: Flows with xylem
                         hiddenzone.water_influx = hiddenzone.calculate_water_flux(hiddenzone.water_potential, axis.xylem.water_potential, hiddenzone.resistance, self.delta_t)
+                        if hiddenzone.leaf_pseudo_age == 0:
+                            # NOTE (stalled emergence fix): water needed to reach the volume set by the dimensions is drawn from the xylem.
+                            # Its rate is at most the flux allowed by the hydraulic resistance under the full osmotic gradient (zero turgor),
+                            # and it relaxes the deficit within one time step. Water is never created and the zone never shrinks here.
+                            max_influx = max(hiddenzone.calculate_water_flux(hiddenzone.osmotic_water_potential, axis.xylem.water_potential, hiddenzone.resistance, self.delta_t), 0.)
+                            water_deficit = max(hiddenzone.target_water_content - hiddenzone.water_content, 0.)
+                            hiddenzone.water_influx = min(max_influx, water_deficit / self.time_step)
                         hiddenzone.water_outflow = 0    #: No water flow between hiddenzone and element
 
                         # Positionned here to capture the last computation of the last loop
@@ -1278,6 +1310,12 @@ class Simulation(object):
                             hiddenzone.leaf_Wmax += delta_hiddenzone_dimensions_plastic['width']
                             hiddenzone.organ_volume = hiddenzone.calculate_organ_volume(hiddenzone_dimensions)
                             hiddenzone.WC_mstruct = hiddenzone.water_content / (hiddenzone.water_content + hiddenzone.mstruct) * 100
+
+                        elif hiddenzone.leaf_pseudo_age == 0:  #: Before the start of turgor-driven growth
+                            # NOTE (stalled emergence fix): only the water content evolves, through the influx computed above.
+                            # Dimensions are driven by morphogenesis (no plastic or elastic deformation in this phase, as before).
+                            y_derivatives[self.initial_conditions_mapping[hiddenzone]['water_content']] = delta_water_content_hz
+                            continue
 
                         else:  #: Before previous leaf emergence
                             continue

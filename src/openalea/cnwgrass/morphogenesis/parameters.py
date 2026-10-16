@@ -173,7 +173,20 @@ class ParametersHydraulics(Parameters):
                                  8: 0.19288286,
                                  9: 0.25080917, 10: 0.28677033, 11: 0.3}  #: Maximum lamina length (m)
         # self.GAMMA = 0.2  #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
-        self.GAMMA = 0.13
+        self.GAMMA = 0.11
+
+        # NOTE (stalled emergence fix): before the emergence of the previous leaf, leaf elongation used to ignore turgor, while
+        # the progression of leaf_pseudo_age (and thus the emergence of the previous leaf) requires turgor > GAMMA. With high GAMMA
+        # values, younger hidden leaves kept elongating exponentially behind a stalled leaf (up to 5.8 times the length of the
+        # leaf enclosing them), until a burst of emergences destabilized the shoot.
+        #: Turgor excess above GAMMA (MPa) at which pre-emergence elongation is no longer limited by turgor (Lockhart-type
+        #: linear ramp from 0 at turgor = GAMMA). Small value so that unstressed growth (turgor 0.1 to 0.5 MPa above GAMMA
+        #: in previous simulations) is unchanged.
+        self.preE_turgor_ramp = 0.05
+        #: Maximal length of a hidden leaf relative to the length of the previous (enclosing) leaf before the latter emerges (-).
+        #: A leaf grows inside the sheath tube of the previous one, so its tip cannot pass the tip of the enclosing leaf.
+        #: Never reached in unstressed simulations (max observed ratio 0.74).
+        self.max_preE_leaf_L_ratio = 1.0
 
 
 def parameters_factory(hydraulics=False):
