@@ -41,6 +41,11 @@ extensions = [
     "nbsphinx",     # for integrating jupyter notebooks
     "myst_parser"   # for parsing .md files
 ]
+try:  # the metafspm components rendered from their declarations (doc/metafspm), when metafspm is installed
+    import openalea.metafspm.sphinx  # noqa: F401
+    extensions.append("openalea.metafspm.sphinx")
+except ImportError:
+    pass
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 autosummary_generate = True

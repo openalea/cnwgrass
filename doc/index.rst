@@ -34,6 +34,7 @@ If you want to make your own development of the model, please fork the repositor
       senescence/index.rst
       integration/index.rst
       hydraulics/index.rst
+      metafspm/gas_exchange.rst
 
 Indices and tables
 ==================

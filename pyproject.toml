@@ -80,6 +80,7 @@ channels = [
   "conda-forge"
 ]
 dependencies = [
+    "openalea.metafspm",                       # openalea.cnwgrass.metafspm: the gas exchange as a metafspm component
     "openalea.mtg",
     "openalea.plantgl",
     "openalea.lpy",
