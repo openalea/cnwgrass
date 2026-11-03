@@ -84,8 +84,8 @@ the main stem only).
 Its inputs: PARa (CaribuLight), green_area, height and width (the architecture: Adel's ShootArchitecture), the
 organs' diameter (Adel's), the surfacic nitrogen and NSC (a CN model's, later; defaults until then), the leaf water
 potential (for Tuzet and hydraulics: MECHA's, lagged by one step). Adel has no element height: element_height (the
-mean of its base's and its end's z) links it, by a translator formula (adel_links()); CNW-Grass's facade took the mean
-height of the element's triangles (mean_triangle_heights).
+mean of its base's and its end's z, a blade element's along its blade) links it, by a translator formula
+(adel_links()); CNW-Grass's facade took the mean height of the element's triangles (mean_triangle_heights).
 
 The legacy's behaviours that this port corrects are named in CORRECTIONS (all applied by default, "recommended";
 corrections=() reproduces the legacy bit for bit). Fixed without a name, since the legacy fails there: an element

@@ -58,22 +58,8 @@ MAIN_PARAMETERS = ("stomatal_model", "Vc_max25_nitrogen_slope", "Jmax25_nitrogen
 WEATHER = dict(air_temperature=20., relative_humidity=0.6, ambient_CO2=410., wind_speed=2.)
 
 
-@dataclass
-class StandDevelopment(ScenarioDevelopment):
-    """ScenarioDevelopment, whose calls while `growing` (ExchangingWheat.grow) add thermal_time_step each (its path
-    without an air temperature): the stand grown to its stage before the day, the scene's forcing air_temperature
-    then giving the degree-days. ShootArchitecture grows by at most a phytomer per call: the stage is reached in
-    steps."""
-    growing = False
-
-    def _degree_days(self, thermal_time_step, base_temperature):
-        if self.growing:
-            return np.asarray(thermal_time_step, dtype=float)
-        return super()._degree_days(thermal_time_step, base_temperature)
-
-
 class ExchangingWheat(ScenarioShoot):
-    """The plant model: Adel's wheat shoot (ShootArchitecture grown by StandDevelopment), its elements' optics
+    """The plant model: Adel's wheat shoot (ShootArchitecture grown by ScenarioDevelopment), its elements' optics
     (Caribu's PlantOptics, which the light reads) and their gas exchange (GasExchange: its PARa the light's, by name;
     its elements' height from Adel's z1, z2, adel_links). A subclass may compute the gas exchange with a subclass of
     GasExchange (gas_exchange_component), its links named after it (translator, adel_links(receiver=...))."""
@@ -82,25 +68,22 @@ class ExchangingWheat(ScenarioShoot):
 
     def __init__(self, data_structure, time_step):
         self.architecture = ShootArchitecture(data_structure=data_structure, time_step=time_step)
-        self.development = StandDevelopment(data_structure=data_structure, time_step=time_step)
+        self.development = ScenarioDevelopment(data_structure=data_structure, time_step=time_step)
         self.optics = PlantOptics(data_structure=data_structure, time_step=time_step)
         self.gas_exchange = self.gas_exchange_component(data_structure=data_structure, time_step=time_step)
         self.couple(self.development, self.architecture, self.optics, self.gas_exchange, translator=self.translator)
         if not data_structure.has("water_potential"):        # an optional input, held here to be given (simulate)
             data_structure.register("water_potential", GasExchange.water_potential, location="node")
 
-    def grow(self, n_calls: int):
-        """The shoot grown by *n_calls* calls of thermal_time_step each (before the scene's first step)."""
-        self.development.growing = True
-        try:
-            for _ in range(int(n_calls)):
-                self.run_together(self.development, self.architecture)
-        finally:
-            self.development.growing = False
+    def grow(self):
+        """The shoot grown to its stage, its development's start (minus each plant's delay), by one call before the
+        scene's first step (ScenarioShoot.run_shoot: every phytomer the stage asks for; the scene's first step adds
+        no degree-days, none passed since)."""
+        self.run_shoot()
         self.optics.run_stage("state")                  # the optics before the first lighting
 
     def run(self):
-        self.run_together(self.development, self.architecture)
+        self.run_shoot()
         self.optics()                                   # the new elements' too
         self.gas_exchange()
 
@@ -254,7 +237,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,
     plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour)."""
     scenario = _check(dict(parameters or {}))
-    shoot = {"n_sect": 2, "leaves": LeafShapes.echap(xy_model="Soissons_byleafclass"), "start": 0.}
+    shoot = {"n_sect": 2, "leaves": LeafShapes.echap(xy_model="Soissons_byleafclass"), "start": float(thermal_time)}
     stand = sown_stand(plants, n_rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing)
     xrange, yrange = int(np.ceil(plants / rows)) * plant_spacing, rows * row_spacing
     table = planting(stand, ExchangingWheat, {**shoot, **scenario},
@@ -270,7 +253,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     built = Scene(table, environment=[CaribuLightModel],
                   environment_scenarios=[{"sun": True, "latitude": LATITUDE, "interval": HOUR}], time_step=HOUR,
                   forcings=forcings, recorder=recorder, start=(day_of_year, start_hour - 1.))
-    built.populations[0].instance.grow(round(thermal_time / ScenarioDevelopment.thermal_time_step) + 1)
+    built.populations[0].instance.grow()
     built.simulate(int(round(hours)))
     return Simulation(scene=built, summary=recorder.table("summary"), plant_hours=recorder.table("plants"),
                       ground_area=ground)
