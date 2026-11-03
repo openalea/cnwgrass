@@ -323,11 +323,11 @@ def test_the_tuzet_feedback(shoots, monkeypatch, quiet):
     monkeypatch.setattr(component, "stomatal_model", "Tuzet")
     _set_inputs(ds, seed=7)
     ds.set("PARa", np.full(ds.n_nodes(), 1000.))
-    if not ds.has("water_potential"):
-        ds.register("water_potential", -0.1, location="node")
+    if not ds.has("leaf_water_potential"):
+        ds.register("leaf_water_potential", -0.1, location="node")
     conductances = []
     for potential in (-0.1, -0.65, -1.5):
-        ds.set("water_potential", np.full(ds.n_nodes(), potential))
+        ds.set("leaf_water_potential", np.full(ds.n_nodes(), potential))
         component()
         conductances.append(np.asarray(ds.get("gs")).copy())
     lit = conductances[0] > 0.1

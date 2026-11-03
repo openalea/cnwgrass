@@ -81,9 +81,9 @@ def test_the_parameters_settings_and_weather(noon):
     assert weather.summary.iloc[0]["net_assimilation"] < reference["net_assimilation"]
 
 
-def test_the_water_potential_closes_the_stomata():
+def test_the_leaf_water_potential_closes_the_stomata():
     """Tuzet: a lower leaf water potential given to every element, lower conductances."""
-    conductances = [simulate({"stomatal_model": "Tuzet"}, hours=1, start_hour=12, water_potential=potential,
+    conductances = [simulate({"stomatal_model": "Tuzet"}, hours=1, start_hour=12, leaf_water_potential=potential,
                              **SMALL).summary.iloc[0]["stomatal_conductance"] for potential in (-0.1, -0.65)]
     assert conductances[1] < conductances[0]
 

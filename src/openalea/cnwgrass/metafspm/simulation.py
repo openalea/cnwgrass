@@ -72,8 +72,8 @@ class ExchangingWheat(ScenarioShoot):
         self.optics = PlantOptics(data_structure=data_structure, time_step=time_step)
         self.gas_exchange = self.gas_exchange_component(data_structure=data_structure, time_step=time_step)
         self.couple(self.development, self.architecture, self.optics, self.gas_exchange, translator=self.translator)
-        if not data_structure.has("water_potential"):        # an optional input, held here to be given (simulate)
-            data_structure.register("water_potential", GasExchange.water_potential, location="node")
+        if not data_structure.has("leaf_water_potential"):   # an optional input, held here to be given (simulate)
+            data_structure.register("leaf_water_potential", GasExchange.leaf_water_potential, location="node")
 
     def grow(self):
         """The shoot grown to its stage, its development's start (minus each plant's delay), by one call before the
@@ -216,8 +216,8 @@ def _check(values: dict) -> dict:
 
 def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0., day_of_year: float = 130.,
              thermal_time: float = 600., PARi=None, air_temperature=None, relative_humidity=None, ambient_CO2=None,
-             wind_speed=None, surfacic_nitrogen=2., water_potential=None, plants: int = 12, rows: int = 3, row_spacing: float = 0.15,
-             plant_spacing: float = 0.04, outputs: str = None) -> Simulation:
+             wind_speed=None, surfacic_nitrogen=2., leaf_water_potential=None, plants: int = 12, rows: int = 3,
+             row_spacing: float = 0.15, plant_spacing: float = 0.04, outputs: str = None) -> Simulation:
     """The gas exchange of a stand of *plants* wheat plants in *rows* rows (*row_spacing*, *plant_spacing* m apart;
     repeated around it: an infinite canopy), grown to *thermal_time* °Cd since sowing, hour by hour for *hours* hours
     from *start_hour* (universal time) of day *day_of_year*, at Paris' latitude. *parameters* ({name: value}) changes
@@ -227,7 +227,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     m-2 s-1, the PAR above the stand; a clear day's by default, Caribu's clear_day_PAR), *air_temperature* (°C, 20 by
     default), *relative_humidity* (a fraction, 0.6), *ambient_CO2* (µmol mol-1, 410), *wind_speed* (m s-1 at 2 m,
     2). *surfacic_nitrogen* (g m-2; 2, CNW-Grass's default) is every element's nitrogen per unit area, given the same
-    way (a CN model would compute it). *water_potential* (MPa) is every element's leaf water potential, which the
+    way (a CN model would compute it). *leaf_water_potential* (MPa) is every element's leaf water potential, which the
     stomatal models "Tuzet" and "hydraulics" read (a hydraulic model, MECHA, would compute it; by default
     GasExchange's, -0.1).
 
@@ -244,7 +244,8 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
                      [{"delay": float(delay)} for delay in random_delays(plants)], xrange=xrange, yrange=yrange)
     given = dict(PARi=PARi if PARi is not None else clear_day_PAR(day_of_year, LATITUDE),
                  air_temperature=air_temperature, relative_humidity=relative_humidity, ambient_CO2=ambient_CO2,
-                 wind_speed=wind_speed, surfacic_nitrogen=surfacic_nitrogen, water_potential=water_potential)
+                 wind_speed=wind_speed, surfacic_nitrogen=surfacic_nitrogen,
+                 leaf_water_potential=leaf_water_potential)
     forcings = {name: as_forcing(value if value is not None else WEATHER[name], time_unit=HOUR, origin="calendar")
                 for name, value in given.items() if value is not None or name in WEATHER}
     ground = xrange * yrange

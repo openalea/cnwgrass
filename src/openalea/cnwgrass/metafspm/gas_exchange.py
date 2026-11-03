@@ -83,7 +83,8 @@ the main stem only).
 
 Its inputs: PARa (CaribuLight), green_area, height and width (the architecture: Adel's ShootArchitecture), the
 organs' diameter (Adel's), the surfacic nitrogen and NSC (a CN model's, later; defaults until then), the leaf water
-potential (for Tuzet and hydraulics: MECHA's, lagged by one step). Adel has no element height: element_height (the
+potential leaf_water_potential (MPa; for Tuzet and hydraulics: MECHA's water_potential, hPa at its Compartments, the
+mean of its liquid per element, lagged by one step: mecha_links()). Adel has no element height: element_height (the
 mean of its base's and its end's z, a blade element's along its blade) links it, by a translator formula
 (adel_links()); CNW-Grass's facade took the mean height of the element's triangles (mean_triangle_heights).
 
@@ -199,6 +200,17 @@ def adel_links(receiver="GasExchange", provider="ShootArchitecture") -> Translat
     """The links from Adel's ShootArchitecture that sharing by name does not make: the elements' height
     (element_height of z1, z2). width, diameter and green_area are shared by their names."""
     return Translator().link(receiver, "height", provider, ("z1", "z2"), formula=element_height)
+
+
+def mecha_links(receiver="GasExchange", provider="MechaHydraulics") -> Translator:
+    """The link from MECHA's hydraulics (MechaHydraulics, on an anatomy-mode DataStructure: its nodes the
+    Compartments): each element's leaf_water_potential (MPa), the mean of MECHA's water_potential (hPa, 1e-4 MPa) over
+    the element's Compartments weighted by their liquid_volume (the walls and protoplasts, not the air spaces and
+    pores, whose water potential is the air's Kelvin equivalent). Read by the Tuzet and hydraulics stomatal models,
+    MECHA's of the step before when the gas exchange runs first (a lagged feedback, outside MECHA's solve)."""
+    return Translator().link(receiver, "leaf_water_potential", provider, {"water_potential": 1e-4},
+                             source_scale=scales.Compartment, scale=scales.SubOrgan, aggregation="weighted_mean",
+                             weight="liquid_volume")
 
 
 # ── the equations, for one element (the legacy's model, its numerics kept) ───
@@ -472,9 +484,10 @@ class GasExchange(FunctionalComponent):
         unit="µmol m-2", unit_comment="of C", description="The element's surfacic non-structural carbohydrates "
         "(sucrose, starch, fructan: surfacic_nonstructural_carbohydrates), which inhibit its photosynthesis",
         by="CNMetabolism", default=0., kind="intensive", **ELEMENT)
-    water_potential: float = input_variable(
+    leaf_water_potential: float = input_variable(
         unit="MPa", description="The element's leaf water potential (the Tuzet and hydraulics stomatal models)",
-        value_comment="the legacy's default -0.1; MECHA's at the step before (a lagged feedback)", by="MECHA",
+        value_comment="the legacy's default -0.1; MECHA's at the step before (a lagged feedback: mecha_links())",
+        by="MECHA",
         default=-0.1, kind="intensive", optional=True, **ELEMENT)
     SAM_temperature: float = input_variable(
         unit="°C", description="The axis' apex temperature: the surface temperature of its elements that exchange "
@@ -690,20 +703,21 @@ class GasExchange(FunctionalComponent):
                 "electron_yield": electron_yield_nitrogen_slope * nitrogen + electron_yield_intercept}
 
     @state(include_inactive=True)
-    def _exchange(self, PARa, green_area, height, width, diameter, surfacic_nitrogen, surfacic_NSC, water_potential,
-                  SAM_temperature, PARa_primitives, primitive_areas, canopy_height, Vc_max25, Jmax25, TPU25, Rdark25,
-                  electron_yield, Ci, BWB_slope_factor, BWB_slope_exponent, Vc_max_activation_enthalpy,
-                  Jmax_activation_enthalpy, TPU_activation_enthalpy, Kc_activation_enthalpy, Ko_activation_enthalpy,
-                  Gamma_activation_enthalpy, Rdark_activation_enthalpy, Vc_max_deactivation_enthalpy,
-                  Jmax_deactivation_enthalpy, TPU_deactivation_enthalpy, Vc_max_entropy, Jmax_entropy, TPU_entropy,
-                  reference_temperature, O2, KC25, KO25, GAMMA25, THETA, stem_efficiency, light_respiration_fraction,
-                  light_respiration_base, light_respiration_scale, NSC_inhibition_threshold, NSC_inhibition_maximum,
-                  NSC_inhibition_constant, minimum_stomatal_conductance, boundary_layer_conductance, stomatal_slope,
-                  vapour_pressure_deficit_scale, reference_water_potential, water_potential_shape,
-                  compensation_point_reference, compensation_point_linear, compensation_point_quadratic,
-                  compensation_point_temperature, wind_attenuation, displacement_height_ratio, roughness_length_ratio,
-                  lamina_boundary_layer_factor, cylinder_boundary_layer_factor, cylinder_boundary_layer_viscosity,
-                  cylinder_boundary_layer_exponent, boundary_layer_ratio, PAR_to_global, PAR_photon_energy) -> dict:
+    def _exchange(self, PARa, green_area, height, width, diameter, surfacic_nitrogen, surfacic_NSC,
+                  leaf_water_potential, SAM_temperature, PARa_primitives, primitive_areas, canopy_height, Vc_max25,
+                  Jmax25, TPU25, Rdark25, electron_yield, Ci, BWB_slope_factor, BWB_slope_exponent,
+                  Vc_max_activation_enthalpy, Jmax_activation_enthalpy, TPU_activation_enthalpy, Kc_activation_enthalpy,
+                  Ko_activation_enthalpy, Gamma_activation_enthalpy, Rdark_activation_enthalpy,
+                  Vc_max_deactivation_enthalpy, Jmax_deactivation_enthalpy, TPU_deactivation_enthalpy, Vc_max_entropy,
+                  Jmax_entropy, TPU_entropy, reference_temperature, O2, KC25, KO25, GAMMA25, THETA, stem_efficiency,
+                  light_respiration_fraction, light_respiration_base, light_respiration_scale, NSC_inhibition_threshold,
+                  NSC_inhibition_maximum, NSC_inhibition_constant, minimum_stomatal_conductance,
+                  boundary_layer_conductance, stomatal_slope, vapour_pressure_deficit_scale, reference_water_potential,
+                  water_potential_shape, compensation_point_reference, compensation_point_linear,
+                  compensation_point_quadratic, compensation_point_temperature, wind_attenuation,
+                  displacement_height_ratio, roughness_length_ratio, lamina_boundary_layer_factor,
+                  cylinder_boundary_layer_factor, cylinder_boundary_layer_viscosity, cylinder_boundary_layer_exponent,
+                  boundary_layer_ratio, PAR_to_global, PAR_photon_energy) -> dict:
         """Each exchanging element's fixed point (element_exchange), at the weather of the step's end; the others
         exchange nothing."""
         arguments = locals()
@@ -715,7 +729,8 @@ class GasExchange(FunctionalComponent):
         lamina = np.isin(np.asarray(ds.labels(location="Organ")), list(self.lamina_labels))
         per_node = {name: np.broadcast_to(np.asarray(arguments[name], dtype=float), (n,))
                     for name in ("PARa", "green_area", "height", "width", "surfacic_nitrogen", "surfacic_NSC",
-                                 "water_potential", "Vc_max25", "Jmax25", "TPU25", "Rdark25", "electron_yield", "Ci")}
+                                 "leaf_water_potential", "Vc_max25", "Jmax25", "TPU25", "Rdark25", "electron_yield",
+                                 "Ci")}
         organ = np.asarray(ds.owner("Organ"))
         diameter = np.asarray(diameter, dtype=float)
         stem_diameter = np.where(organ >= 0, diameter[organ.clip(0)] if diameter.size else 0., 0.)
@@ -758,7 +773,7 @@ class GasExchange(FunctionalComponent):
             result = primitives_exchange(PARs, areas, float(per_node["surfacic_nitrogen"][i]),
                                          float(per_node["surfacic_NSC"][i]), capacities, float(dimension[i]),
                                          float(per_node["height"][i]), float(plant_canopy[i]), bool(lamina[i]),
-                                         float(per_node["water_potential"][i]), start_Ci, weather,
+                                         float(per_node["leaf_water_potential"][i]), start_Ci, weather,
                                          plant_parameters[kind], options)
             for name, value in zip(("Ag", "An", "Rd", "gs", "Ci", "Ts", "Tr"), result[:7]):
                 outputs[name][i] = value

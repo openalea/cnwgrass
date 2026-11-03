@@ -42,8 +42,11 @@ is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene
   ``Ts`` (°C), ``Tr`` (mmol m-2 s-1) and ``transpiration`` (mmol s-1, extensive: its sum per Organ or per plant is
   the organ's or the plant's); per plant, ``canopy_height``; the capacities at 25 °C (``Vc_max25``, ...).
 - **The stomatal model** is a setting, ``stomatal_model="BWB"`` (the default), ``"Leuning"``, ``"Tuzet"`` or
-  ``"hydraulics"``. Tuzet and hydraulics read the elements' leaf ``water_potential`` (MPa), e.g. MECHA's (hPa, a
-  link's factor 1e-4) per element: a feedback lagged by one scene step, outside MECHA's solve.
+  ``"hydraulics"``. Tuzet and hydraulics read the elements' ``leaf_water_potential`` (MPa), e.g. MECHA's
+  ``water_potential`` (hPa at its Compartments): ``mecha_links()`` links it, its factor 1e-4, the mean over each
+  element's Compartments weighted by MECHA's ``liquid_volume`` (the air spaces and pores, whose potential is the air's
+  Kelvin equivalent, left out); a feedback lagged by one scene step, outside MECHA's solve. The plant model registers
+  ``leaf_water_potential`` at the SubOrgans before coupling (an optional input is not registered until given).
 - **Parameters** are per plant (a plant's scenario may change any), with their units, bounds and references;
   ``TOTAL_NITROGEN`` is the legacy's other parametrisation (the surfacic nitrogen with its structural part).
 - **The nitrogen and carbohydrates** (``surfacic_nitrogen``, ``surfacic_NSC``) are inputs a CN model will give; until
