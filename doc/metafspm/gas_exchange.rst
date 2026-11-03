@@ -51,6 +51,21 @@ is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene
   ``surfacic_total_nitrogen`` and ``surfacic_nonstructural_carbohydrates`` compute them from the amounts as the
   legacy does.
 
+Tutorials
+=========
+
+``openalea.cnwgrass.metafspm.simulation.simulate()`` computes, hour by hour, the gas exchange of a small stand of
+Adel's wheat plants lit by Caribu (its plant model ``ExchangingWheat``), its results as tables. Two series of
+notebooks use it, in ``example/tutorials/``:
+
+- ``user/``, for beginners, without the formalism: a first run, changing a parameter, combining parameters, a
+  sensitivity analysis (metafspm's ``variants``), a measured weather, the light, the plants and the leaf water
+  potential of the models it runs with;
+- ``developer/``: an overview, metafspm's component formalism on ``GasExchange`` (declarations, steps, forcings,
+  settings, the stomatal models, the corrections) and its coupling in a plant model and a scene (Caribu's ``PARa``
+  by the scene's identity links, its transpiration summed per organ into MECHA's ``leaf_transpiration``), and
+  extending the component.
+
 The equations
 =============
 
