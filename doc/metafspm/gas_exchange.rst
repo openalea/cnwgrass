@@ -39,8 +39,16 @@ is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene
                   forcings=meteo)            # PARi, air_temperature, relative_humidity, ambient_CO2, wind_speed
 
 - **Outputs** per element: ``Ag``, ``An``, ``Rd`` (µmol m-2 s-1), ``gs`` (mol m-2 s-1), ``Ci`` (µmol mol-1),
-  ``Ts`` (°C), ``Tr`` (mmol m-2 s-1) and ``transpiration`` (mmol s-1, extensive: its sum per Organ or per plant is
-  the organ's or the plant's); per plant, ``canopy_height``; the capacities at 25 °C (``Vc_max25``, ...).
+  ``Ts`` (°C), ``Tr`` (mmol m-2 s-1), the area it exchanges over ``exchanging_area`` (m2) and ``transpiration``
+  (``Tr`` · ``exchanging_area``, mmol s-1, extensive: its sum per Organ or per plant is the organ's or the plant's);
+  per plant, ``canopy_height``; the capacities at 25 °C (``Vc_max25``, ...). The fluxes per unit area are weighted by
+  ``exchanging_area``.
+- **An element crossing the soil surface** (a shoot whose crown is below the soil, as Caribu's light is cut there)
+  exchanges over its part above the soil only: the optional input ``emerged_green_area`` (m2) is that part's green
+  area, a translator formula of the architecture's variables (Adel's ``z1``, ``z2``, ``area``, ``green_area``: the
+  receiving variable has its own name, since a link within one DataStructure derives its receiving variable under
+  its name, and ``green_area`` is Adel's, the whole element's). Not given (NaN), the whole green area exchanges;
+  0, the element is below the soil and exchanges nothing.
 - **The stomatal model** is a setting, ``stomatal_model="BWB"`` (the default), ``"Leuning"``, ``"Tuzet"`` or
   ``"hydraulics"``. Tuzet and hydraulics read the elements' ``leaf_water_potential`` (MPa), e.g. MECHA's
   ``water_potential`` (hPa at its Compartments): ``mecha_links()`` links it, its factor 1e-4, the mean over each

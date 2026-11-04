@@ -3,6 +3,7 @@ its equations element by element, bit for bit with the legacy's numerics (correc
 and option of the legacy; the component on Adel's plants (ShootArchitecture) in a metafspm Scene, bit for bit on
 every element it computes, its parameters per plant; the corrections and the fixed failures."""
 import os
+from dataclasses import fields
 
 import numpy as np
 import pandas as pd
@@ -282,6 +283,48 @@ def test_the_component_reproduces_the_legacy(shoots, model, monkeypatch, quiet):
     assert (outputs["Ag"][others] == 0).all() and (outputs["Tr"][others] == 0).all()
     hidden = labels == "HiddenElement"
     assert (outputs["Ts"][hidden] == 22.).all()
+
+
+def test_an_element_exchanges_over_its_green_area_above_the_soil(shoots, quiet):
+    """emerged_green_area (an element crossing the soil surface: the green area of its part above it, as Caribu's
+    light is cut there) is the area it exchanges over (exchanging_area): its fluxes per unit area unchanged, its
+    transpiration Tr times that area, the per-area variables weighted by it; an element wholly below the soil (0)
+    exchanges nothing. Not given (NaN, or not registered: an optional input), the whole green area exchanges; green_area
+    keeps its meaning (the element's)."""
+    scene, weather = shoots
+    population = scene.populations[0]
+    ds, component = population.data_structure, population.instance.gas_exchange
+    weather.update(air_temperature=20., relative_humidity=0.6, ambient_CO2=400., wind_speed=2.)
+    inputs = _set_inputs(ds, seed=7)
+    assert not ds.has("emerged_green_area")
+    component()
+    whole = {name: np.array(ds.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
+    computed = whole["exchanging_area"] > 0
+    np.testing.assert_array_equal(whole["exchanging_area"][computed], inputs["green_area"][computed])
+    assert next(f for f in fields(port.GasExchange) if f.name == "An").metadata["weight"] == "exchanging_area"
+    plant = np.asarray(ds.owner("Plant"))
+    lowest = int(np.flatnonzero(computed & (plant == 0))[np.argmin(inputs["z1"][computed & (plant == 0)])])
+    emerged = 0.5 * inputs["green_area"]
+    emerged[lowest] = 0.                                             # wholly below the soil
+    emerged[np.flatnonzero(computed)[-1]] = np.nan                   # not cut: its whole green area
+    ds.register("emerged_green_area", emerged, location="node")
+    try:
+        Ci = np.array(inputs["Ci"])
+        ds.set("Ci", Ci)
+        component()
+        cut = {name: np.array(ds.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
+    finally:
+        ds.unregister("emerged_green_area")
+    np.testing.assert_array_equal(ds.get("green_area"), inputs["green_area"])
+    expected_area = np.where(np.isnan(emerged), inputs["green_area"], emerged)
+    expected_area[lowest] = 0.
+    others = computed.copy()
+    others[lowest] = False
+    np.testing.assert_array_equal(cut["exchanging_area"][computed], expected_area[computed])
+    for name in OUTPUTS:                                             # per unit area: as over the whole green area
+        np.testing.assert_allclose(cut[name][others], whole[name][others], rtol=1e-12, err_msg=name)
+    np.testing.assert_allclose(cut["transpiration"], cut["Tr"] * cut["exchanging_area"], rtol=1e-15)
+    assert cut["Ag"][lowest] == 0 and cut["Tr"][lowest] == 0 and cut["transpiration"][lowest] == 0
 
 
 def test_the_component_declarations_and_the_organs(shoots, quiet):

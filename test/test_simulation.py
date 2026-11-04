@@ -19,20 +19,24 @@ def noon():
 
 
 def test_the_summary_is_the_elements(noon):
-    """The last hour's row: the elements' fluxes summed per m2 of ground, their temperature and conductance
-    green-area weighted; the hours from start_hour; a clear day's light absorbed."""
+    """The last hour's row: the elements' fluxes summed per m2 of ground, their temperature and conductance weighted
+    by their exchanging area (the whole green area: the stand is above the soil); the hours from start_hour; a clear
+    day's light absorbed."""
     summary, elements = noon.summary, noon.elements()
     assert summary["hour"].tolist() == [11., 12.]
     last = summary.iloc[-1]
-    assert last["net_assimilation"] == pytest.approx((elements["An"] * elements["green_area"]).sum()
+    computing = elements["exchanging_area"] > 0
+    assert computing.any()
+    np.testing.assert_array_equal(elements["exchanging_area"][computing], elements["green_area"][computing])
+    assert last["net_assimilation"] == pytest.approx((elements["An"] * elements["exchanging_area"]).sum()
                                                      / noon.ground_area, rel=1e-12)
     assert last["transpiration"] == pytest.approx(elements["transpiration"].sum() / noon.ground_area, rel=1e-12)
-    assert last["surface_temperature"] == pytest.approx(np.average(elements["Ts"], weights=elements["green_area"]))
+    assert last["surface_temperature"] == pytest.approx(np.average(elements["Ts"], weights=elements["exchanging_area"]))
     assert 0 < last["PAR_absorbed"] < last["PARi"] and last["net_assimilation"] > 0
     assert last["air_temperature"] == 20.
     blades = elements[elements["organ"] == "blade"]                 # a stem's Ag times stem_efficiency, its An not
     assert (blades["Ag"] >= blades["An"]).all()
-    np.testing.assert_allclose(elements["transpiration"], elements["Tr"] * elements["green_area"], rtol=1e-12)
+    np.testing.assert_allclose(elements["transpiration"], elements["Tr"] * elements["exchanging_area"], rtol=1e-12)
     assert set(elements["organ"]) <= {"blade", "sheath", "internode"} and (elements["organ"] == "blade").any()
 
 

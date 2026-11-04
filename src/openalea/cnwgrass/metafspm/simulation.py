@@ -20,10 +20,11 @@ results as tables.
                                                 plants.csv, the plants' summaries (Plant/)
 
 The stand: rows of wheat plants grown by Adel's port (ScenarioShoot: ShootArchitecture grown by ScenarioDevelopment,
-echap's leaf shapes), their bases at the soil surface, with development delays of up to 60 °Cd, grown to
-*thermal_time* before the day; then, every hour, Caribu (CaribuLightModel, with the sun) lights it and GasExchange
-computes each element's gas exchange from the light it absorbs (PARa, linked by name) and the weather. The plants keep
-growing during the day, by the degree-days of the air temperature. Lengths in m, PAR in µmol m-2 s-1.
+CN-Wheat's leaf shapes, Adel's LeafShapes.cnwheat()), their bases at the soil surface, with development delays of up
+to 60 °Cd, grown to *thermal_time* before the day; then, every hour, Caribu (CaribuLightModel, with the sun) lights it
+and GasExchange computes each element's gas exchange from the light it absorbs (PARa, linked by name) and the
+weather. The plants keep growing during the day, by the degree-days of the air temperature. Lengths in m, PAR in
+µmol m-2 s-1.
 """
 from dataclasses import dataclass, fields
 
@@ -113,15 +114,16 @@ class _Summary:
         ds = scene.populations[0].data_structure
         light = scene.environment[0].light.data_structure
         weather = {name: forcing_value(self.forcings[name], scene.time) for name in ("PARi", *WEATHER)}
-        green_area = np.asarray(ds.get("green_area"))
+        exchanging_area = np.asarray(ds.get("exchanging_area"))
         exchanging = _exchanging(ds)
-        area = green_area[exchanging]
+        area = exchanging_area[exchanging]
 
         def per_ground(name):
-            return float(np.sum(np.asarray(ds.get(name)) * green_area)) / self.ground
+            return float(np.sum(np.asarray(ds.get(name)) * exchanging_area)) / self.ground
 
         def mean(name):
-            return float(np.sum(np.asarray(ds.get(name))[exchanging] * area) / np.sum(area)) if area.size else np.nan
+            return float(np.sum(np.asarray(ds.get(name))[exchanging] * area) / np.sum(area)) if area.sum() > 0 \
+                else np.nan
 
         return dict(hour=scene.start[1] + scene.time / HOUR, **weather,
                     PAR_absorbed=float(np.sum(np.asarray(light.get("PARa")) * np.asarray(light.get("lit_area"))))
@@ -137,14 +139,14 @@ def _plants_row(scene):
     if scene.iteration == 0:
         return None
     ds = scene.populations[0].data_structure
-    green_area = np.asarray(ds.get("green_area"))
+    green_area, exchanging_area = np.asarray(ds.get("green_area")), np.asarray(ds.get("exchanging_area"))
 
     def per_plant(values):
         return np.asarray(ds.map_to(np.asarray(values, dtype=float), "node", "Plant", "sum"))
 
     return pd.DataFrame(dict(hour=scene.start[1] + scene.time / HOUR, plant=np.arange(len(ds.entity_ids("Plant"))),
                              green_area=per_plant(green_area),
-                             net_assimilation=per_plant(np.asarray(ds.get("An")) * green_area),
+                             net_assimilation=per_plant(np.asarray(ds.get("An")) * exchanging_area),
                              transpiration=per_plant(ds.get("transpiration"))))
 
 
@@ -168,17 +170,18 @@ class Simulation:
 
     def elements(self) -> pd.DataFrame:
         """The leaf and stem elements with a green area at the last hour, one row each: its plant (0, 1, ...), organ
-        (blade, sheath or internode), height (m), green area (m2), PARa (the PAR it absorbs, µmol m-2 s-1), Ag and An
+        (blade, sheath or internode), height (m), green area (m2), exchanging area (m2: its green area above the
+        soil, 0 if it exchanges nothing), PARa (the PAR it absorbs, µmol m-2 s-1), Ag and An
         (its gross and net assimilation, µmol CO2 m-2 s-1), gs (its stomatal conductance, mol m-2 s-1), Ci (its
         internal CO2, µmol mol-1), Ts (its temperature, °C), Tr (its transpiration rate, mmol m-2 s-1) and
-        transpiration (Tr times its green area, mmol s-1)."""
+        transpiration (Tr times its exchanging area, mmol s-1)."""
         ds = self.data_structure
         exchanging = _exchanging(ds)
         organ = self.architecture.organ_names()[np.asarray(ds.owner("Organ"))]
         table = pd.DataFrame(dict(plant=np.asarray(ds.owner("Plant")), organ=organ,
                                   **{name: np.asarray(ds.get(name), dtype=float) for name in (
-                                      "height", "green_area", "PARa", "Ag", "An", "gs", "Ci", "Ts", "Tr",
-                                      "transpiration")}))
+                                      "height", "green_area", "exchanging_area", "PARa", "Ag", "An", "gs", "Ci", "Ts",
+                                      "Tr", "transpiration")}))
         return table[exchanging].reset_index(drop=True)
 
     def plants(self) -> pd.DataFrame:
@@ -237,7 +240,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,
     plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour)."""
     scenario = _check(dict(parameters or {}))
-    shoot = {"n_sect": 2, "leaves": LeafShapes.echap(xy_model="Soissons_byleafclass"), "start": float(thermal_time)}
+    shoot = {"n_sect": 2, "leaves": LeafShapes.cnwheat(), "start": float(thermal_time)}
     stand = sown_stand(plants, n_rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing)
     xrange, yrange = int(np.ceil(plants / rows)) * plant_spacing, rows * row_spacing
     table = planting(stand, ExchangingWheat, {**shoot, **scenario},

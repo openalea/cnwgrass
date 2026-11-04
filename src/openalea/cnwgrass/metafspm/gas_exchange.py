@@ -16,7 +16,8 @@ Its steps follow the physics:
                       Vc_max25, Jmax25, TPU25, Rdark25 = S · (Na − Na_min), and the electron yield α = S_α · Na + β
     _exchange         for each exchanging element, the fixed point of the photosynthesis, the stomatal conductance,
                       the internal CO2 and the energy balance (on Ci and Ts, from Ci the previous step's and Ts = Ta);
-                      Ag, An, Rd, gs, Ci, Ts, Tr, and the element's transpiration Tr · green_area
+                      Ag, An, Rd, gs, Ci, Ts, Tr, the area it exchanges over (exchanging_area: its green area
+                      above the soil) and its transpiration Tr · exchanging_area
 
 The equations (units: µmol m-2 s-1 for the CO2 fluxes and PAR, µmol mol-1 for the CO2 concentrations, °C for the
 temperatures unless in K, kPa for the vapour pressures):
@@ -82,6 +83,9 @@ elements (roots, in a DataStructure holding the whole plant) get 0 and Ts NaN. E
 the main stem only).
 
 Its inputs: PARa (CaribuLight), green_area, height and width (the architecture: Adel's ShootArchitecture), the
+green area of the element's part above the soil (emerged_green_area: optional, a translator formula of the element's
+ends and areas where an architecture crosses the soil, as Caribu's light is cut there; without it, the whole green
+area exchanges), the
 organs' diameter (Adel's), the surfacic nitrogen and NSC (a CN model's, later; defaults until then), the leaf water
 potential leaf_water_potential (MPa; for Tuzet and hydraulics: MECHA's water_potential, hPa at its Compartments, the
 mean of its liquid per element, lagged by one step: mecha_links()). Adel has no element height: element_height (the
@@ -110,7 +114,7 @@ from openalea.metafspm.solve.decorator import rate, state
 from openalea.metafspm.testing.corrections import Corrections
 
 ELEMENT = dict(scale=scales.SubOrgan)
-PER_AREA = dict(scale=scales.SubOrgan, kind="intensive", weight="green_area")
+PER_AREA = dict(scale=scales.SubOrgan, kind="intensive", weight="exchanging_area")
 BY = "GasExchange"
 BRAUNE = "Braune et al. (2009); Evers et al. (2010); Barillot et al. (2016); Gauthier et al. (2021)"
 BERNACCHI = "Bernacchi et al. (2001)"
@@ -194,6 +198,14 @@ def mean_triangle_heights(triangles, n_elements):
     total = np.bincount(triangles.owner, weights=heights, minlength=n_elements)
     count = np.bincount(triangles.owner, minlength=n_elements)
     return np.divide(total, count, out=np.full(n_elements, np.nan), where=count > 0)
+
+
+def exchanging_areas(green_area, emerged_green_area) -> np.ndarray:
+    """Each element's area exchanging with the air (m2): its green area above the soil (*emerged_green_area*), its
+    whole green area where that is not given (NaN: no soil cut)."""
+    green_area = np.asarray(green_area, dtype=float)
+    emerged_green_area = np.broadcast_to(np.asarray(emerged_green_area, dtype=float), green_area.shape)
+    return np.where(np.isnan(emerged_green_area), green_area, emerged_green_area)
 
 
 def adel_links(receiver="GasExchange", provider="ShootArchitecture") -> Translator:
@@ -465,6 +477,11 @@ class GasExchange(FunctionalComponent):
                                  by="CaribuLight", default=0., kind="intensive", **ELEMENT)
     green_area: float = input_variable(unit="m2", description="The element's green area (0: no gas exchange)",
                                        by="ShootArchitecture", default=0., **ELEMENT)
+    emerged_green_area: float = input_variable(
+        unit="m2", description="The green area of the element's part above the soil, the part exchanging with the "
+        "air (an element crossing the soil surface)", value_comment="NaN: the whole green area (no soil cut); a "
+        "translator formula of the element's ends and areas (Adel's z1, z2, area, green_area)",
+        by="ShootArchitecture", default=np.nan, optional=True, **ELEMENT)
     height: float = input_variable(
         unit="m", description="The element's height above the soil", value_comment="NaN: no geometry, no gas "
         "exchange; Adel's: element_height(z1, z2) (adel_links()); CNW-Grass's facade: its triangles' mean height",
@@ -535,8 +552,13 @@ class GasExchange(FunctionalComponent):
                                "a shoot element", default=np.nan, **PER_AREA)
     Tr: float = state_variable(unit="mmol m-2 s-1", unit_comment="of water", description="The element's "
                                "transpiration rate", default=0., **PER_AREA)
+    exchanging_area: float = state_variable(unit="m2", description="The element's area exchanging with the air: "
+                                            "its green area above the soil (emerged_green_area, else green_area)",
+                                            value_comment="0: an element exchanging nothing", default=0.,
+                                            kind="extensive", **ELEMENT)
     transpiration: float = state_variable(unit="mmol s-1", unit_comment="of water", description="The element's "
-                                          "transpiration, Tr · green_area", default=0., kind="extensive", **ELEMENT)
+                                          "transpiration, Tr · exchanging_area", default=0., kind="extensive",
+                                          **ELEMENT)
 
     # --- Parameters: the nitrogen dependences (Gauthier et al. 2021, the legacy's SurfacicProteins) ---
     Vc_max25_nitrogen_slope: float = _parameter("µmol g-1 s-1", "Vc_max25's increase with Na", 84.965,
@@ -682,11 +704,13 @@ class GasExchange(FunctionalComponent):
         CORRECTIONS.resolve(self.corrections)
 
     @rate(include_inactive=True)
-    def _canopy_height(self, height, green_area, exchanging_labels):
-        """Each plant's canopy height: its exchanging elements' highest, with a green area (0 without any)."""
+    def _canopy_height(self, height, green_area, emerged_green_area, exchanging_labels):
+        """Each plant's canopy height: its exchanging elements' highest, with a green area above the soil (0 without
+        any)."""
         ds = self.data_structure
         exchanging = np.isin(np.asarray(ds.labels()), list(exchanging_labels))
-        values = np.where(exchanging & (np.asarray(green_area) != 0) & np.isfinite(height), height, 0.)
+        area = exchanging_areas(green_area, emerged_green_area)
+        values = np.where(exchanging & (area != 0) & np.isfinite(height), height, 0.)
         return np.maximum(ds.map_to(values, "node", "Plant", "max"), 0.)
 
     @rate(include_inactive=True)
@@ -703,9 +727,9 @@ class GasExchange(FunctionalComponent):
                 "electron_yield": electron_yield_nitrogen_slope * nitrogen + electron_yield_intercept}
 
     @state(include_inactive=True)
-    def _exchange(self, PARa, green_area, height, width, diameter, surfacic_nitrogen, surfacic_NSC,
-                  leaf_water_potential, SAM_temperature, PARa_primitives, primitive_areas, canopy_height, Vc_max25,
-                  Jmax25, TPU25, Rdark25, electron_yield, Ci, BWB_slope_factor, BWB_slope_exponent,
+    def _exchange(self, PARa, green_area, emerged_green_area, height, width, diameter, surfacic_nitrogen,
+                  surfacic_NSC, leaf_water_potential, SAM_temperature, PARa_primitives, primitive_areas, canopy_height,
+                  Vc_max25, Jmax25, TPU25, Rdark25, electron_yield, Ci, BWB_slope_factor, BWB_slope_exponent,
                   Vc_max_activation_enthalpy, Jmax_activation_enthalpy, TPU_activation_enthalpy, Kc_activation_enthalpy,
                   Ko_activation_enthalpy, Gamma_activation_enthalpy, Rdark_activation_enthalpy,
                   Vc_max_deactivation_enthalpy, Jmax_deactivation_enthalpy, TPU_deactivation_enthalpy, Vc_max_entropy,
@@ -718,8 +742,8 @@ class GasExchange(FunctionalComponent):
                   displacement_height_ratio, roughness_length_ratio, lamina_boundary_layer_factor,
                   cylinder_boundary_layer_factor, cylinder_boundary_layer_viscosity, cylinder_boundary_layer_exponent,
                   boundary_layer_ratio, PAR_to_global, PAR_photon_energy) -> dict:
-        """Each exchanging element's fixed point (element_exchange), at the weather of the step's end; the others
-        exchange nothing."""
+        """Each exchanging element's fixed point (element_exchange), at the weather of the step's end, over its green
+        area above the soil (exchanging_areas); the others exchange nothing."""
         arguments = locals()
         ds = self.data_structure
         n = np.asarray(PARa).size
@@ -728,7 +752,7 @@ class GasExchange(FunctionalComponent):
         hidden = np.isin(labels, list(self.hidden_labels))
         lamina = np.isin(np.asarray(ds.labels(location="Organ")), list(self.lamina_labels))
         per_node = {name: np.broadcast_to(np.asarray(arguments[name], dtype=float), (n,))
-                    for name in ("PARa", "green_area", "height", "width", "surfacic_nitrogen", "surfacic_NSC",
+                    for name in ("PARa", "height", "width", "surfacic_nitrogen", "surfacic_NSC",
                                  "leaf_water_potential", "Vc_max25", "Jmax25", "TPU25", "Rdark25", "electron_yield",
                                  "Ci")}
         organ = np.asarray(ds.owner("Organ"))
@@ -748,7 +772,8 @@ class GasExchange(FunctionalComponent):
 
         outputs = {name: np.zeros(n) for name in ("Ag", "An", "Rd", "gs", "Ci", "Tr")}
         outputs["Ts"] = np.where(exchanging | hidden, apex, np.nan)
-        computing = exchanging & (per_node["green_area"] > 0) & np.isfinite(per_node["height"]) & (plant_canopy > 0)
+        area = np.broadcast_to(exchanging_areas(green_area, emerged_green_area), (n,))
+        computing = exchanging & (area > 0) & np.isfinite(per_node["height"]) & (plant_canopy > 0)
         computing &= per_node["surfacic_nitrogen"] != 0
         indices = np.flatnonzero(computing)
         if self.primitive_scale and indices.size and (PARa_primitives is None or primitive_areas is None):
@@ -781,7 +806,8 @@ class GasExchange(FunctionalComponent):
         if not_converged:
             warnings.warn(f"GasExchange: {not_converged} elements did not converge in {self.maximum_iterations} "
                           f"iterations (Ci, Ts within {self.convergence_tolerance})", RuntimeWarning)
-        outputs["transpiration"] = outputs["Tr"] * per_node["green_area"]
+        outputs["exchanging_area"] = np.where(computing, area, 0.)
+        outputs["transpiration"] = outputs["Tr"] * outputs["exchanging_area"]
         return outputs
 
 
