@@ -96,3 +96,10 @@ def test_the_outputs(tmp_path):
     simulate(hours=1, start_hour=12, outputs=str(tmp_path), **SMALL)
     assert {"run.json", "scenario.json", "summary.csv", "plants.csv"} <= {path.name for path in tmp_path.iterdir()}
     assert len(pd.read_csv(tmp_path / "summary.csv")) == 1
+
+
+def test_the_run_configuration_is_the_scenes():
+    """compute= (metafspm's Compute) is the Scene's run configuration."""
+    from openalea.metafspm.compute import Compute
+    compute = Compute(threads=1, memory="keep")
+    assert simulate(hours=1, start_hour=11, compute=compute, **SMALL).scene.compute is compute

@@ -220,7 +220,8 @@ def _check(values: dict) -> dict:
 def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0., day_of_year: float = 130.,
              thermal_time: float = 600., PARi=None, air_temperature=None, relative_humidity=None, ambient_CO2=None,
              wind_speed=None, surfacic_nitrogen=2., leaf_water_potential=None, plants: int = 12, rows: int = 3,
-             row_spacing: float = 0.15, plant_spacing: float = 0.04, outputs: str = None) -> Simulation:
+             row_spacing: float = 0.15, plant_spacing: float = 0.04, outputs: str = None,
+             compute=None) -> Simulation:
     """The gas exchange of a stand of *plants* wheat plants in *rows* rows (*row_spacing*, *plant_spacing* m apart;
     repeated around it: an infinite canopy), grown to *thermal_time* °Cd since sowing, hour by hour for *hours* hours
     from *start_hour* (universal time) of day *day_of_year*, at Paris' latitude. *parameters* ({name: value}) changes
@@ -238,7 +239,9 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     *start_hour*, so that its first step computes the gas exchange at *start_hour*, the summary's first hour.
 
     *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,
-    plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour)."""
+    plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour).
+    *compute*: the Scene's run configuration (metafspm's Compute: its threads, its workers the light's projection
+    threads; None: Compute())."""
     scenario = _check(dict(parameters or {}))
     shoot = {"n_sect": 2, "leaves": LeafShapes.cnwheat(), "start": float(thermal_time)}
     stand = sown_stand(plants, n_rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing)
@@ -256,7 +259,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
                              tables={"summary": _Summary(forcings, ground), "plants": _plants_row})
     built = Scene(table, environment=[CaribuLightModel],
                   environment_scenarios=[{"sun": True, "latitude": LATITUDE, "interval": HOUR}], time_step=HOUR,
-                  forcings=forcings, recorder=recorder, start=(day_of_year, start_hour - 1.))
+                  forcings=forcings, recorder=recorder, start=(day_of_year, start_hour - 1.), compute=compute)
     built.populations[0].instance.grow()
     built.simulate(int(round(hours)))
     return Simulation(scene=built, summary=recorder.table("summary"), plant_hours=recorder.table("plants"),
