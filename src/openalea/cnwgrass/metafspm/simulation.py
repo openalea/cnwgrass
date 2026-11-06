@@ -236,8 +236,8 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     stomatal models "Tuzet" and "hydraulics" read (a hydraulic model, MECHA, would compute it; by default
     GasExchange's, -0.1).
 
-    The clock: a step reads its forcings' means over its hour (metafspm's forcings over the step), its sun at its end:
-    the scene starts an hour before *start_hour*, so that its first step is the hour ending at *start_hour*, the
+    The clock: a step reads its forcings' means over its hour (metafspm's forcings over the step), its sun at the
+    hour's middle (Caribu's sources by panel): the scene starts an hour before *start_hour*, so that its first step is the hour ending at *start_hour*, the
     summary's first hour (its weather the hour's means).
 
     *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,

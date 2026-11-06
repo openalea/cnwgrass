@@ -49,7 +49,8 @@ is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene
   no exchange), and its green area above it, the architecture's ``green_area`` times its green triangles' share
   above the soil (``FractionIn("air", weight="green")``, Adel's per-triangle green share: the senescence going down
   from the top), under a receiver-private name (``names={"green_area": "green_area_in_air"}``): the gas exchange
-  reads it as its ``green_area``, Adel's ``green_area`` staying the whole element's.
+  reads it as its ``green_area``, Adel's ``green_area`` staying the whole element's. An element Adel does not draw
+  (an element without triangles) has no part in the air either: it exchanges nothing.
 - **The stomatal model** is a setting, ``stomatal_model="BWB"`` (the default), ``"Leuning"``, ``"Tuzet"`` or
   ``"hydraulics"``. Tuzet and hydraulics read the elements' ``leaf_water_potential`` (MPa), e.g. MECHA's
   ``water_potential`` (hPa at its Compartments): ``mecha_links()`` links it, its factor 1e-4, the mean over each

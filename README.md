@@ -108,7 +108,27 @@ https://cnwgrass.rtfd.io
 
 # Usage
 
-To date, *CNW-Grass* has been used in four main contexts described below. 
+## The gas exchange in metafspm
+
+On the `to_metafspm` branch, CNW-Grass's gas exchange is a [metafspm](https://github.com/openalea/metafspm)
+component, `GasExchange` (`openalea.cnwgrass.metafspm`), on Adel's wheat shoots lit by Caribu (the plant model
+`ExchangingWheat`). It needs metafspm, Adel's and Caribu's `to_metafspm` branches next to it (metafspm's *metafspm in
+five minutes*, Caribu's row, then `pip install -e cnwgrass --no-deps`). The gas exchange of a small stand over a day:
+
+```python
+from openalea.cnwgrass.metafspm.simulation import simulate
+
+result = simulate()                    # 12 plants, hour by hour, the default weather
+print(result.summary)                  # per hour: PAR, net assimilation, transpiration, temperatures
+```
+
+`simulate(..., compute=Compute(...))` (`from openalea.metafspm import Compute`) sets how the run uses the machine
+(threads, process pool, device, sparse solver); the default `Compute()` suits a laptop. Step-by-step tutorials:
+`example/tutorials/user/` for newcomers (a first run, parameters, sensitivity, measured weather, with other models)
+and `example/tutorials/developer/` (metafspm's component formalism on `GasExchange`, extending it); the component's
+description is in `doc/metafspm/gas_exchange.rst`.
+
+The original model: to date, *CNW-Grass* has been used in four main contexts described below. 
 
 The scripts to run *CNW-Grass* are located in:
 * `cnwgrass\example\NEMA`
