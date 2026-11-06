@@ -14,7 +14,6 @@ from openalea.cnwgrass.metafspm.gas_exchange import GasExchange, mecha_links
 granap = pytest.importorskip("openalea.granap.metafspm.component")
 mecha = pytest.importorskip("openalea.mecha.component")
 
-from openalea.metafspm.coupling.choregrapher import Choregrapher  # noqa: E402
 from openalea.metafspm.coupling.component import StructuralComponent  # noqa: E402
 from openalea.metafspm.coupling.composite_wrapper import CompositeModel  # noqa: E402
 from openalea.metafspm.data_structure.configs import PropsConfig  # noqa: E402
@@ -91,7 +90,6 @@ class Coupled(CompositeModel):
 
 @pytest.fixture(scope="module")
 def coupled():
-    Choregrapher().set_simulation_time_step(3600.)
     ds = population_data_structure(planting([Planting()], None), Initiated, time_step=3600.).data_structure
     Anatomy(data_structure=ds)()
     ds.register("barrier", np.ones(ds.n_nodes()), location="node")

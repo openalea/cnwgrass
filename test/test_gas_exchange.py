@@ -189,7 +189,6 @@ def test_the_legacy_failures_fixed():
 # ── the component, on Adel's plants ──────────────────────────────────────────
 
 adel = pytest.importorskip("openalea.adel.development")
-from openalea.metafspm.coupling.choregrapher import Choregrapher  # noqa: E402
 from openalea.metafspm.scene.population import Planting, planting  # noqa: E402
 from openalea.metafspm.scene.scene import Scene  # noqa: E402
 from openalea.metafspm.coupling.translator import Translator  # noqa: E402
@@ -212,7 +211,6 @@ class ExchangingShoot(adel.ScenarioShoot):
 @pytest.fixture(scope="module")
 def shoots():
     """Two plants grown 60 days, the second with its own THETA and stem_efficiency; the weather a mutable dict."""
-    Choregrapher().reset()
     weather = dict(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
     table = planting([Planting(), Planting(x=0.2)], ExchangingShoot, {},
                      [{}, {"THETA": 0.8, "stem_efficiency": 0.6}])
@@ -313,7 +311,6 @@ def test_an_element_exchanges_over_the_green_area_it_reads(shoots, quiet):
     computed = whole["exchanging_area"] > 0
     np.testing.assert_array_equal(whole["exchanging_area"][computed], inputs["green_area"][computed])
     assert next(f for f in fields(port.GasExchange) if f.name == "An").metadata["weight"] == "exchanging_area"
-    Choregrapher().reset()
     halved = Scene(planting([Planting(), Planting(x=0.2)], HalfExchangingShoot, {},
                             [{}, {"THETA": 0.8, "stem_efficiency": 0.6}]),
                    time_step=86400., forcings={name: (lambda time, name=name: weather[name]) for name in weather})
@@ -429,7 +426,6 @@ def test_a_sown_shoot_exchanges_over_its_parts_above_the_soil(quiet):
     """emerged_links: each element's green area above the soil surface (the Scene's), from its green triangles'
     share there, read by the gas exchange as its green_area (Adel's untouched); its height the centre of its part
     above the soil, NaN wholly below (no gas exchange)."""
-    Choregrapher().reset()
     weather = dict(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
     scene = Scene(planting([Planting(z=-0.05)], SownExchangingShoot, {}), time_step=86400., soil_surface=0.,
                   forcings={name: (lambda time, name=name: weather[name]) for name in weather})
