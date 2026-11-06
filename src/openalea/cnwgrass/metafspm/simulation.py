@@ -37,7 +37,7 @@ from openalea.adel.leaf_shapes import LeafShapes
 from openalea.caribu.component import CaribuLightModel
 from openalea.caribu.optics import PlantOptics
 from openalea.caribu.simulation import clear_day_PAR
-from openalea.metafspm.coupling.forcings import as_forcing, forcing_value
+from openalea.metafspm.coupling.forcings import as_forcing, forcing_mean
 from openalea.metafspm.scene.population import planting
 from openalea.metafspm.scene.recorder import SceneRecorder
 from openalea.metafspm.scene.scenarios import parameter_table
@@ -113,7 +113,8 @@ class _Summary:
             return None
         ds = scene.populations[0].data_structure
         light = scene.environment[0].light.data_structure
-        weather = {name: forcing_value(self.forcings[name], scene.time) for name in ("PARi", *WEATHER)}
+        weather = {name: forcing_mean(self.forcings[name], scene.time - scene.time_step, scene.time)  # the hour's
+                   for name in ("PARi", *WEATHER)}
         exchanging_area = np.asarray(ds.get("exchanging_area"))
         exchanging = _exchanging(ds)
         area = exchanging_area[exchanging]
@@ -235,8 +236,9 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     stomatal models "Tuzet" and "hydraulics" read (a hydraulic model, MECHA, would compute it; by default
     GasExchange's, -0.1).
 
-    The clock: a step reads its forcings at its end (metafspm's convention): the scene starts an hour before
-    *start_hour*, so that its first step computes the gas exchange at *start_hour*, the summary's first hour.
+    The clock: a step reads its forcings' means over its hour (metafspm's forcings over the step), its sun at its end:
+    the scene starts an hour before *start_hour*, so that its first step is the hour ending at *start_hour*, the
+    summary's first hour (its weather the hour's means).
 
     *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,
     plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour).

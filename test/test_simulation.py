@@ -80,7 +80,7 @@ def test_the_parameters_settings_and_weather(noon):
     assert leuning.summary.iloc[0]["stomatal_conductance"] != pytest.approx(reference["stomatal_conductance"])
     weather = simulate(hours=1, start_hour=12, air_temperature=pd.Series([10., 30.], index=[0., 24.]),
                        surfacic_nitrogen=1., **SMALL)
-    assert weather.summary.iloc[0]["air_temperature"] == pytest.approx(20.)
+    assert weather.summary.iloc[0]["air_temperature"] == pytest.approx(10. + 20. * 11.5 / 24.)   # 11 to 12 h's mean
     assert np.all(np.asarray(weather.data_structure.get("surfacic_nitrogen")) == 1.)
     assert weather.summary.iloc[0]["net_assimilation"] < reference["net_assimilation"]
 
