@@ -44,11 +44,12 @@ is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene
   per plant, ``canopy_height``; the capacities at 25 °C (``Vc_max25``, ...). The fluxes per unit area are weighted by
   ``exchanging_area``.
 - **An element crossing the soil surface** (a shoot whose crown is below the soil, as Caribu's light is cut there)
-  exchanges over its part above the soil only: the optional input ``emerged_green_area`` (m2) is that part's green
-  area, a translator formula of the architecture's variables (Adel's ``z1``, ``z2``, ``area``, ``green_area``: the
-  receiving variable has its own name, since a link within one DataStructure derives its receiving variable under
-  its name, and ``green_area`` is Adel's, the whole element's). Not given (NaN), the whole green area exchanges;
-  0, the element is below the soil and exchanges nothing.
+  exchanges over its part above the soil only: ``emerged_links()`` gives the gas exchange each element's height, the
+  centre of its triangles' parts above the Scene's soil surface (metafspm's ``CentreIn("air")``: NaN wholly below,
+  no exchange), and its green area above it, the architecture's ``green_area`` times its green triangles' share
+  above the soil (``FractionIn("air", weight="green")``, Adel's per-triangle green share: the senescence going down
+  from the top), under a receiver-private name (``names={"green_area": "green_area_in_air"}``): the gas exchange
+  reads it as its ``green_area``, Adel's ``green_area`` staying the whole element's.
 - **The stomatal model** is a setting, ``stomatal_model="BWB"`` (the default), ``"Leuning"``, ``"Tuzet"`` or
   ``"hydraulics"``. Tuzet and hydraulics read the elements' ``leaf_water_potential`` (MPa), e.g. MECHA's
   ``water_potential`` (hPa at its Compartments): ``mecha_links()`` links it, its factor 1e-4, the mean over each

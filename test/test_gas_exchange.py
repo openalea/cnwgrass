@@ -192,6 +192,7 @@ adel = pytest.importorskip("openalea.adel.development")
 from openalea.metafspm.coupling.choregrapher import Choregrapher  # noqa: E402
 from openalea.metafspm.scene.population import Planting, planting  # noqa: E402
 from openalea.metafspm.scene.scene import Scene  # noqa: E402
+from openalea.metafspm.coupling.translator import Translator  # noqa: E402
 
 
 class ExchangingShoot(adel.ScenarioShoot):
@@ -285,46 +286,52 @@ def test_the_component_reproduces_the_legacy(shoots, model, monkeypatch, quiet):
     assert (outputs["Ts"][hidden] == 22.).all()
 
 
-def test_an_element_exchanges_over_its_green_area_above_the_soil(shoots, quiet):
-    """emerged_green_area (an element crossing the soil surface: the green area of its part above it, as Caribu's
-    light is cut there) is the area it exchanges over (exchanging_area): its fluxes per unit area unchanged, its
-    transpiration Tr times that area, the per-area variables weighted by it; an element wholly below the soil (0)
-    exchanges nothing. Not given (NaN, or not registered: an optional input), the whole green area exchanges; green_area
-    keeps its meaning (the element's)."""
+def _halved(green_area):
+    return 0.5 * np.asarray(green_area)
+
+
+class HalfExchangingShoot(ExchangingShoot):
+    """The gas exchange over half the elements' green area: a link of a receiver-private name (metafspm's
+    Link(names=)), as an assembly gives it the green area above the soil (emerged_links)."""
+    translator = Translator(port.adel_links().links).link("GasExchange", "green_area", "ShootArchitecture",
+                                                          ("green_area",), formula=_halved,
+                                                          names={"green_area": "half_green_area"})
+
+
+def test_an_element_exchanges_over_the_green_area_it_reads(shoots, quiet):
+    """The area an element exchanges over (exchanging_area) is the green area the gas exchange reads: given by a link
+    of a receiver-private name (here half the architecture's), its fluxes per unit area as over the whole, its
+    transpiration Tr times that area, the per-area variables weighted by it; the architecture's green_area keeps its
+    meaning (the element's, untouched)."""
     scene, weather = shoots
     population = scene.populations[0]
     ds, component = population.data_structure, population.instance.gas_exchange
     weather.update(air_temperature=20., relative_humidity=0.6, ambient_CO2=400., wind_speed=2.)
     inputs = _set_inputs(ds, seed=7)
-    assert not ds.has("emerged_green_area")
     component()
     whole = {name: np.array(ds.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
     computed = whole["exchanging_area"] > 0
     np.testing.assert_array_equal(whole["exchanging_area"][computed], inputs["green_area"][computed])
     assert next(f for f in fields(port.GasExchange) if f.name == "An").metadata["weight"] == "exchanging_area"
-    plant = np.asarray(ds.owner("Plant"))
-    lowest = int(np.flatnonzero(computed & (plant == 0))[np.argmin(inputs["z1"][computed & (plant == 0)])])
-    emerged = 0.5 * inputs["green_area"]
-    emerged[lowest] = 0.                                             # wholly below the soil
-    emerged[np.flatnonzero(computed)[-1]] = np.nan                   # not cut: its whole green area
-    ds.register("emerged_green_area", emerged, location="node")
-    try:
-        Ci = np.array(inputs["Ci"])
-        ds.set("Ci", Ci)
-        component()
-        cut = {name: np.array(ds.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
-    finally:
-        ds.unregister("emerged_green_area")
-    np.testing.assert_array_equal(ds.get("green_area"), inputs["green_area"])
-    expected_area = np.where(np.isnan(emerged), inputs["green_area"], emerged)
-    expected_area[lowest] = 0.
-    others = computed.copy()
-    others[lowest] = False
-    np.testing.assert_array_equal(cut["exchanging_area"][computed], expected_area[computed])
+    Choregrapher().reset()
+    halved = Scene(planting([Planting(), Planting(x=0.2)], HalfExchangingShoot, {},
+                            [{}, {"THETA": 0.8, "stem_efficiency": 0.6}]),
+                   time_step=86400., forcings={name: (lambda time, name=name: weather[name]) for name in weather})
+    for _ in range(60):
+        halved.run()
+    half_population = halved.populations[0]
+    half_ds, half_component = half_population.data_structure, half_population.instance.gas_exchange
+    assert half_ds.n_nodes() == ds.n_nodes()
+    _set_inputs(half_ds, seed=7)
+    half_ds.set("Ci", inputs["Ci"])
+    half_component()
+    cut = {name: np.array(half_ds.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
+    np.testing.assert_array_equal(half_ds.get("green_area"), inputs["green_area"])      # the architecture's
+    np.testing.assert_array_equal(half_component.read("green_area"), 0.5 * inputs["green_area"])
+    np.testing.assert_array_equal(cut["exchanging_area"][computed], 0.5 * inputs["green_area"][computed])
     for name in OUTPUTS:                                             # per unit area: as over the whole green area
-        np.testing.assert_allclose(cut[name][others], whole[name][others], rtol=1e-12, err_msg=name)
+        np.testing.assert_allclose(cut[name][computed], whole[name][computed], rtol=1e-12, err_msg=name)
     np.testing.assert_allclose(cut["transpiration"], cut["Tr"] * cut["exchanging_area"], rtol=1e-15)
-    assert cut["Ag"][lowest] == 0 and cut["Tr"][lowest] == 0 and cut["transpiration"][lowest] == 0
 
 
 def test_the_component_declarations_and_the_organs(shoots, quiet):
@@ -411,3 +418,33 @@ def test_the_component_at_the_primitive_scale(shoots, monkeypatch, quiet):
     legacy = legacy_run(elements, (18.8, 360., 0.53, 2.2), canopy_height=float(ds.get("canopy_height")[0]))
     for name in OUTPUTS:
         assert_arrays_equal([legacy[key][name] for key in elements], np.asarray(ds.get(name))[nodes], name=name)
+
+
+class SownExchangingShoot(ExchangingShoot):
+    """The gas exchange of a sown shoot over its elements' parts above the soil (emerged_links)."""
+    translator = port.emerged_links()
+
+
+def test_a_sown_shoot_exchanges_over_its_parts_above_the_soil(quiet):
+    """emerged_links: each element's green area above the soil surface (the Scene's), from its green triangles'
+    share there, read by the gas exchange as its green_area (Adel's untouched); its height the centre of its part
+    above the soil, NaN wholly below (no gas exchange)."""
+    Choregrapher().reset()
+    weather = dict(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
+    scene = Scene(planting([Planting(z=-0.05)], SownExchangingShoot, {}), time_step=86400., soil_surface=0.,
+                  forcings={name: (lambda time, name=name: weather[name]) for name in weather})
+    for _ in range(40):
+        scene.run()
+    ds, component = scene.populations[0].data_structure, scene.populations[0].instance.gas_exchange
+    green_area, read = np.asarray(ds.get("green_area")), component.read("green_area")
+    assert (read <= green_area * (1 + 1e-12)).all() and (read < green_area).any() and (read > 0).any()
+    triangles = ds.triangles()
+    lowest = np.full(ds.n_nodes(), np.inf)
+    np.minimum.at(lowest, triangles.owner, triangles.vertices[..., 2].min(axis=1))
+    highest = np.full(ds.n_nodes(), -np.inf)
+    np.maximum.at(highest, triangles.owner, triangles.vertices[..., 2].max(axis=1))
+    drawn = np.bincount(triangles.owner, minlength=ds.n_nodes()) > 0
+    buried, emerged = drawn & (highest < 0), drawn & (lowest >= 0)
+    assert buried.any() and (read[buried] == 0).all() and np.isnan(component.read("height")[buried]).all()
+    np.testing.assert_allclose(read[emerged], green_area[emerged], rtol=1e-12)
+    assert (component.read("height")[emerged] > 0).all()
