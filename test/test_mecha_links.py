@@ -51,11 +51,11 @@ class Seedling(StructuralComponent):
                                          **PropsConfig(scale=s.SubOrgan, edge_type='+', label=L.SubOrgan.LeafElement))
         root = g.add_component_with_topo(organ("Root", "Root", "RootInternode"), stem,
                                          **PropsConfig(scale=s.SubOrgan, edge_type='+', label=L.SubOrgan.RootSegment))
-        g.property("stem_radius")[stem] = 1e-3
-        for vertex, radius in ((stem, 1e-3), (leaf, 1e-3), (root, 0.55e-3)):
-            g.property("radius")[vertex] = radius
-            g.property("length")[vertex] = 5e-3
-            g.property("distance_from_tip")[vertex] = 0.
+        g.set_values("stem_radius", [stem], [1e-3])
+        vertices = [stem, leaf, root]
+        g.set_values("radius", vertices, [1e-3, 1e-3, 0.55e-3])
+        g.set_values("length", vertices, [5e-3] * 3)
+        g.set_values("distance_from_tip", vertices, [0.] * 3)
 
 
 class Anatomy(GranapAnatomy):
