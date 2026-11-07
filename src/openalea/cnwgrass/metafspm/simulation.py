@@ -36,7 +36,7 @@ from openalea.adel.development import ScenarioDevelopment, ScenarioShoot, random
 from openalea.adel.leaf_shapes import LeafShapes
 from openalea.caribu.component import CaribuLightModel
 from openalea.caribu.optics import PlantOptics
-from openalea.caribu.simulation import clear_day_PAR
+from openalea.caribu.simulation import calendar_date, clear_day_PAR, hours_since
 from openalea.metafspm.coupling.forcings import as_forcing, forcing_mean
 from openalea.metafspm.scene.population import planting
 from openalea.metafspm.scene.recorder import SceneRecorder
@@ -105,8 +105,8 @@ def _exchanging(ds) -> np.ndarray:
 class _Summary:
     """The summary row of the hour just computed; none before the first step."""
 
-    def __init__(self, forcings: dict, ground: float):
-        self.forcings, self.ground = forcings, ground
+    def __init__(self, forcings: dict, ground: float, midnight):
+        self.forcings, self.ground, self.midnight = forcings, ground, midnight
 
     def __call__(self, scene):
         if scene.iteration == 0:
@@ -126,7 +126,7 @@ class _Summary:
             return float(np.sum(np.asarray(ds.get(name))[exchanging] * area) / np.sum(area)) if area.sum() > 0 \
                 else np.nan
 
-        return dict(hour=scene.start[1] + scene.time / HOUR, **weather,
+        return dict(hour=hours_since(scene, self.midnight), **weather,
                     PAR_absorbed=float(np.sum(np.asarray(light.get("PARa")) * np.asarray(light.get("lit_area"))))
                     / self.ground,
                     gross_assimilation=per_ground("Ag"), net_assimilation=per_ground("An"),
@@ -134,9 +134,18 @@ class _Summary:
                     surface_temperature=mean("Ts"), stomatal_conductance=mean("gs"))
 
 
-def _plants_row(scene):
-    """Per plant, the hour just computed: its green area (m2), net assimilation (µmol CO2 s-1) and transpiration
-    (mmol H2O s-1)."""
+class _PlantsRow:
+    """Per plant, the hour just computed (since the first day's *midnight*): its green area (m2), net assimilation (µmol
+    CO2 s-1) and transpiration (mmol H2O s-1)."""
+
+    def __init__(self, midnight):
+        self.midnight = midnight
+
+    def __call__(self, scene):
+        return _plants_row(scene, hours_since(scene, self.midnight))
+
+
+def _plants_row(scene, hour: float):
     if scene.iteration == 0:
         return None
     ds = scene.populations[0].data_structure
@@ -145,7 +154,7 @@ def _plants_row(scene):
     def per_plant(values):
         return np.asarray(ds.map_to(np.asarray(values, dtype=float), "node", "Plant", "sum"))
 
-    return pd.DataFrame(dict(hour=scene.start[1] + scene.time / HOUR, plant=np.arange(len(ds.entity_ids("Plant"))),
+    return pd.DataFrame(dict(hour=hour, plant=np.arange(len(ds.entity_ids("Plant"))),
                              green_area=per_plant(green_area),
                              net_assimilation=per_plant(np.asarray(ds.get("An")) * exchanging_area),
                              transpiration=per_plant(ds.get("transpiration"))))
@@ -225,7 +234,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
              compute=None) -> Simulation:
     """The gas exchange of a stand of *plants* wheat plants in *rows* rows (*row_spacing*, *plant_spacing* m apart;
     repeated around it: an infinite canopy), grown to *thermal_time* °Cd since sowing, hour by hour for *hours* hours
-    from *start_hour* (universal time) of day *day_of_year*, at Paris' latitude. *parameters* ({name: value}) changes
+    from *start_hour* (universal time) of day *day_of_year* (of 2026: the Scene's start date), at Paris' latitude. *parameters* ({name: value}) changes
     GasExchange's parameters and settings: parameters() lists them all.
 
     The weather (each a number, a function of the hour of the day, or a pandas Series indexed by it): *PARi* (µmol
@@ -258,10 +267,12 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
                 for name, value in given.items() if value is not None or name in WEATHER}
     ground = xrange * yrange
     recorder = SceneRecorder(outputs, summaries=outputs is not None,
-                             tables={"summary": _Summary(forcings, ground), "plants": _plants_row})
+                             tables={"summary": _Summary(forcings, ground, calendar_date(day_of_year)),
+                                     "plants": _PlantsRow(calendar_date(day_of_year))})
     built = Scene(table, environment=[CaribuLightModel],
-                  environment_scenarios=[{"sun": True, "latitude": LATITUDE, "interval": HOUR}], time_step=HOUR,
-                  forcings=forcings, recorder=recorder, start=(day_of_year, start_hour - 1.), compute=compute)
+                  environment_scenarios=[{"sun": True, "latitude": LATITUDE, "interval": "1 h"}], time_step=HOUR,
+                  forcings=forcings, recorder=recorder, start=calendar_date(day_of_year, start_hour - 1.),
+                  compute=compute)
     built.populations[0].instance.grow()
     built.simulate(int(round(hours)))
     return Simulation(scene=built, summary=recorder.table("summary"), plant_hours=recorder.table("plants"),
