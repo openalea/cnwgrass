@@ -32,13 +32,13 @@ import numpy as np
 import pandas as pd
 
 from openalea.adel.architecture import ShootArchitecture
-from openalea.adel.development import ScenarioDevelopment, ScenarioShoot, random_delays, sown_stand
+from openalea.adel.development import ScenarioDevelopment, ScenarioShoot, random_delays
 from openalea.adel.leaf_shapes import LeafShapes
 from openalea.caribu.component import CaribuLightModel
 from openalea.caribu.optics import PlantOptics
 from openalea.caribu.simulation import calendar_date, clear_day_PAR, hours_since
 from openalea.metafspm.coupling.forcings import as_forcing, forcing_mean
-from openalea.metafspm.scene.population import planting
+from openalea.metafspm.scene.population import planting, stand
 from openalea.metafspm.scene.recorder import SceneRecorder
 from openalea.metafspm.scene.scenarios import parameter_table
 from openalea.metafspm.scene.scene import Scene
@@ -255,17 +255,16 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     threads and its process pool, its sparse solver; None: Compute())."""
     scenario = _check(dict(parameters or {}))
     shoot = {"n_sect": 2, "leaves": LeafShapes.cnwheat(), "start": float(thermal_time)}
-    stand = sown_stand(plants, n_rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing)
-    xrange, yrange = int(np.ceil(plants / rows)) * plant_spacing, rows * row_spacing
-    table = planting(stand, ExchangingWheat, {**shoot, **scenario},
-                     [{"delay": float(delay)} for delay in random_delays(plants)], xrange=xrange, yrange=yrange)
+    sown = stand(plants, rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing, jitter=0.005, seed=0)
+    table = planting(sown, ExchangingWheat, {**shoot, **scenario},
+                     [{"delay": float(delay)} for delay in random_delays(plants)])
     given = dict(PARi=PARi if PARi is not None else clear_day_PAR(day_of_year, LATITUDE),
                  air_temperature=air_temperature, relative_humidity=relative_humidity, ambient_CO2=ambient_CO2,
                  wind_speed=wind_speed, surfacic_nitrogen=surfacic_nitrogen,
                  leaf_water_potential=leaf_water_potential)
     forcings = {name: as_forcing(value if value is not None else WEATHER[name], time_unit=HOUR, origin="calendar")
                 for name, value in given.items() if value is not None or name in WEATHER}
-    ground = xrange * yrange
+    ground = sown.xrange * sown.yrange
     recorder = SceneRecorder(outputs, summaries=outputs is not None,
                              tables={"summary": _Summary(forcings, ground, calendar_date(day_of_year)),
                                      "plants": _PlantsRow(calendar_date(day_of_year))})

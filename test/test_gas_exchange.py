@@ -427,7 +427,7 @@ def test_a_sown_shoot_exchanges_over_its_parts_above_the_soil(quiet):
     share there, read by the gas exchange as its green_area (Adel's untouched); its height the centre of its part
     above the soil, NaN wholly below (no gas exchange)."""
     weather = dict(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
-    scene = Scene(planting([Planting(z=-0.05)], SownExchangingShoot, {}), time_step=86400., soil_surface=0.,
+    scene = Scene(planting([Planting(depth=0.05)], SownExchangingShoot, {}), time_step=86400., soil_surface=0.,
                   forcings={name: (lambda time, name=name: weather[name]) for name in weather})
     for _ in range(40):
         scene.run()
