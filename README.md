@@ -123,7 +123,7 @@ print(result.summary)                  # per hour: PAR, net assimilation, transp
 ```
 
 `simulate(..., compute=Compute(...))` (`from openalea.metafspm import Compute`) sets how the run uses the machine
-(threads, process pool, device, sparse solver); the default `Compute()` suits a laptop. Step-by-step tutorials:
+(threads, `"auto"` by default; process pool, device, sparse solver); the default `Compute()` suits a laptop. Step-by-step tutorials:
 `example/tutorials/user/` for newcomers (a first run, parameters, sensitivity, measured weather, with other models)
 and `example/tutorials/developer/` (metafspm's component formalism on `GasExchange`, extending it); the component's
 description is in `doc/metafspm/gas_exchange.rst`.
