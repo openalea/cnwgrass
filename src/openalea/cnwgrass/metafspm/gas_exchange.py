@@ -188,7 +188,8 @@ def surfacic_nonstructural_carbohydrates(sucrose, starch, fructan, green_area):
 # ── the element's height, from the architecture ──────────────────────────────
 
 def element_height(z1, z2):
-    """An element's height (m): the mean of its base's and its end's (Adel's z1, z2), for a translator formula."""
+    """An element's height (m): the mean of its base's and its end's heights (Adel's drawn ends, display_z1,
+    display_z2), for a translator formula."""
     return (np.asarray(z1, dtype=float) + np.asarray(z2, dtype=float)) / 2
 
 
@@ -203,8 +204,9 @@ def mean_triangle_heights(triangles, n_elements):
 
 def adel_links(receiver="GasExchange", provider="ShootArchitecture") -> Translator:
     """The links from Adel's ShootArchitecture that sharing by name does not make: the elements' height
-    (element_height of z1, z2). width, diameter and green_area are shared by their names."""
-    return Translator().link(receiver, "height", provider, ("z1", "z2"), formula=element_height)
+    (element_height of where Adel draws them, display_z1, display_z2: its topological ends z1, z2 stack the hidden
+    parts the turtle draws on the visible ones). width, diameter and green_area are shared by their names."""
+    return Translator().link(receiver, "height", provider, ("display_z1", "display_z2"), formula=element_height)
 
 
 def emerged_links(receiver="GasExchange", provider="ShootArchitecture") -> Translator:
@@ -494,7 +496,8 @@ class GasExchange(FunctionalComponent):
                                        by="ShootArchitecture", default=0., **ELEMENT)
     height: float = input_variable(
         unit="m", description="The element's height above the soil", value_comment="NaN: no geometry, no gas "
-        "exchange; Adel's: element_height(z1, z2) (adel_links()); CNW-Grass's facade: its triangles' mean height",
+        "exchange; Adel's: element_height(display_z1, display_z2) (adel_links()); CNW-Grass's facade: its "
+        "triangles' mean height",
         by="ShootArchitecture", default=np.nan, kind="descriptor", **ELEMENT)
     width: float = input_variable(unit="m", description="The lamina element's width (its characteristic dimension "
                                   "for the heat transfer)", by="ShootArchitecture", default=0., kind="descriptor",

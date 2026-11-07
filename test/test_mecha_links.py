@@ -65,27 +65,20 @@ class Anatomy(GranapAnatomy):
                                                         organ_class=LeafAnatomy), size=None)}
 
 
-class Initiated:
+class Initiated(CompositeModel):
     """The plants' anatomies, wired at the segments' junctions; no component (the test couples them)."""
     initiators, nodes, wiring = (Seedling, Anatomy), "Compartment", staticmethod(junction_rules)
-
-    def __init__(self, data_structure, time_step):
-        self.components = []
-
-    def run(self):
-        pass
 
 
 class Coupled(CompositeModel):
     """MECHA's hydraulics and the gas exchange on one DataStructure, the leaf water potential linked."""
     translator = mecha_links()
+    parts = {"hydraulics": MechaHydraulics, "gas_exchange": GasExchange}
 
     def __init__(self, data_structure, time_step):
-        self.hydraulics = MechaHydraulics(data_structure=data_structure, time_step=time_step)
-        self.gas_exchange = GasExchange(data_structure=data_structure, time_step=time_step)
         # an optional input, not registered until given: held at the elements, for the link to map onto them
         data_structure.register("leaf_water_potential", GasExchange.leaf_water_potential, location="SubOrgan")
-        self.couple(self.hydraulics, self.gas_exchange)
+        super().__init__(data_structure, time_step)
 
 
 @pytest.fixture(scope="module")

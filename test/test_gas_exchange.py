@@ -191,21 +191,16 @@ def test_the_legacy_failures_fixed():
 adel = pytest.importorskip("openalea.adel.development")
 from openalea.metafspm.scene.population import Planting, planting  # noqa: E402
 from openalea.metafspm.scene.scene import Scene  # noqa: E402
+from openalea.metafspm.coupling.composite_wrapper import CompositeModel  # noqa: E402
 from openalea.metafspm.coupling.translator import Translator  # noqa: E402
 
 
-class ExchangingShoot(adel.ScenarioShoot):
-    """Adel's plant model with its gas exchange (its elements' height from their z1, z2: adel_links)."""
+class ExchangingShoot(CompositeModel):
+    """Adel's plant model (ScenarioShoot, nested) with its gas exchange (its elements' height from their drawn ends:
+    adel_links)."""
+    initiators = (adel.ScenarioShoot,)
+    parts = {"shoot": adel.ScenarioShoot, "gas_exchange": port.GasExchange}
     translator = port.adel_links()
-
-    def __init__(self, data_structure, time_step):
-        super().__init__(data_structure, time_step)
-        self.gas_exchange = port.GasExchange(data_structure=data_structure, time_step=time_step)
-        self.couple(self.development, self.architecture, self.gas_exchange, translator=self.translator)
-
-    def run(self):
-        super().run()
-        self.gas_exchange()
 
 
 @pytest.fixture(scope="module")
@@ -222,8 +217,8 @@ def shoots():
 
 
 def _set_inputs(ds, seed):
-    """Random inputs on every element (the heights through Adel's z1 = z2; the surfacic nitrogen from proteins per
-    unit green area, as the legacy computes it), the previous Ci too."""
+    """Random inputs on every element (the heights through Adel's drawn ends, display_z1 = display_z2; the surfacic
+    nitrogen from proteins per unit green area, as the legacy computes it), the previous Ci too."""
     generator = np.random.default_rng(seed)
     n = ds.n_nodes()
     height = generator.uniform(0.01, 0.6, n)
@@ -231,7 +226,7 @@ def _set_inputs(ds, seed):
     values = dict(PARa=generator.uniform(0, 2000, n) * (generator.random(n) < 0.8),
                   green_area=10 ** generator.uniform(-5, -2.5, n), width=generator.uniform(0.001, 0.02, n),
                   surfacic_nitrogen=port.surfacic_photosynthetic_nitrogen(proteins, 1.),
-                  surfacic_NSC=generator.uniform(0, 1e6, n), z1=height, z2=height,
+                  surfacic_NSC=generator.uniform(0, 1e6, n), display_z1=height, display_z2=height,
                   Ci=np.where(generator.random(n) < 0.5, np.nan, generator.uniform(100, 400, n)))
     for name, value in values.items():
         ds.set(name, value)
@@ -258,7 +253,7 @@ def test_the_component_reproduces_the_legacy(shoots, model, monkeypatch, quiet):
     assert computed.sum() > 20 and (organs[computed] == "Blade").any() and (organs[computed] != "Blade").any()
     canopy = np.asarray(ds.get("canopy_height"))
     for p in range(canopy.size):
-        assert canopy[p] == inputs["z1"][exchanging & (plant == p)].max()
+        assert canopy[p] == inputs["display_z1"][exchanging & (plant == p)].max()
     outputs = {name: np.asarray(ds.get(name)) for name in OUTPUTS}
     diameter = np.asarray(ds.get("diameter"))
     for p, changes in enumerate(({}, {"THETA": 0.8, "EFFICENCY_STEM": 0.6})):     # the second plant's parameters
@@ -270,7 +265,7 @@ def test_the_component_reproduces_the_legacy(shoots, model, monkeypatch, quiet):
             for i in nodes.tolist():
                 lamina = organs[i] == "Blade"
                 elements[(1, "MS", i, "blade" if lamina else "sheath", labels[i])] = python_floats(dict(
-                    width=inputs["width"][i] if lamina else diameter[organ[i]], height=inputs["z1"][i],
+                    width=inputs["width"][i] if lamina else diameter[organ[i]], height=inputs["display_z1"][i],
                     PARa=inputs["PARa"][i], nitrates=0., amino_acids=0., Nstruct=0., green_area=1.,
                     proteins=inputs["proteins"][i], sucrose=inputs["surfacic_NSC"][i], starch=0., fructan=0.,
                     PARa_prim=[], area_prim=0, Ci=previous_Ci[i], water_potential=-0.1))
@@ -408,7 +403,7 @@ def test_the_component_at_the_primitive_scale(shoots, monkeypatch, quiet):
                            & (plant == 0))
     diameter = np.asarray(ds.get("diameter"))[ds.owner("Organ")]
     elements = {(1, "MS", i, "blade" if organs[i] == "Blade" else "sheath", labels[i]): python_floats(dict(
-        width=inputs["width"][i] if organs[i] == "Blade" else diameter[i], height=inputs["z1"][i], PARa=0.,
+        width=inputs["width"][i] if organs[i] == "Blade" else diameter[i], height=inputs["display_z1"][i], PARa=0.,
         nitrates=0., amino_acids=0., Nstruct=0., green_area=1., proteins=inputs["proteins"][i],
         sucrose=inputs["surfacic_NSC"][i], starch=0., fructan=0., PARa_prim=PARs[i], area_prim=areas[i],
         Ci=previous_Ci[i])) for i in nodes.tolist()}

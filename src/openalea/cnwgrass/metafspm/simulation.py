@@ -31,12 +31,12 @@ from dataclasses import dataclass, fields
 import numpy as np
 import pandas as pd
 
-from openalea.adel.architecture import ShootArchitecture
-from openalea.adel.development import ScenarioDevelopment, ScenarioShoot, random_delays
+from openalea.adel.development import ScenarioShoot, random_delays
 from openalea.adel.leaf_shapes import LeafShapes
 from openalea.caribu.component import CaribuLightModel
 from openalea.caribu.optics import PlantOptics
 from openalea.caribu.simulation import calendar_date, clear_day_PAR, hours_since
+from openalea.metafspm.coupling.composite_wrapper import CompositeModel
 from openalea.metafspm.coupling.forcings import as_forcing, forcing_mean
 from openalea.metafspm.scene.population import planting, stand
 from openalea.metafspm.scene.recorder import SceneRecorder
@@ -59,34 +59,28 @@ MAIN_PARAMETERS = ("stomatal_model", "Vc_max25_nitrogen_slope", "Jmax25_nitrogen
 WEATHER = dict(air_temperature=20., relative_humidity=0.6, ambient_CO2=410., wind_speed=2.)
 
 
-class ExchangingWheat(ScenarioShoot):
-    """The plant model: Adel's wheat shoot (ShootArchitecture grown by ScenarioDevelopment), its elements' optics
-    (Caribu's PlantOptics, which the light reads) and their gas exchange (GasExchange: its PARa the light's, by name;
-    its elements' height from Adel's z1, z2, adel_links). A subclass may compute the gas exchange with a subclass of
-    GasExchange (gas_exchange_component), its links named after it (translator, adel_links(receiver=...))."""
-    gas_exchange_component = GasExchange
+class ExchangingWheat(CompositeModel):
+    """The plant model: Adel's wheat shoot (ScenarioShoot, nested: ShootArchitecture grown by ScenarioDevelopment),
+    its elements' optics (Caribu's PlantOptics, which the light reads) and their gas exchange (GasExchange: its PARa
+    the light's, by name; its elements' height from Adel's display ends, adel_links), run in this order. A model
+    computing the gas exchange with a subclass of GasExchange gives it as its part, its links named after it
+    (``parts = {**ExchangingWheat.parts, "gas_exchange": GasExchangeWithEfficiency}``, translator
+    adel_links(receiver=...))."""
+    initiators = (ScenarioShoot,)
+    parts = {"shoot": ScenarioShoot, "optics": PlantOptics, "gas_exchange": GasExchange}
     translator = adel_links()
 
     def __init__(self, data_structure, time_step):
-        self.architecture = ShootArchitecture(data_structure=data_structure, time_step=time_step)
-        self.development = ScenarioDevelopment(data_structure=data_structure, time_step=time_step)
-        self.optics = PlantOptics(data_structure=data_structure, time_step=time_step)
-        self.gas_exchange = self.gas_exchange_component(data_structure=data_structure, time_step=time_step)
-        self.couple(self.development, self.architecture, self.optics, self.gas_exchange, translator=self.translator)
+        super().__init__(data_structure, time_step)
         if not data_structure.has("leaf_water_potential"):   # an optional input, held here to be given (simulate)
             data_structure.register("leaf_water_potential", GasExchange.leaf_water_potential, location="node")
 
     def grow(self):
         """The shoot grown to its stage, its development's start (minus each plant's delay), by one call before the
-        scene's first step (ScenarioShoot.run_shoot: every phytomer the stage asks for; the scene's first step adds
-        no degree-days, none passed since)."""
-        self.run_shoot()
-        self.optics.run_stage("state")                  # the optics before the first lighting
-
-    def run(self):
-        self.run_shoot()
-        self.optics()                                   # the new elements' too
-        self.gas_exchange()
+        scene's first step (ScenarioShoot.grow: every phytomer the stage asks for; the scene's first step adds no
+        degree-days, none passed since); the optics before the first lighting."""
+        self.shoot.grow()
+        self.optics.run_stage("state")
 
 
 def parameters(values: dict = None, main_only: bool = False) -> pd.DataFrame:
@@ -176,7 +170,7 @@ class Simulation:
 
     @property
     def architecture(self):
-        return self.scene.populations[0].instance.architecture
+        return self.scene.populations[0].instance.shoot.architecture
 
     def elements(self) -> pd.DataFrame:
         """The leaf and stem elements with a green area at the last hour, one row each: its plant (0, 1, ...), organ
@@ -269,7 +263,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
                              tables={"summary": _Summary(forcings, ground, calendar_date(day_of_year)),
                                      "plants": _PlantsRow(calendar_date(day_of_year))})
     built = Scene(table, environment=[CaribuLightModel],
-                  environment_scenarios=[{"sun": True, "latitude": LATITUDE, "interval": "1 h"}], time_step=HOUR,
+                  environment_scenarios=[{"sun": True, "latitude": LATITUDE, "cadence": {"light": "1 h"}}], time_step=HOUR,
                   forcings=forcings, recorder=recorder, start=calendar_date(day_of_year, start_hour - 1.),
                   compute=compute)
     built.populations[0].instance.grow()
