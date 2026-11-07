@@ -16,24 +16,18 @@ legacy's equations and numerics.
 Using it
 ========
 
-A plant model adds it to its components; the elements' height comes from Adel's ``z1``, ``z2`` through a translator
+A plant model adds it to its components; the elements' height comes from where Adel draws them (``display_z1``, ``display_z2``) through a translator
 formula (``adel_links()``); ``width``, ``diameter`` and ``green_area`` are Adel's, shared by their names; ``PARa``
 is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene)::
 
     from openalea.adel.development import ScenarioShoot
     from openalea.cnwgrass.metafspm.gas_exchange import GasExchange, adel_links
+    from openalea.metafspm.coupling.composite_wrapper import CompositeModel
 
-    class Wheat(ScenarioShoot):
+    class Wheat(CompositeModel):
+        initiators = (ScenarioShoot,)
+        parts = {"shoot": ScenarioShoot, "gas_exchange": GasExchange}     # Adel's shoot nested, then the exchange
         translator = adel_links()
-
-        def __init__(self, data_structure, time_step):
-            super().__init__(data_structure, time_step)
-            self.gas_exchange = GasExchange(data_structure=data_structure, time_step=time_step)
-            self.couple(self.development, self.architecture, self.gas_exchange, translator=self.translator)
-
-        def run(self):
-            super().run()
-            self.gas_exchange()
 
     scene = Scene(planting([Planting()], Wheat, {}), environment=[CaribuLightModel], time_step=3600.,
                   forcings=meteo)            # PARi, air_temperature, relative_humidity, ambient_CO2, wind_speed
