@@ -245,8 +245,8 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
 
     *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,
     plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour).
-    *compute*: the Scene's run configuration (metafspm's Compute: its threads, its workers the light's projection
-    threads and its process pool, its sparse solver; None: Compute())."""
+    *compute*: the Scene's run configuration (metafspm's Compute: its threads, the light's projection threads too,
+    its sparse solver; None: Compute())."""
     scenario = _check(dict(parameters or {}))
     shoot = {"n_sect": 2, "leaves": LeafShapes.cnwheat(), "start": float(thermal_time)}
     sown = stand(plants, rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing, jitter=0.005, seed=0)
