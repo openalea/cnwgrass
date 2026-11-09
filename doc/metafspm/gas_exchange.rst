@@ -29,7 +29,7 @@ is the light's (Caribu's ``CaribuLightModel``, an environment model of the scene
         parts = {"shoot": ScenarioShoot, "gas_exchange": GasExchange}     # Adel's shoot nested, then the exchange
         translator = adel_links()
 
-    scene = Scene(planting([Planting()], Wheat, {}), environment=[CaribuLightModel], time_step=3600.,
+    scene = Scene(planting([Planting()], Wheat, {}), environment=[CaribuLightModel], time_step="1 h",
                   forcings=meteo)            # PARi, air_temperature, relative_humidity, ambient_CO2, wind_speed
 
 - **Outputs** per element: ``Ag``, ``An``, ``Rd`` (µmol m-2 s-1), ``gs`` (mol m-2 s-1), ``Ci`` (µmol mol-1),
