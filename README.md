@@ -93,9 +93,12 @@ To activate the environment: `conda activate cnwgrass`
 
 ### Developers
 
-1) To clone the project, please use:
+1) To clone the project, on its metafspm branch, with the repositories it runs with next to it (the usage below),
+please use:
 ```commandline
-git clone https://github.com/openalea/cnwgrass
+git clone -b to_metafspm https://github.com/openalea/cnwgrass
+git clone -b release2026 https://github.com/openalea/metafspm.git metafspm
+git clone -b other_platforms_bindings https://github.com/openalea/encoding3d.git encoding3d
 ```
 
 2) Move to the cloned directory, then create and activate a conda environment with dependencies:
@@ -122,8 +125,13 @@ result = simulate()                    # 12 plants, hour by hour, the default we
 print(result.summary)                  # per hour: PAR, net assimilation, transpiration, temperatures
 ```
 
-`simulate(..., compute=Compute(...))` (`from openalea.metafspm import Compute`) sets how the run uses the machine
-(threads, `"auto"` by default; device, sparse solver); the default `Compute()` suits a laptop. Step-by-step tutorials:
+`simulate(..., compute=Compute(...))` (`from openalea.metafspm import Compute`) sets how the run uses the machine:
+the threads of numba's kernels, of the linear solves' blocks and of a reduction's kinds (`threads="auto"` by
+default: the processors, each part taking those that pay, the results the same at any number; BLAS stays at one),
+the device (`"cpu"`, or `"cuda"` with CuPy), the memory policy and
+the sparse solver (`linear_solver=`: SuperLU by default; PARDISO and MUMPS optional, used when installed). The default
+`Compute()` suits a laptop; metafspm's user guide (`docs/user.md`, *The run configuration*) and *Running on a GPU*
+(`docs/gpu.md`) give the details. Step-by-step tutorials:
 `example/tutorials/user/` for newcomers (a first run, parameters, sensitivity, measured weather, with other models)
 and `example/tutorials/developer/` (metafspm's component formalism on `GasExchange`, extending it); the component's
 description is in `doc/metafspm/gas_exchange.rst`.
