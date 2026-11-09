@@ -249,7 +249,9 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     its sparse solver; None: Compute())."""
     scenario = _check(dict(parameters or {}))
     shoot = {"n_sect": 2, "leaves": LeafShapes.cnwheat(), "start": float(thermal_time)}
-    sown = stand(plants, rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing, jitter=0.005, seed=0)
+    # the plants at the soil surface, as before metafspm's stand (its default depth, 2.5 cm, would bury the sheaths)
+    sown = stand(plants, rows=rows, row_spacing=row_spacing, plant_spacing=plant_spacing, depth=0., jitter=0.005,
+                 seed=0)
     table = planting(sown, ExchangingWheat, {**shoot, **scenario},
                      [{"delay": float(delay)} for delay in random_delays(plants)])
     given = dict(PARi=PARi if PARi is not None else clear_day_PAR(day_of_year, LATITUDE),
