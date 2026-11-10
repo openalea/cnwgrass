@@ -101,10 +101,18 @@ git clone -b release2026 https://github.com/openalea/metafspm.git metafspm
 git clone -b other_platforms_bindings https://github.com/openalea/encoding3d.git encoding3d
 ```
 
-2) Move to the cloned directory, then create and activate a conda environment with dependencies:
+2) Move to the cloned directory, then create and activate a conda environment with dependencies (it brings
+`openalea.metafspm`, from `openalea3`, and through it encoding3d):
 ```commandline
 conda env create -n cnwgrass -f conda/environment.yml 
 activate cnwgrass
+```
+
+3) Until metafspm's `release2026` and encoding3d are published on `openalea3`, the environment's `openalea.metafspm` is
+an older version: install the two clones over it (`--no-deps`: the environment already has their dependencies):
+```commandline
+pip install -e ../encoding3d --no-deps
+pip install -e ../metafspm --no-deps
 ```
 # Documentation
 https://cnwgrass.rtfd.io
