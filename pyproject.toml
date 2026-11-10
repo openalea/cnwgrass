@@ -46,11 +46,7 @@ classifiers = [
 
 # you can list here all dependencies that are pip-instalable, and that have a name identical to the one used by conda (to allow reuse of this list in meta.yaml)
 # If conda name is different, please do not declare the pip name, and declare conda name in the next section
-dependencies = [
-    "numpy",
-    "pandas",
-    "scipy",
-]
+dependencies = []          # numpy, pandas, scipy: openalea.metafspm's (below, a conda package)
 
 [project.optional-dependencies]
 test = [
@@ -80,8 +76,8 @@ channels = [
   "conda-forge"
 ]
 dependencies = [
-    "openalea.metafspm",                       # openalea.cnwgrass.metafspm: the gas exchange as a metafspm component
-    "openalea.mtg",
+    "openalea.metafspm",                       # openalea.cnwgrass.metafspm: the gas exchange as a metafspm component;
+                                               # brings numpy, pandas, scipy, numba and openalea.mtg
     "openalea.plantgl",
     "openalea.lpy",
     "openalea.caribu",
