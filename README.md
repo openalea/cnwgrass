@@ -141,7 +141,10 @@ the graph systems' sparse solver (`linear_solver="superlu"` by default: one back
 giving each its own, by its qualified name `"Component._system"`, else a property it declares such as `"symmetric"`,
 else `"default"`; CHOLMOD, PARDISO and MUMPS optional, checked when the Scene is built). The default
 `Compute()` suits a laptop; metafspm's user guide (`docs/user.md`, *The run configuration*) and *Running on a GPU*
-(`docs/gpu.md`) give the details. Step-by-step tutorials:
+(`docs/gpu.md`) give the details. Several plants on several cores: `Compute(processes=2)` (or `"auto"`) runs each population of the scene
+(`planting(..., population=[...])`, one name per plant) in its own process, with the bits of one process; it
+pays for several heavy plants (steps of a second or more), the default `processes=1` otherwise (metafspm's
+`docs/user.md`, *Populations in processes*). Step-by-step tutorials:
 `example/tutorials/user/` for newcomers (a first run, parameters, sensitivity, measured weather, with other models)
 and `example/tutorials/developer/` (metafspm's component formalism on `GasExchange`, extending it); the component's
 description is in `doc/metafspm/gas_exchange.rst`.

@@ -439,3 +439,47 @@ def test_a_sown_shoot_exchanges_over_its_parts_above_the_soil(quiet):
     assert buried.any() and (read[buried] == 0).all() and np.isnan(component.read("height")[buried]).all()
     np.testing.assert_allclose(read[emerged], green_area[emerged], rtol=1e-12)
     assert (component.read("height")[emerged] > 0).all()
+
+
+def _every_value(scene) -> dict:
+    """Every numeric variable of every population, by population and name."""
+    found = {}
+    for population in scene.populations:
+        data_structure = population.data_structure
+        for name in data_structure.available_vars():
+            values = np.asarray(data_structure.get(name))
+            if values.dtype != object:
+                found[f"{population.name} {name}"] = values.copy()
+    return found
+
+
+def _two_populations_at(processes, build, steps) -> dict:
+    """*build*(Compute)'s scene run *steps* steps: every value of its populations."""
+    from openalea.metafspm.compute import Compute
+    scene = build(Compute(threads=1, processes=processes))
+    try:
+        for _ in range(steps):
+            scene.run()
+        assert type(scene.runner).__name__ == ("ProcessRunner" if processes > 1 else "SequentialRunner")
+        return _every_value(scene)
+    finally:
+        scene.finish()
+
+
+def _assert_same_bits(one: dict, two: dict) -> None:
+    assert one.keys() == two.keys() and one
+    for key, values in one.items():
+        np.testing.assert_array_equal(two[key], values, err_msg=key)
+
+
+def test_two_populations_in_two_processes_give_the_bits_of_one(quiet):
+    """Two exchanging shoots in two populations (planting(population=)): Compute(processes=2) runs each in its worker
+    process, with the values of one process."""
+    weather = dict(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
+
+    def build(compute):
+        table = planting([Planting(), Planting(x=0.2)], ExchangingShoot, {}, [{}, {"THETA": 0.8}],
+                         population=["first", "second"])
+        return Scene(table, time_step=86400., forcings={name: (lambda time, name=name: weather[name])
+                                                         for name in weather}, compute=compute)
+    _assert_same_bits(_two_populations_at(1, build, 20), _two_populations_at(2, build, 20))
