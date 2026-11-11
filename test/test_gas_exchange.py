@@ -216,11 +216,11 @@ def shoots():
     return scene, weather
 
 
-def _set_inputs(ds, seed):
+def _set_inputs(data_structure, seed):
     """Random inputs on every element (the heights through Adel's drawn ends, display_z1 = display_z2; the surfacic
     nitrogen from proteins per unit green area, as the legacy computes it), the previous Ci too."""
     generator = np.random.default_rng(seed)
-    n = ds.n_nodes()
+    n = data_structure.n_nodes()
     height = generator.uniform(0.01, 0.6, n)
     proteins = generator.uniform(0, 2e5, n) * (generator.random(n) < 0.95)
     values = dict(PARa=generator.uniform(0, 2000, n) * (generator.random(n) < 0.8),
@@ -229,8 +229,8 @@ def _set_inputs(ds, seed):
                   surfacic_NSC=generator.uniform(0, 1e6, n), display_z1=height, display_z2=height,
                   Ci=np.where(generator.random(n) < 0.5, np.nan, generator.uniform(100, 400, n)))
     for name, value in values.items():
-        ds.set(name, value)
-    ds.set("diameter", generator.uniform(0.001, 0.005, len(ds.entity_ids("Organ"))))
+        data_structure.set(name, value)
+    data_structure.set("diameter", generator.uniform(0.001, 0.005, len(data_structure.entity_ids("Organ"))))
     return dict(values, proteins=proteins)
 
 
@@ -238,24 +238,24 @@ def _set_inputs(ds, seed):
 def test_the_component_reproduces_the_legacy(shoots, model, monkeypatch, quiet):
     scene, weather = shoots
     population = scene.populations[0]
-    ds, component = population.data_structure, population.instance.gas_exchange
+    data_structure, component = population.data_structure, population.instance.gas_exchange
     monkeypatch.setattr(component, "stomatal_model", model)
     monkeypatch.setattr(component, "corrections", ())
     weather.update(air_temperature=22., relative_humidity=0.4, ambient_CO2=410., wind_speed=1.5)
-    inputs = _set_inputs(ds, seed=5)
+    inputs = _set_inputs(data_structure, seed=5)
     previous_Ci = inputs["Ci"].copy()
     component()
 
-    labels, organs = ds.labels(), ds.labels(location="Organ")
-    plant, organ = ds.owner("Plant"), ds.owner("Organ")
+    labels, organs = data_structure.labels(), data_structure.labels(location="Organ")
+    plant, organ = data_structure.owner("Plant"), data_structure.owner("Organ")
     exchanging = np.isin(labels, ["StemElement", "LeafElement"])
     computed = exchanging & (inputs["surfacic_nitrogen"] != 0)
     assert computed.sum() > 20 and (organs[computed] == "Blade").any() and (organs[computed] != "Blade").any()
-    canopy = np.asarray(ds.get("canopy_height"))
+    canopy = np.asarray(data_structure.get("canopy_height"))
     for p in range(canopy.size):
         assert canopy[p] == inputs["display_z1"][exchanging & (plant == p)].max()
-    outputs = {name: np.asarray(ds.get(name)) for name in OUTPUTS}
-    diameter = np.asarray(ds.get("diameter"))
+    outputs = {name: np.asarray(data_structure.get(name)) for name in OUTPUTS}
+    diameter = np.asarray(data_structure.get("diameter"))
     for p, changes in enumerate(({}, {"THETA": 0.8, "EFFICENCY_STEM": 0.6})):     # the second plant's parameters
         with monkeypatch.context() as patched:
             for name, value in changes.items():
@@ -272,7 +272,7 @@ def test_the_component_reproduces_the_legacy(shoots, model, monkeypatch, quiet):
             legacy = legacy_run(elements, (22., 410., 0.4, 1.5), model, canopy_height=float(canopy[p]))
             for name in OUTPUTS:
                 assert_arrays_equal([legacy[key][name] for key in elements], outputs[name][nodes], name=name)
-    assert_arrays_equal(outputs["Tr"] * inputs["green_area"], ds.get("transpiration"), name="transpiration")
+    assert_arrays_equal(outputs["Tr"] * inputs["green_area"], data_structure.get("transpiration"), name="transpiration")
     others = ~computed
     assert (outputs["Ag"][others] == 0).all() and (outputs["Tr"][others] == 0).all()
     hidden = labels == "HiddenElement"
@@ -298,11 +298,11 @@ def test_an_element_exchanges_over_the_green_area_it_reads(shoots, quiet):
     meaning (the element's, untouched)."""
     scene, weather = shoots
     population = scene.populations[0]
-    ds, component = population.data_structure, population.instance.gas_exchange
+    data_structure, component = population.data_structure, population.instance.gas_exchange
     weather.update(air_temperature=20., relative_humidity=0.6, ambient_CO2=400., wind_speed=2.)
-    inputs = _set_inputs(ds, seed=7)
+    inputs = _set_inputs(data_structure, seed=7)
     component()
-    whole = {name: np.array(ds.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
+    whole = {name: np.array(data_structure.get(name)) for name in OUTPUTS + ("exchanging_area", "transpiration")}
     computed = whole["exchanging_area"] > 0
     np.testing.assert_array_equal(whole["exchanging_area"][computed], inputs["green_area"][computed])
     assert next(f for f in fields(port.GasExchange) if f.name == "An").metadata["weight"] == "exchanging_area"
@@ -313,7 +313,7 @@ def test_an_element_exchanges_over_the_green_area_it_reads(shoots, quiet):
         halved.run()
     half_population = halved.populations[0]
     half_ds, half_component = half_population.data_structure, half_population.instance.gas_exchange
-    assert half_ds.n_nodes() == ds.n_nodes()
+    assert half_ds.n_nodes() == data_structure.n_nodes()
     _set_inputs(half_ds, seed=7)
     half_ds.set("Ci", inputs["Ci"])
     half_component()
@@ -329,17 +329,17 @@ def test_an_element_exchanges_over_the_green_area_it_reads(shoots, quiet):
 def test_the_component_declarations_and_the_organs(shoots, quiet):
     scene, weather = shoots
     population = scene.populations[0]
-    ds, component = population.data_structure, population.instance.gas_exchange
+    data_structure, component = population.data_structure, population.instance.gas_exchange
     weather.update(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
-    _set_inputs(ds, seed=6)
+    _set_inputs(data_structure, seed=6)
     component()
     table = port.GasExchange.declarations().set_index("name")
     assert table.loc["transpiration", "kind"] == "extensive" and table.loc["Tr", "kind"] == "intensive"
     assert set(port.GasExchange.declared_forcings()) == {"air_temperature", "relative_humidity", "ambient_CO2",
                                                          "wind_speed"}
     assert table.loc["THETA", "min_value"] == 0. and table.loc["THETA", "references"]
-    organ_transpiration = ds.map_to(ds.get("transpiration"), "node", "Organ", "sum")
-    assert organ_transpiration.sum() == pytest.approx(np.sum(ds.get("transpiration")))
+    organ_transpiration = data_structure.map_to(data_structure.get("transpiration"), "node", "Organ", "sum")
+    assert organ_transpiration.sum() == pytest.approx(np.sum(data_structure.get("transpiration")))
     assert (organ_transpiration > 0).sum() > 5
 
 
@@ -348,12 +348,12 @@ def test_the_component_restarts_Ci(shoots, quiet):
     ambient CO2 (the legacy divides by it)."""
     scene, weather = shoots
     population = scene.populations[0]
-    ds, component = population.data_structure, population.instance.gas_exchange
-    _set_inputs(ds, seed=8)
-    ds.set("Ci", np.zeros(ds.n_nodes()))
+    data_structure, component = population.data_structure, population.instance.gas_exchange
+    _set_inputs(data_structure, seed=8)
+    data_structure.set("Ci", np.zeros(data_structure.n_nodes()))
     component()
-    computed = np.isin(ds.labels(), ["StemElement", "LeafElement"]) & (np.asarray(ds.get("surfacic_nitrogen")) > 0)
-    assert np.isfinite(ds.get("Ci")).all() and (np.asarray(ds.get("Ci"))[computed] > 0).all()
+    computed = np.isin(data_structure.labels(), ["StemElement", "LeafElement"]) & (np.asarray(data_structure.get("surfacic_nitrogen")) > 0)
+    assert np.isfinite(data_structure.get("Ci")).all() and (np.asarray(data_structure.get("Ci"))[computed] > 0).all()
 
 
 @pytest.mark.filterwarnings("ignore:GasExchange:RuntimeWarning")   # some strongly closed elements oscillate
@@ -361,17 +361,17 @@ def test_the_tuzet_feedback(shoots, monkeypatch, quiet):
     """Tuzet: a lower leaf water potential closes the stomata (the potential an input, e.g. MECHA's)."""
     scene, weather = shoots
     population = scene.populations[0]
-    ds, component = population.data_structure, population.instance.gas_exchange
+    data_structure, component = population.data_structure, population.instance.gas_exchange
     monkeypatch.setattr(component, "stomatal_model", "Tuzet")
-    _set_inputs(ds, seed=7)
-    ds.set("PARa", np.full(ds.n_nodes(), 1000.))
-    if not ds.has("leaf_water_potential"):
-        ds.register("leaf_water_potential", -0.1, location="node")
+    _set_inputs(data_structure, seed=7)
+    data_structure.set("PARa", np.full(data_structure.n_nodes(), 1000.))
+    if not data_structure.has("leaf_water_potential"):
+        data_structure.register("leaf_water_potential", -0.1, location="node")
     conductances = []
     for potential in (-0.1, -0.65, -1.5):
-        ds.set("leaf_water_potential", np.full(ds.n_nodes(), potential))
+        data_structure.set("leaf_water_potential", np.full(data_structure.n_nodes(), potential))
         component()
-        conductances.append(np.asarray(ds.get("gs")).copy())
+        conductances.append(np.asarray(data_structure.get("gs")).copy())
     lit = conductances[0] > 0.1
     assert lit.sum() > 5
     assert (conductances[0][lit] > conductances[1][lit]).all() and (conductances[1][lit] > conductances[2][lit]).all()
@@ -382,34 +382,34 @@ def test_the_component_at_the_primitive_scale(shoots, monkeypatch, quiet):
     variables), as the legacy's prim_scale with corrections=()."""
     scene, weather = shoots
     population = scene.populations[0]
-    ds, component = population.data_structure, population.instance.gas_exchange
+    data_structure, component = population.data_structure, population.instance.gas_exchange
     monkeypatch.setattr(component, "primitive_scale", True)
     monkeypatch.setattr(component, "corrections", ())
     monkeypatch.setattr(legacy_parameters, "prim_scale", True)
     weather.update(air_temperature=18.8, relative_humidity=0.53, ambient_CO2=360., wind_speed=2.2)
-    inputs = _set_inputs(ds, seed=9)
+    inputs = _set_inputs(data_structure, seed=9)
     generator = np.random.default_rng(9)
-    n = ds.n_nodes()
+    n = data_structure.n_nodes()
     PARs = [list(generator.uniform(0, 2000, int(generator.integers(1, 4)))) for _ in range(n)]
     areas = [list(generator.uniform(1e-5, 1e-4, len(values))) for values in PARs]
     for name, values in (("PARa_primitives", PARs), ("primitive_areas", areas)):
-        if not ds.has(name):
-            ds.register(name, None, location="node", dtype="object")
-        ds.set(name, np.array(values + [None], dtype=object)[:-1])
+        if not data_structure.has(name):
+            data_structure.register(name, None, location="node", dtype="object")
+        data_structure.set(name, np.array(values + [None], dtype=object)[:-1])
     previous_Ci = inputs["Ci"].copy()
     component()
-    labels, organs, plant = ds.labels(), ds.labels(location="Organ"), ds.owner("Plant")
+    labels, organs, plant = data_structure.labels(), data_structure.labels(location="Organ"), data_structure.owner("Plant")
     nodes = np.flatnonzero(np.isin(labels, ["StemElement", "LeafElement"]) & (inputs["surfacic_nitrogen"] != 0)
                            & (plant == 0))
-    diameter = np.asarray(ds.get("diameter"))[ds.owner("Organ")]
+    diameter = np.asarray(data_structure.get("diameter"))[data_structure.owner("Organ")]
     elements = {(1, "MS", i, "blade" if organs[i] == "Blade" else "sheath", labels[i]): python_floats(dict(
         width=inputs["width"][i] if organs[i] == "Blade" else diameter[i], height=inputs["display_z1"][i], PARa=0.,
         nitrates=0., amino_acids=0., Nstruct=0., green_area=1., proteins=inputs["proteins"][i],
         sucrose=inputs["surfacic_NSC"][i], starch=0., fructan=0., PARa_prim=PARs[i], area_prim=areas[i],
         Ci=previous_Ci[i])) for i in nodes.tolist()}
-    legacy = legacy_run(elements, (18.8, 360., 0.53, 2.2), canopy_height=float(ds.get("canopy_height")[0]))
+    legacy = legacy_run(elements, (18.8, 360., 0.53, 2.2), canopy_height=float(data_structure.get("canopy_height")[0]))
     for name in OUTPUTS:
-        assert_arrays_equal([legacy[key][name] for key in elements], np.asarray(ds.get(name))[nodes], name=name)
+        assert_arrays_equal([legacy[key][name] for key in elements], np.asarray(data_structure.get(name))[nodes], name=name)
 
 
 class SownExchangingShoot(ExchangingShoot):
@@ -426,15 +426,15 @@ def test_a_sown_shoot_exchanges_over_its_parts_above_the_soil(quiet):
                   forcings={name: (lambda time, name=name: weather[name]) for name in weather})
     for _ in range(40):
         scene.run()
-    ds, component = scene.populations[0].data_structure, scene.populations[0].instance.gas_exchange
-    green_area, read = np.asarray(ds.get("green_area")), component.read("green_area")
+    data_structure, component = scene.populations[0].data_structure, scene.populations[0].instance.gas_exchange
+    green_area, read = np.asarray(data_structure.get("green_area")), component.read("green_area")
     assert (read <= green_area * (1 + 1e-12)).all() and (read < green_area).any() and (read > 0).any()
-    triangles = ds.triangles()
-    lowest = np.full(ds.n_nodes(), np.inf)
+    triangles = data_structure.triangles()
+    lowest = np.full(data_structure.n_nodes(), np.inf)
     np.minimum.at(lowest, triangles.owner, triangles.vertices[..., 2].min(axis=1))
-    highest = np.full(ds.n_nodes(), -np.inf)
+    highest = np.full(data_structure.n_nodes(), -np.inf)
     np.maximum.at(highest, triangles.owner, triangles.vertices[..., 2].max(axis=1))
-    drawn = np.bincount(triangles.owner, minlength=ds.n_nodes()) > 0
+    drawn = np.bincount(triangles.owner, minlength=data_structure.n_nodes()) > 0
     buried, emerged = drawn & (highest < 0), drawn & (lowest >= 0)
     assert buried.any() and (read[buried] == 0).all() and np.isnan(component.read("height")[buried]).all()
     np.testing.assert_allclose(read[emerged], green_area[emerged], rtol=1e-12)

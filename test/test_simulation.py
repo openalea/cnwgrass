@@ -52,17 +52,17 @@ def test_the_plants_add_up_the_hours(noon):
 
 def test_the_stand_grown_to_its_stage(noon):
     """The plants' thermal time: thermal_time minus their delays, and the degree-days of the hours before."""
-    ds = noon.data_structure
-    delays = np.asarray(ds.get("delay"))
-    np.testing.assert_allclose(np.asarray(ds.get("thermal_time")), SMALL["thermal_time"] - delays + 20. / 24.,
+    data_structure = noon.data_structure
+    delays = np.asarray(data_structure.get("delay"))
+    np.testing.assert_allclose(np.asarray(data_structure.get("thermal_time")), SMALL["thermal_time"] - delays + 20. / 24.,
                                rtol=1e-12)
 
 
 def test_the_plants_are_sown_at_the_soil_surface(noon):
     """The plants' bases at the soil surface (their depth 0: not metafspm's stand default), so that every element is
     above it and exchanges over its whole green area."""
-    ds = noon.data_structure
-    np.testing.assert_array_equal(np.asarray(ds.get("z")), 0.)
+    data_structure = noon.data_structure
+    np.testing.assert_array_equal(np.asarray(data_structure.get("z")), 0.)
     elements = noon.elements()
     assert (elements["height"] >= 0.).all()
     np.testing.assert_array_equal(elements["exchanging_area"], elements["green_area"])

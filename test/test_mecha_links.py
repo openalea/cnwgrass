@@ -33,29 +33,29 @@ class Seedling(StructuralComponent):
     """A stem element bearing a leaf element and a root segment, 5 mm long each."""
 
     @classmethod
-    def initiate_plant(cls, g, plant, parameters):
-        s, L = g.scales, g.labels
+    def initiate_plant(cls, mtg, plant, parameters):
+        s, L = mtg.scales, mtg.labels
 
         def organ(axis_label, kind, organ_label):
-            axis = g.add_component(plant, **PropsConfig(scale=s.Axis, edge_type='/', label=getattr(L.Axis, axis_label)))
-            unit = g.add_component(axis, **PropsConfig(scale=s.GrowthUnit, edge_type='/',
+            axis = mtg.add_component(plant, **PropsConfig(scale=s.Axis, edge_type='/', label=getattr(L.Axis, axis_label)))
+            unit = mtg.add_component(axis, **PropsConfig(scale=s.GrowthUnit, edge_type='/',
                                                        label=getattr(L.GrowthUnit, kind)))
-            phytomer = g.add_component(unit, **PropsConfig(scale=s.Phytomer, edge_type='/',
+            phytomer = mtg.add_component(unit, **PropsConfig(scale=s.Phytomer, edge_type='/',
                                                            label=getattr(L.Phytomer, kind)))
-            return g.add_component(phytomer, **PropsConfig(scale=s.Organ, edge_type='/',
+            return mtg.add_component(phytomer, **PropsConfig(scale=s.Organ, edge_type='/',
                                                            label=getattr(L.Organ, organ_label)))
 
-        stem = g.add_component(organ("Shoot", "Shoot", "StemInternode"),
+        stem = mtg.add_component(organ("Shoot", "Shoot", "StemInternode"),
                                **PropsConfig(scale=s.SubOrgan, edge_type='/', label=L.SubOrgan.StemElement))
-        leaf = g.add_component_with_topo(organ("Shoot", "Shoot", "Leaf"), stem,
+        leaf = mtg.add_component_with_topo(organ("Shoot", "Shoot", "Leaf"), stem,
                                          **PropsConfig(scale=s.SubOrgan, edge_type='+', label=L.SubOrgan.LeafElement))
-        root = g.add_component_with_topo(organ("Root", "Root", "RootInternode"), stem,
+        root = mtg.add_component_with_topo(organ("Root", "Root", "RootInternode"), stem,
                                          **PropsConfig(scale=s.SubOrgan, edge_type='+', label=L.SubOrgan.RootSegment))
-        g.set_values("stem_radius", [stem], [1e-3])
+        mtg.set_values("stem_radius", [stem], [1e-3])
         vertices = [stem, leaf, root]
-        g.set_values("radius", vertices, [1e-3, 1e-3, 0.55e-3])
-        g.set_values("length", vertices, [5e-3] * 3)
-        g.set_values("distance_from_tip", vertices, [0.] * 3)
+        mtg.set_values("radius", vertices, [1e-3, 1e-3, 0.55e-3])
+        mtg.set_values("length", vertices, [5e-3] * 3)
+        mtg.set_values("distance_from_tip", vertices, [0.] * 3)
 
 
 class Anatomy(GranapAnatomy):
@@ -83,16 +83,16 @@ class Coupled(CompositeModel):
 
 @pytest.fixture(scope="module")
 def coupled():
-    ds = population_data_structure(planting([Planting()], None), Initiated, time_step=3600.).data_structure
-    Anatomy(data_structure=ds)()
-    ds.register("barrier", np.ones(ds.n_nodes()), location="node")
-    ds.register("soil_psi", np.full(ds.n_nodes(), SOIL), location="node")
-    leaf = np.asarray(ds.labels(location="Organ", per_node=False)) == "Leaf"
-    ds.register("leaf_transpiration", np.where(leaf, TRANSPIRATION, 0.), location="Organ")
-    model = Coupled(ds, 3600.)
+    data_structure = population_data_structure(planting([Planting()], None), Initiated, time_step=3600.).data_structure
+    Anatomy(data_structure=data_structure)()
+    data_structure.register("barrier", np.ones(data_structure.n_nodes()), location="node")
+    data_structure.register("soil_psi", np.full(data_structure.n_nodes(), SOIL), location="node")
+    leaf = np.asarray(data_structure.labels(location="Organ", per_node=False)) == "Leaf"
+    data_structure.register("leaf_transpiration", np.where(leaf, TRANSPIRATION, 0.), location="Organ")
+    model = Coupled(data_structure, 3600.)
     model.hydraulics.collar_condition = 0.
     model.hydraulics()
-    return ds, model
+    return data_structure, model
 
 
 def test_the_gas_exchange_names_its_leaf_water_potential_apart_from_mechas():
@@ -106,16 +106,16 @@ def test_the_gas_exchange_names_its_leaf_water_potential_apart_from_mechas():
 
 
 def test_each_element_gets_the_mean_of_its_liquid_in_mpa(coupled):
-    ds, _ = coupled
-    elements = ds.entity_ids("SubOrgan")
-    owner = np.asarray(ds.owner("SubOrgan"))
-    water, liquid = np.asarray(ds.get("water_potential")), np.asarray(ds.get("liquid_volume"))
-    vapour = np.asarray(ds.get("vapour_node")) > 0
+    data_structure, _ = coupled
+    elements = data_structure.entity_ids("SubOrgan")
+    owner = np.asarray(data_structure.owner("SubOrgan"))
+    water, liquid = np.asarray(data_structure.get("water_potential")), np.asarray(data_structure.get("liquid_volume"))
+    vapour = np.asarray(data_structure.get("vapour_node")) > 0
     expected = np.array([np.sum(water[owner == i] * liquid[owner == i]) / np.sum(liquid[owner == i])
                          for i in range(elements.size)]) * 1e-4
-    assert ds.location("leaf_water_potential") == "SubOrgan"
-    np.testing.assert_allclose(ds.get("leaf_water_potential"), expected, rtol=1e-12)
-    leaf = ds.labels(location="SubOrgan", per_node=False) == "LeafElement"
+    assert data_structure.location("leaf_water_potential") == "SubOrgan"
+    np.testing.assert_allclose(data_structure.get("leaf_water_potential"), expected, rtol=1e-12)
+    leaf = data_structure.labels(location="SubOrgan", per_node=False) == "LeafElement"
     index = int(np.flatnonzero(leaf)[0])
     liquid_range = water[(owner == index) & ~vapour] * 1e-4
-    assert liquid_range.min() <= ds.get("leaf_water_potential")[index] <= liquid_range.max() < 0
+    assert liquid_range.min() <= data_structure.get("leaf_water_potential")[index] <= liquid_range.max() < 0

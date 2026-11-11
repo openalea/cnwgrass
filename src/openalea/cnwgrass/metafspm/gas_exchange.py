@@ -3,7 +3,7 @@ CNW-Grass's gas exchange as a metafspm component: each shoot element's photosynt
 temperature and transpiration, from the light it absorbs, its nitrogen and the weather (the legacy
 openalea.cnwgrass.gasexchange, its Simulation and its facade).
 
-    GasExchange(data_structure=ds, time_step=3600.)       a FunctionalComponent at the SubOrgan scale (Adel's
+    GasExchange(data_structure=data_structure, time_step=3600.)       a FunctionalComponent at the SubOrgan scale (Adel's
                                                           elements: StemElement, LeafElement), on a plant model's
                                                           DataStructure; its parameters per plant
     GasExchange(..., stomatal_model="Tuzet")              the stomatal conductance limited by the leaf water
@@ -85,7 +85,7 @@ the main stem only).
 Its inputs: PARa (CaribuLight), green_area, height and width (the architecture: Adel's ShootArchitecture; where an
 architecture crosses the soil, an assembly gives the gas exchange the green area of the element's part above it, as
 Caribu's light is cut there: a link of a receiver-private name, metafspm's Link(names={"green_area": ...}), from the
-architecture's green_area and the green triangles' share above the soil, ds.geometry; Adel's green_area untouched), the
+architecture's green_area and the green triangles' share above the soil, data_structure.geometry; Adel's green_area untouched), the
 organs' diameter (Adel's), the surfacic nitrogen and NSC (a CN model's, later; defaults until then), the leaf water
 potential leaf_water_potential (MPa; for Tuzet and hydraulics: MECHA's water_potential, hPa at its Compartments, the
 mean of its liquid per element, lagged by one step: mecha_links()). Adel has no element height: element_height (the
@@ -175,7 +175,7 @@ def surfacic_photosynthetic_nitrogen(proteins, green_area, conversion=1.06):
 
 def surfacic_total_nitrogen(nitrates, amino_acids, proteins, structural_nitrogen, green_area):
     """The surfacic nitrogen, structural included (g m-2), from the amounts of nitrates, amino acids and proteins
-    (µmol N) and the structural nitrogen (g): the legacy's with SurfacicProteins False (with TOTAL_NITROGEN)."""
+    (µmol N) and the structural nitrogen (mtg): the legacy's with SurfacicProteins False (with TOTAL_NITROGEN)."""
     return ((nitrates + amino_acids + proteins) * 1E-6 * NITROGEN_MOLAR_MASS + structural_nitrogen) / green_area
 
 
@@ -212,7 +212,7 @@ def adel_links(receiver="GasExchange", provider="ShootArchitecture") -> Translat
 def emerged_links(receiver="GasExchange", provider="ShootArchitecture") -> Translator:
     """
     adel_links for a shoot crossing the soil surface (sown, on a crown below it: the Scene's soil_surface), the gas
-    exchange of each element's part above it only, as Caribu's light is cut there (metafspm's ds.geometry, the
+    exchange of each element's part above it only, as Caribu's light is cut there (metafspm's data_structure.geometry, the
     domain "air"): its height, the centre of its triangles' parts above the soil (CentreIn: NaN wholly below, no gas
     exchange); its green area, the architecture's green_area times its green triangles' share above the soil
     (FractionIn, weighted by Adel's per-triangle "green": the senescence going down from the top; 0 without any),
@@ -719,11 +719,11 @@ class GasExchange(FunctionalComponent):
     @rate(include_inactive=True)
     def _canopy_height(self, height, green_area, exchanging_labels):
         """Each plant's canopy height: its exchanging elements' highest, with a green area (0 without any)."""
-        ds = self.data_structure
-        exchanging = np.isin(np.asarray(ds.labels()), list(exchanging_labels))
+        data_structure = self.data_structure
+        exchanging = np.isin(np.asarray(data_structure.labels()), list(exchanging_labels))
         area = np.asarray(green_area, dtype=float)
         values = np.where(exchanging & (area != 0) & np.isfinite(height), height, 0.)
-        return np.maximum(ds.map_to(values, "node", "Plant", "max"), 0.)
+        return np.maximum(data_structure.map_to(values, "node", "Plant", "max"), 0.)
 
     @rate(include_inactive=True)
     def _capacities(self, surfacic_nitrogen, Vc_max25_nitrogen_slope, Jmax25_nitrogen_slope, TPU25_nitrogen_slope,
@@ -757,24 +757,24 @@ class GasExchange(FunctionalComponent):
         """Each exchanging element's fixed point (element_exchange), at the weather of the step's end, over its green
         area; the others exchange nothing."""
         arguments = locals()
-        ds = self.data_structure
+        data_structure = self.data_structure
         n = np.asarray(PARa).size
-        labels = np.asarray(ds.labels())
+        labels = np.asarray(data_structure.labels())
         exchanging = np.isin(labels, list(self.exchanging_labels))
         hidden = np.isin(labels, list(self.hidden_labels))
-        lamina = np.isin(np.asarray(ds.labels(location="Organ")), list(self.lamina_labels))
+        lamina = np.isin(np.asarray(data_structure.labels(location="Organ")), list(self.lamina_labels))
         per_node = {name: np.broadcast_to(np.asarray(arguments[name], dtype=float), (n,))
                     for name in ("PARa", "height", "width", "surfacic_nitrogen", "surfacic_NSC",
                                  "leaf_water_potential", "Vc_max25", "Jmax25", "TPU25", "Rdark25", "electron_yield",
                                  "Ci")}
-        organ = np.asarray(ds.owner("Organ"))
+        organ = np.asarray(data_structure.owner("Organ"))
         diameter = np.asarray(diameter, dtype=float)
         stem_diameter = np.where(organ >= 0, diameter[organ.clip(0)] if diameter.size else 0., 0.)
         dimension = np.where(lamina, per_node["width"], stem_diameter)
-        plant_canopy = np.asarray(canopy_height, dtype=float)[np.asarray(ds.owner("Plant"))]
+        plant_canopy = np.asarray(canopy_height, dtype=float)[np.asarray(data_structure.owner("Plant"))]
         apex = np.asarray(SAM_temperature, dtype=float)
         if apex.ndim:
-            apex = apex[np.asarray(ds.owner("Axis"))]
+            apex = apex[np.asarray(data_structure.owner("Axis"))]
 
         weather = Weather(*(float(self.forcing(name)) for name in Weather._fields))
         options = Options(self.stomatal_model, bool(self.NSC_retroinhibition), float(self.convergence_tolerance),
@@ -831,7 +831,7 @@ _CAPACITY_PARAMETERS = {"Vc_max25_nitrogen_slope", "Jmax25_nitrogen_slope", "TPU
                         "electron_yield_intercept"}
 ElementParameters = namedtuple("ElementParameters", [
     item.name for item in fields(GasExchange)
-    if item.metadata.get("variable_type") == "parameter" and item.name not in _CAPACITY_PARAMETERS])
+    if item.metadata.get("role") == "parameter" and item.name not in _CAPACITY_PARAMETERS])
 
 
 def default_parameters(**changes) -> ElementParameters:

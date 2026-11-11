@@ -91,9 +91,9 @@ def parameters(values: dict = None, main_only: bool = False) -> pd.DataFrame:
     return table[table["main"]].reset_index(drop=True) if main_only else table
 
 
-def _exchanging(ds) -> np.ndarray:
+def _exchanging(data_structure) -> np.ndarray:
     """The elements that may exchange gas: Adel's stem and leaf elements with a green area."""
-    return np.isin(np.asarray(ds.labels()), EXCHANGING) & (np.asarray(ds.get("green_area")) > 0)
+    return np.isin(np.asarray(data_structure.labels()), EXCHANGING) & (np.asarray(data_structure.get("green_area")) > 0)
 
 
 class _Summary:
@@ -103,28 +103,28 @@ class _Summary:
         self.forcings, self.ground, self.midnight = forcings, ground, midnight
 
     def __call__(self, scene):
-        if scene.iteration == 0:
+        if scene.step_count == 0:
             return None
-        ds = scene.populations[0].data_structure
+        data_structure = scene.populations[0].data_structure
         light = scene.environment[0].light.data_structure
         weather = {name: forcing_mean(self.forcings[name], scene.time - scene.time_step, scene.time)  # the hour's
                    for name in ("PARi", *WEATHER)}
-        exchanging_area = np.asarray(ds.get("exchanging_area"))
-        exchanging = _exchanging(ds)
+        exchanging_area = np.asarray(data_structure.get("exchanging_area"))
+        exchanging = _exchanging(data_structure)
         area = exchanging_area[exchanging]
 
         def per_ground(name):
-            return float(np.sum(np.asarray(ds.get(name)) * exchanging_area)) / self.ground
+            return float(np.sum(np.asarray(data_structure.get(name)) * exchanging_area)) / self.ground
 
         def mean(name):
-            return float(np.sum(np.asarray(ds.get(name))[exchanging] * area) / np.sum(area)) if area.sum() > 0 \
+            return float(np.sum(np.asarray(data_structure.get(name))[exchanging] * area) / np.sum(area)) if area.sum() > 0 \
                 else np.nan
 
         return dict(hour=hours_since(scene, self.midnight), **weather,
                     PAR_absorbed=float(np.sum(np.asarray(light.get("PARa")) * np.asarray(light.get("lit_area"))))
                     / self.ground,
                     gross_assimilation=per_ground("Ag"), net_assimilation=per_ground("An"),
-                    transpiration=float(np.sum(ds.get("transpiration"))) / self.ground,
+                    transpiration=float(np.sum(data_structure.get("transpiration"))) / self.ground,
                     surface_temperature=mean("Ts"), stomatal_conductance=mean("gs"))
 
 
@@ -140,18 +140,18 @@ class _PlantsRow:
 
 
 def _plants_row(scene, hour: float):
-    if scene.iteration == 0:
+    if scene.step_count == 0:
         return None
-    ds = scene.populations[0].data_structure
-    green_area, exchanging_area = np.asarray(ds.get("green_area")), np.asarray(ds.get("exchanging_area"))
+    data_structure = scene.populations[0].data_structure
+    green_area, exchanging_area = np.asarray(data_structure.get("green_area")), np.asarray(data_structure.get("exchanging_area"))
 
     def per_plant(values):
-        return np.asarray(ds.map_to(np.asarray(values, dtype=float), "node", "Plant", "sum"))
+        return np.asarray(data_structure.map_to(np.asarray(values, dtype=float), "node", "Plant", "sum"))
 
-    return pd.DataFrame(dict(hour=hour, plant=np.arange(len(ds.entity_ids("Plant"))),
+    return pd.DataFrame(dict(hour=hour, plant=np.arange(len(data_structure.entity_ids("Plant"))),
                              green_area=per_plant(green_area),
-                             net_assimilation=per_plant(np.asarray(ds.get("An")) * exchanging_area),
-                             transpiration=per_plant(ds.get("transpiration"))))
+                             net_assimilation=per_plant(np.asarray(data_structure.get("An")) * exchanging_area),
+                             transpiration=per_plant(data_structure.get("transpiration"))))
 
 
 @dataclass
@@ -179,18 +179,18 @@ class Simulation:
         (its gross and net assimilation, µmol CO2 m-2 s-1), gs (its stomatal conductance, mol m-2 s-1), Ci (its
         internal CO2, µmol mol-1), Ts (its temperature, °C), Tr (its transpiration rate, mmol m-2 s-1) and
         transpiration (Tr times its exchanging area, mmol s-1)."""
-        ds = self.data_structure
-        exchanging = _exchanging(ds)
-        organ = self.architecture.organ_names()[np.asarray(ds.owner("Organ"))]
-        table = pd.DataFrame(dict(plant=np.asarray(ds.owner("Plant")), organ=organ,
-                                  **{name: np.asarray(ds.get(name), dtype=float) for name in (
+        data_structure = self.data_structure
+        exchanging = _exchanging(data_structure)
+        organ = self.architecture.organ_names()[np.asarray(data_structure.owner("Organ"))]
+        table = pd.DataFrame(dict(plant=np.asarray(data_structure.owner("Plant")), organ=organ,
+                                  **{name: np.asarray(data_structure.get(name), dtype=float) for name in (
                                       "height", "green_area", "exchanging_area", "PARa", "Ag", "An", "gs", "Ci", "Ts",
                                       "Tr", "transpiration")}))
         return table[exchanging].reset_index(drop=True)
 
     def plants(self) -> pd.DataFrame:
         """Per plant: its green area at the last hour (m2), the CO2 it fixed (net, mmol) and the water it transpired
-        (g) over the run."""
+        (mtg) over the run."""
         hours = self.plant_hours.groupby("plant")
         return pd.DataFrame({"green_area": hours["green_area"].last(),
                              "net_assimilation": hours["net_assimilation"].sum() * HOUR / 1e3,
@@ -260,7 +260,7 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
                  leaf_water_potential=leaf_water_potential)
     forcings = {name: as_forcing(value if value is not None else WEATHER[name], time_unit=HOUR, origin="calendar")
                 for name, value in given.items() if value is not None or name in WEATHER}
-    ground = sown.xrange * sown.yrange
+    ground = sown.x_range * sown.y_range
     recorder = SceneRecorder(outputs, summaries=outputs is not None,
                              tables={"summary": _Summary(forcings, ground, calendar_date(day_of_year)),
                                      "plants": _PlantsRow(calendar_date(day_of_year))})
