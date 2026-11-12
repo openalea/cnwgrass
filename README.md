@@ -2,7 +2,7 @@
 [![License](https://img.shields.io/badge/license-CeCILL--C-blue )](https://img.shields.io/badge/license-CeCILL--C-blue )
 
 [![OpenAlea CI](https://github.com/openalea/cnwgrass/actions/workflows/openalea_ci.yml/badge.svg?branch=master)](https://github.com/openalea/cnwgrass/actions/workflows/openalea_ci.yml)
-[![Documentation Status](https://readthedocs.org/projects/cnwgrass/badge/?version=latest)](https://cnwgrass.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://app.readthedocs.org/projects/cnwgrass/badge/?version=latest)](https://cnwgrass.readthedocs.io/en/latest/?badge=latest)
 
 [![Platform](https://anaconda.org/openalea3/openalea.cnw-grass/badges/version.svg)](https://anaconda.org/openalea3/openalea.cnw-grass)
 [![Platform](https://anaconda.org/openalea3/openalea.cnw-grass/badges/platforms.svg)](https://anaconda.org/openalea3/openalea.cnw-grass)
