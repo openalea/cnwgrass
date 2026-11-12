@@ -104,8 +104,11 @@ def test_the_leaf_water_potential_closes_the_stomata():
 
 def test_the_outputs(tmp_path):
     simulate(hours=1, start_hour=12, outputs=str(tmp_path), **SMALL)
-    assert {"run.json", "scenario.json", "summary.csv", "plants.csv"} <= {path.name for path in tmp_path.iterdir()}
-    assert len(pd.read_csv(tmp_path / "summary.csv")) == 1
+    assert {"run.json", "scenario.json"} <= {path.name for path in tmp_path.iterdir()}
+    hand_declared = tmp_path / "summaries" / "hand_declared"
+    assert {"summary.csv", "plants.csv"} <= {path.name for path in hand_declared.iterdir()}
+    assert (tmp_path / "summaries" / "Plant" / "ExchangingWheat" / "summaries.csv").exists()
+    assert len(pd.read_csv(hand_declared / "summary.csv")) == 1
 
 
 def test_the_run_configuration_is_the_scenes():

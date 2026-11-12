@@ -16,8 +16,9 @@ results as tables.
     simulate({"stomatal_model": "Leuning"})     another stomatal conductance model
     simulate(air_temperature=series)            a measured weather (each a number, a function of the hour, or a
                                                 pandas Series indexed by hour)
-    simulate(outputs="outputs")                 the run's files too: run.json, scenario.json, summary.csv,
-                                                plants.csv, the plants' summaries (Plant/)
+    simulate(outputs="outputs")                 the run's files too: run.json, scenario.json,
+                                                summaries/hand_declared/ (summary.csv, plants.csv), the plants'
+                                                summaries (summaries/Plant/)
 
 The stand: rows of wheat plants grown by Adel's port (ScenarioShoot: ShootArchitecture grown by ScenarioDevelopment,
 CN-Wheat's leaf shapes, Adel's LeafShapes.cnwheat()), their bases at the soil surface, with development delays of up
@@ -243,8 +244,9 @@ def simulate(parameters: dict = None, hours: float = 24., start_hour: float = 0.
     hour's middle (Caribu's sources by panel): the scene starts an hour before *start_hour*, so that its first step is the hour ending at *start_hour*, the
     summary's first hour (its weather the hour's means).
 
-    *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json, summary.csv,
-    plants.csv (the plants' hours) and Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour).
+    *outputs*: a folder for the run's files (metafspm's SceneRecorder): run.json, scenario.json,
+    summaries/hand_declared/summary.csv, summaries/hand_declared/plants.csv (the plants' hours) and
+    summaries/Plant/ExchangingWheat/summaries.csv (every variable per plant, every hour).
     *compute*: the Scene's run configuration (metafspm's Compute: its threads, the light's projection threads too,
     its sparse solver; None: Compute())."""
     scenario = _check(dict(parameters or {}))
