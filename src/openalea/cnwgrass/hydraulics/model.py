@@ -890,6 +890,22 @@ class PhotosyntheticOrganElement:
         return osmotic_water_potential
 
     @staticmethod
+    def calculate_nitrate_osmotic_water_potential(nitrates, volume, temperature):
+        """ Osmotic water potential due to nitrate, added outside the sigmoid of modelled organic solutes (NITRATE_COUNTER_ION_FACTOR osmoles per mol N).
+
+        :param float nitrates: µmol N under the form of nitrate
+        :param float volume: (m3)
+        :param float temperature: temperature (°C), same as for the other solutes of the element
+
+        :return: Nitrate osmotic water potential (MPa)
+        :rtype: float
+        """
+        if not volume or volume <= 0. or not nitrates or nitrates <= 0.:
+            return 0.
+        conc_nitrates = parameters.NITRATE_COUNTER_ION_FACTOR * (nitrates * 1E-6) / (volume * parameters.VSTORAGE)  # nitrate + counter-cation
+        return - parameters.R * (temperature + parameters.CELSIUS_2_KELVIN) * conc_nitrates / parameters.RHO_WATER
+
+    @staticmethod
     def calculate_water_potential(turgor_water_potential, osmotic_water_potential):
         """ Total water potential of the organ
 

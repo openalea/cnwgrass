@@ -171,7 +171,7 @@ class Simulation(object):
     #: of the compartments associated to each hidden zone (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     HIDDENZONE_STATE = HIDDENZONE_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.HiddenZone, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at hidden zone scale
-    HIDDENZONE_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'water_potential', 'volume', 'length', 'phi_width', 'phi_thickness', 'phi_length', 'phi_volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct', 'omega', 'leaf_Lmax', 'delta_hiddenzone_dimensions_plastic', 'delta_weq', 'delta_leaf_L']
+    HIDDENZONE_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'nitrate_osmotic_water_potential', 'resistance', 'water_potential', 'volume', 'length', 'phi_width', 'phi_thickness', 'phi_length', 'phi_volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct', 'omega', 'leaf_Lmax', 'delta_hiddenzone_dimensions_plastic', 'delta_weq', 'delta_leaf_L']
     #: the fluxes exchanged between the compartments at hidden zone scale
     HIDDENZONE_FLUXES = ['water_influx', 'water_outflow', 'Growth']
     #: the variables computed by integrating values of hidden zone components parameters/variables recursively
@@ -193,7 +193,7 @@ class Simulation(object):
     #: of the compartments associated to each organ (see :attr:`MODEL_COMPARTMENTS_NAMES`)
     ELEMENTS_STATE = ELEMENTS_STATE_PARAMETERS + MODEL_COMPARTMENTS_NAMES.get(model.PhotosyntheticOrganElement, [])
     #: the variables that we need to compute in order to compute fluxes and/or compartments values at organ scale
-    ELEMENTS_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'resistance', 'water_potential', 'volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct']
+    ELEMENTS_INTERMEDIATE_VARIABLES = ['osmotic_water_potential', 'nitrate_osmotic_water_potential', 'resistance', 'water_potential', 'volume', 'epsilon_volume', 'organ_volume', 'WC_mstruct']
     #: the fluxes exchanged between the compartments at organ scale
     ELEMENTS_FLUXES = ['water_influx']
     #: the variables computed by integrating values of organ components parameters/variables recursively
@@ -560,6 +560,7 @@ class Simulation(object):
             # interpolate the forcing
             self._interpolate_forcing()
 
+        self._update_nitrate_osmotic_water_potentials()
         self._update_initial_conditions()
         if self.isolated_roots and self.cnwgrass_roots:
             self._update_initial_conditions_roots()
@@ -604,6 +605,53 @@ class Simulation(object):
             self.t_offset += self.time_step
 
         logger.info('Run of Hydraulics DONE')
+
+    @staticmethod
+    def _element_temperature(element, axis):
+        """Organ surface temperature from gas exchange (Ts, same step), or the SAM temperature where it is missing, as gas exchange itself does
+        for elements without photosynthetic nitrogen. Replaces element.temperature, which was never loaded and stayed at its initial 0 degrees C.
+        """
+        Ts = getattr(element, 'Ts', None)
+        if Ts is None or Ts != Ts:
+            return axis.SAM_temperature
+        return Ts
+
+    def _update_nitrate_osmotic_water_potentials(self):
+        """Once per time step, before the solve: smoothed nitrate osmotic term of each lamina and sheath element from its own nitrate,
+        propagated to each hidden zone from its own emerged lamina, or else from the youngest emerged lamina of the axis.
+        """
+        smoothing = 1. - np.exp(- self.delta_t / parameters.NITRATE_OSMOTIC_SMOOTHING_TIME)  # delta_t in s, as the smoothing time (time_step is in h)
+        for plant in self.population.plants:
+            for axis in plant.axes:
+                youngest_lamina = None
+                for phytomer in axis.phytomers:
+                    for organ in (phytomer.lamina, phytomer.sheath):
+                        if organ is None:
+                            continue
+                        for element in (organ.exposed_element, organ.enclosed_element):
+                            if element is None:
+                                continue
+                            if not parameters.NITRATE_OSMOTIC_ADJUSTMENT:
+                                element.nitrate_osmotic_water_potential = 0.
+                                continue
+                            # volume from the water content state (element.volume is not loaded at the start of the step)
+                            water_content = getattr(element, 'water_content', None)
+                            volume = element.calculate_volume(water_content) if water_content else None
+                            current = element.calculate_nitrate_osmotic_water_potential(getattr(element, 'nitrates', 0.), volume, self._element_temperature(element, axis))
+                            previous = getattr(element, 'nitrate_osmotic_water_potential_previous', None)
+                            element.nitrate_osmotic_water_potential = current if previous is None else previous + smoothing * (current - previous)
+                    if phytomer.lamina is not None and phytomer.lamina.exposed_element is not None:
+                        if youngest_lamina is None or phytomer.index > youngest_lamina[0]:
+                            youngest_lamina = (phytomer.index, phytomer.lamina.exposed_element)
+                for phytomer in axis.phytomers:
+                    hiddenzone = phytomer.hiddenzone
+                    if hiddenzone is None:
+                        continue
+                    if phytomer.lamina is not None and phytomer.lamina.exposed_element is not None:
+                        source = phytomer.lamina.exposed_element
+                    else:
+                        source = youngest_lamina[1] if youngest_lamina is not None else None
+                    hiddenzone.nitrate_osmotic_water_potential = source.nitrate_osmotic_water_potential if source is not None else 0.
 
     def _update_initial_conditions(self):
         """Update the compartments values in :attr:`initial_conditions` from the compartments values of :attr:`population`.
@@ -837,7 +885,7 @@ class Simulation(object):
                             hiddenzone.water_content = max(y[self.initial_conditions_mapping[hiddenzone]['water_content']], 0.)
                             hiddenzone.volume = hiddenzone.calculate_volume(max(hiddenzone.water_content, 1e-12))
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature) + hiddenzone.nitrate_osmotic_water_potential
                             #: Total water potential (in equilibrium with the xylem, as before)
                             hiddenzone.water_potential = axis.xylem.water_potential
                             #: Turgor water potential
@@ -849,7 +897,7 @@ class Simulation(object):
                             hiddenzone.water_content = y[self.initial_conditions_mapping[hiddenzone]['water_content']]
                             hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature) + hiddenzone.nitrate_osmotic_water_potential
                             #: Total water potential
                             hiddenzone.water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
                             #: Length
@@ -895,7 +943,7 @@ class Simulation(object):
                                 element.volume = element.calculate_organ_volume(element.organ_dimensions)
                                 element.water_content = element.volume * parameters.RHO_WATER
                                 # : Osmotic water potential
-                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.fructan)
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, self._element_temperature(element, axis), element.fructan) + element.nitrate_osmotic_water_potential
                                 #: Total water potential
                                 element.water_potential = axis.xylem.water_potential
                                 # : Turgor water potential
@@ -914,7 +962,7 @@ class Simulation(object):
                                 # : Turgor water potential
                                 element.turgor_water_potential = y[self.initial_conditions_mapping[element]['turgor_water_potential']]
                                 #: Osmotic water potential
-                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.fructan)
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, self._element_temperature(element, axis), element.fructan) + element.nitrate_osmotic_water_potential
                                 #: Total water potential
                                 element.water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
 
@@ -1160,7 +1208,7 @@ class Simulation(object):
                             hiddenzone.water_content = max(y[self.initial_conditions_mapping[hiddenzone]['water_content']], 0.)
                             hiddenzone.volume = hiddenzone.calculate_volume(max(hiddenzone.water_content, 1e-12))
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature) + hiddenzone.nitrate_osmotic_water_potential
                             #: Total water potential (in equilibrium with the xylem, as before)
                             hiddenzone.water_potential = axis.xylem.water_potential
                             #: Turgor water potential
@@ -1172,7 +1220,7 @@ class Simulation(object):
                             hiddenzone.water_content = y[self.initial_conditions_mapping[hiddenzone]['water_content']]
                             hiddenzone.volume = hiddenzone.calculate_volume(hiddenzone.water_content)
                             #: Osmotic water potential
-                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature)
+                            hiddenzone.osmotic_water_potential = hiddenzone.calculate_osmotic_water_potential(hiddenzone.fructan, hiddenzone.sucrose, hiddenzone.amino_acids, hiddenzone.volume, axis.SAM_temperature) + hiddenzone.nitrate_osmotic_water_potential
                             #: Total water potential
                             hiddenzone.water_potential = hiddenzone.calculate_water_potential(hiddenzone.turgor_water_potential, hiddenzone.osmotic_water_potential)
                             #: Length
@@ -1220,7 +1268,7 @@ class Simulation(object):
                                 element.volume = element.calculate_organ_volume(element.organ_dimensions)
                                 element.water_content = element.volume * parameters.RHO_WATER
                                 # : Osmotic water potential
-                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.fructan)
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, self._element_temperature(element, axis), element.fructan) + element.nitrate_osmotic_water_potential
                                 #: Total water potential
                                 element.water_potential = axis.xylem.water_potential
                                 # : Turgor water potential
@@ -1239,7 +1287,7 @@ class Simulation(object):
                                 # : Turgor water potential
                                 element.turgor_water_potential = y[self.initial_conditions_mapping[element]['turgor_water_potential']]
                                 #: Osmotic water potential
-                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, element.temperature, element.fructan)
+                                element.osmotic_water_potential = element.calculate_osmotic_water_potential(element.sucrose, element.amino_acids, element.volume, self._element_temperature(element, axis), element.fructan) + element.nitrate_osmotic_water_potential
                                 #: Total water potential
                                 element.water_potential = element.calculate_water_potential(element.turgor_water_potential, element.osmotic_water_potential)
 

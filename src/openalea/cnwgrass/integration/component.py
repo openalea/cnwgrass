@@ -481,7 +481,8 @@ class CNW_Grass(Model):
                                                                     self.shared_soils_inputs_outputs_df,
                                                                     update_shared_df=UPDATE_SHARED_DF,
                                                                     isolated_roots=isolated_roots,
-                                                                    cnwgrass_roots=cnwgrass_roots)
+                                                                    cnwgrass_roots=cnwgrass_roots,
+                                                                    tillers_replications=tillers_replications)
 
         # -- MODEL INTEGRATION --
         # Facade initialisation

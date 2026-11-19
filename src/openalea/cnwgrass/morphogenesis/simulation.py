@@ -445,7 +445,7 @@ class Simulation(object):
                                         next_hiddenzone_outputs['sheath_Lmax'] = self.model.calculate_sheath_Lmax(next_hiddenzone_outputs['leaf_Lmax'],
                                                                                                              next_hiddenzone_outputs['lamina_Lmax'])  #: Final sheath length
                                     else:
-                                        next_hiddenzone_outputs['lamina_Lmax'] = self.model.calculate_lamina_Lmax(hiddenzone_id[2])  #: Maximal lamina length
+                                        next_hiddenzone_outputs['lamina_Lmax'] = self.model.calculate_lamina_Lmax(next_hiddenzone_id[2])  #: Maximal lamina length of the next leaf (own rank)
 
                                     next_hiddenzone_outputs['leaf_pseudo_age'] = 0  #: Pseudo age of the leaf since beginning of automate growth (s)
                                     self.outputs['hiddenzone'][next_hiddenzone_id] = next_hiddenzone_outputs
@@ -487,6 +487,9 @@ class Simulation(object):
                             if self.hydraulics:
                                 # hydraulics -> the whole leaf is considered
                                 if curr_hiddenzone_outputs['leaf_pseudo_age'] >= self.model.parameters.te:
+                                    end_leaf_elongation = True
+                                # Prescribed well-watered maximum: leaf_Lmax = lamina_Lmax * (1 + SL_ratio), turgor-driven growth can only reduce it
+                                elif curr_hiddenzone_outputs['leaf_L'] >= curr_hiddenzone_outputs['lamina_Lmax'] * (1 + self.model.calculate_SL_ratio(hiddenzone_id[2])):
                                     end_leaf_elongation = True
 
                             else:
@@ -594,8 +597,8 @@ class Simulation(object):
                                     self.outputs['elements'][hidden_sheath_id]['is_growing'] = False
 
                                     # - Visible sheath
-                                    SL_ratio = self.model.calculate_SL_ratio(hiddenzone_id[2])
-                                    all_element_outputs[lamina_id]['length'] = curr_hiddenzone_outputs['leaf_L'] / (1 + SL_ratio)
+                                    # Keep the blade at its current length (capped at lamina_Lmax) so that ligulation is continuous; the rest of leaf_L is sheath
+                                    all_element_outputs[lamina_id]['length'] = min(all_element_outputs[lamina_id]['length'], curr_hiddenzone_outputs['lamina_Lmax'])
                                     self.outputs['elements'][visible_sheath_id]['length'] = max(1E-03,
                                                                                                 curr_hiddenzone_outputs[
                                                                                                     'leaf_L'] -
@@ -610,7 +613,7 @@ class Simulation(object):
                                     # Hiddenzone
                                     curr_hiddenzone_outputs['lamina_Lmax'] = all_element_outputs[lamina_id]['length']
                                     curr_hiddenzone_outputs['sheath_Lmax'] = self.outputs['elements'][visible_sheath_id]['length'] + leaf_pseudostem_length
-                                    curr_hiddenzone_outputs['SL_ratio'] = SL_ratio
+                                    curr_hiddenzone_outputs['SL_ratio'] = curr_hiddenzone_outputs['sheath_Lmax'] / all_element_outputs[lamina_id]['length'] # Realised, not prescribed
 
                                     # Initialise variables for the next internode todo: temporary version for hydraulics : new internodes should initiate at ligulation
                                     if next_hiddenzone_id in all_hiddenzone_inputs:

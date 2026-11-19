@@ -22,6 +22,16 @@ AMINO_ACIDS_N_RATIO = 1.17  #: Mean number of mol of N in 1 mol of the major ami
 WATER_MOLAR_MASS = 18  #: g mol-1
 VSTORAGE = 0.8  #: Storage portion of the volume of the organ (-)
 
+#: Osmotic effect of shoot nitrate, as xylem solutes are in the water potential sent by the roots (-RT.Cv_x):
+#: laminae and sheaths use their own nitrate, a hidden zone that of its own emerged lamina, or else of the youngest emerged lamina of its axis.
+NITRATE_OSMOTIC_ADJUSTMENT = True
+#: Osmoles per mol of nitrate N: nitrate plus one monovalent counter-cation, mainly K+ (K+-nitrate-malate shuttle, Ben Zioni et al. 1971 Physiol Plant 24:288),
+#: as Root-CyNAPS counts xylem nitrate in Cv_x (C_solutes_xylem = xylem_Nm / 0.5). Other cell solutes stay in the sigmoid floor.
+NITRATE_COUNTER_ION_FACTOR = 2.
+#: Time constant of the exponential smoothing of the nitrate osmotic term (s). Element nitrate follows transpiration (0 at night),
+#: whereas growing zones adjust osmotically within about a day (salt-stressed barley, Fricke & Peters 2002 Plant Physiol 129:374)
+NITRATE_OSMOTIC_SMOOTHING_TIME = 24 * 3600.
+
 VANT_HOFF_SUCROSE = 1  #: Van't Hoff coefficient of sucrose (dimensionless)
 VANT_HOFF_AMINO_ACIDS = 1.25  #: Van't Hoff coefficient estimated for amino acids (dimensionless)
 
@@ -150,11 +160,24 @@ class HiddenZoneParameters(OrganParameters):
         self.RATIO_MSTRUCT_DM = 0.8     #: Ratio mstruct/dry matter (dimensionless). From growth model.
         self.SLOPE_MASS_VOLUME = 3.23337E-06  #: Slope of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3 g-1). Found from Williams 1960, Fig 11.
         self.OFFSET_MASS_VOLUME = 1.82312E-13  #: Offset of the relation between leaf dry mass and its volume at the time of the previous leaf emergence (m3). Found from Williams 1960, Fig 11.
-        # self.GAMMA = 0.2    #: Critical value for the pressure component which must be exceeded for irreversible volume changes (MPa). Found from Coussement et al., 2018 : 0.3 Mpa for soybean.
-        self.GAMMA = 0.11
+        #: Yield threshold of turgor for irreversible expansion (MPa): apparent value of barley leaf elongation zone epidermis
+        #: measured by cell pressure probe and Lockhart analysis (Touati et al. 2015 Plant Cell Physiol 56:1364, 0.368 MPa).
+        #: Replaces 0.2 (assumed value, Coussement et al. 2021 grass model; 0.3 MPa for soybean in Coussement et al. 2018).
+        self.GAMMA = 0.37
 
-        self.Sa = 260     #: (mol m-3)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
-        self.Sb = 0.9      #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        #: Sigmoid of effective solute concentration c_eff = Sa / (Sb + exp(Sc * c / Sd)), c being the modelled solutes concentration:
+        #:   c = 0     -> c_eff = Sa / (Sb + 1)  (non-modelled osmotica, here 227.5 mol m-3, about -0.53 MPa at 8 °C)
+        #:   c -> inf  -> c_eff = Sa / Sb        (ceiling, here 350 mol m-3, about -0.82 MPa at 8 °C)
+        #:   Sc / Sd sets how fast c_eff goes from floor to ceiling (unchanged from elements).
+        #: Floor mostly inorganic (K+, NO3-, Cl-) in cereal elongation zones (Fricke et al. 2006 J Exp Bot 57:1079), sugar span 52
+        #: (about 12% of osmolality: 6-11% in barley, Fricke 2002 Planta 215:327; 13% in wheat, Hu & Schmidhalter 1998 Aust J Plant Physiol 25:591)
+        #: Floor first fitted to main stem leaf 5 and 6 emergence of the reference run (489 and 962 h), then lowered from 237.5 once nitrate was added (emergence came 25-65 h early),
+        #: giving young growing zone turgor of about 0.47-0.49 MPa, within the range measured in grass elongation zones (0.45-0.68; Fricke 2002 Ann Bot 90:157 Table 2).
+        #: Nitrate is added outside the sigmoid (see NITRATE_OSMOTIC_ADJUSTMENT).
+        #: Ceiling raised from 289.5 (B6): with 289.5, leaves 6-8 stop at tend shorter than lamina_Lmax + pseudostem, so sheaths copy the pseudostem (3.5 cm vs 4.3-8.9 in the reference run)
+        #: and the pseudostem never lengthens; the higher ceiling lets leaves reach lamina_Lmax, the excess becoming sheath. Best of floors 220-242.5 x ceilings 289.5-400 in the offline chain (B3 run base).
+        self.Sa = 650.0   #: (mol m-3)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
+        self.Sb = 1.8571  #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
         self.Sc = -8.5     #: (-)    Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
         self.Sd = 1000    #: (mol m-3)  Parameter of a sigmoidal function of equivalent solutes concentration used in osmotic water potential
 
