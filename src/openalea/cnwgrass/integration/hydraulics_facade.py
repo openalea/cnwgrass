@@ -74,7 +74,10 @@ class hydraulicsFacade(object):
                  shared_elements_inputs_outputs_df,
                  shared_organs_inputs_outputs_df,
                  shared_soils_inputs_outputs_df,
-                 update_shared_df=True):
+                 update_shared_df=True,
+                 isolated_roots=False,
+                 cnwgrass_roots=True,
+                 tillers_replications=None):
         """
                 :param openalea.mtg.mtg.MTG shared_mtg: The MTG shared between all models.
                 :param int delta_t: The delta between two runs, in seconds.
@@ -91,8 +94,9 @@ class hydraulicsFacade(object):
         """
         
         self._shared_mtg = shared_mtg  #: the MTG shared between all models
+        self.tillers_replications = tillers_replications  #: replication weight per tiller id, so that tillers' transpiration reaches the roots
 
-        self._simulation = hydraulics_simulation.Simulation(delta_t=delta_t)
+        self._simulation = hydraulics_simulation.Simulation(delta_t=delta_t, isolated_roots=isolated_roots, cnwgrass_roots=cnwgrass_roots)
 
         self.population, self.soils = hydraulics_converter.from_dataframes(model_axes_inputs_df, model_hiddenzones_inputs_df, model_elements_inputs_df, model_organs_inputs_df, model_soils_inputs_df)
 
@@ -114,6 +118,8 @@ class hydraulicsFacade(object):
                                            hydraulics_elements_data_df=model_elements_inputs_df,
                                            hydraulics_organs_data_df=model_organs_inputs_df,
                                            hydraulics_soils_data_df=model_soils_inputs_df)
+
+        self.isolated_roots = isolated_roots
 
     def run(self, update_shared_df=False):
 
@@ -197,6 +203,15 @@ class hydraulicsFacade(object):
         self.population = hydraulics_model.Population()
         mapping_topology = {'predecessor': {}, 'successor': {}}
 
+        # Replications per cohort rank (tiller Tn -> rank n + 3), as in cnmetabolism_facade
+        cohorts_replications = {}
+        if self.tillers_replications is not None:
+            for tiller_id, replication_weight in self.tillers_replications.items():
+                try:
+                    cohorts_replications[int(tiller_id[1:]) + 3] = replication_weight
+                except ValueError:
+                    continue
+
         # traverse the MTG recursively from top
 
         for mtg_plant_vid in self._shared_mtg.components_iter(self._shared_mtg.root):
@@ -205,6 +220,15 @@ class hydraulicsFacade(object):
             # create a new plant
             hydraulics_plant = hydraulics_model.Plant(mtg_plant_index)
             is_valid_plant = False
+            # Emerged tillers of this plant, used to replicate MS phytomers (Hack to treat tillering cases : TEMPORARY)
+            cohorts = []
+            for mtg_axis_vid in self._shared_mtg.components_iter(mtg_plant_vid):
+                mtg_axis_label = self._shared_mtg.label(mtg_axis_vid)
+                if mtg_axis_label != 'MS':
+                    try:
+                        cohorts.append(int(mtg_axis_label[1:]) + 3)
+                    except ValueError:
+                        continue
             for mtg_axis_vid in self._shared_mtg.components_iter(mtg_plant_vid):
                 mtg_axis_label = self._shared_mtg.label(mtg_axis_vid)
                 #: keep only MS TODO: temporary
@@ -227,7 +251,10 @@ class hydraulicsFacade(object):
                     mtg_axis_properties = self._shared_mtg.get_vertex_property(mtg_axis_vid)
                     if mtg_organ_label in mtg_axis_properties:
                         mtg_organ_properties = mtg_axis_properties[mtg_organ_label]
-                        hydraulics_organ_data_names = set(hydraulics_simulation.Simulation.ORGANS_STATE).intersection(hydraulics_organ.__dict__)
+                        access_mtg_names = hydraulics_simulation.Simulation.ORGANS_STATE
+                        if hydraulics_organ_class == hydraulics_model.Xylem and self.isolated_roots:
+                            access_mtg_names += ['water_potential', 'root_xylem_water_potential', 'shoot_root_xylem_conductance']
+                        hydraulics_organ_data_names = set(access_mtg_names).intersection(hydraulics_organ.__dict__)
                         if set(mtg_organ_properties).issuperset(hydraulics_organ_data_names):
                             hydraulics_organ_data_dict = {}
                             for hydraulics_organ_data_name in hydraulics_organ_data_names:
@@ -254,13 +281,13 @@ class hydraulicsFacade(object):
                     mtg_metamer_index = int(self._shared_mtg.index(mtg_metamer_vid))
 
                     # create a new phytomer
-                    hydraulics_phytomer = hydraulics_model.Phytomer(mtg_metamer_index)
+                    hydraulics_phytomer = hydraulics_model.Phytomer(mtg_metamer_index, cohorts=cohorts, cohorts_replications=cohorts_replications)
                     mtg_hiddenzone_label = hydraulics_converter.hydraulics_CLASSES_TO_DATAFRAME_ORGANS_MAPPING[hydraulics_model.HiddenZone]
                     mtg_metamer_properties = self._shared_mtg.get_vertex_property(mtg_metamer_vid)
 
                     if mtg_hiddenzone_label in mtg_metamer_properties and mtg_metamer_properties[mtg_hiddenzone_label]['leaf_is_growing']:
                         has_valid_hiddenzone = True
-                        hydraulics_hiddenzone = hydraulics_model.HiddenZone(label=mtg_hiddenzone_label)
+                        hydraulics_hiddenzone = hydraulics_model.HiddenZone(label=mtg_hiddenzone_label, cohorts=cohorts, cohorts_replications=cohorts_replications, index=mtg_metamer_index)
                         mtg_hiddenzone_properties = mtg_metamer_properties[mtg_hiddenzone_label]
 
                         # Adding aggregated variables into inputs
@@ -316,7 +343,7 @@ class hydraulicsFacade(object):
                                 continue
 
                             has_valid_element = True
-                            hydraulics_element = hydraulics_ORGANS_TO_ELEMENTS_MAPPING[hydraulics_organ_class](label=mtg_element_label)
+                            hydraulics_element = hydraulics_ORGANS_TO_ELEMENTS_MAPPING[hydraulics_organ_class](label=mtg_element_label, cohorts=cohorts, cohorts_replications=cohorts_replications, index=mtg_metamer_index)
                             mtg_element_properties = self._shared_mtg.get_vertex_property(mtg_element_vid)
                             hydraulics_element_data_names = set(hydraulics_simulation.Simulation.ELEMENTS_RUN_VARIABLES).intersection(hydraulics_element.__dict__)    #: Adding aggregated variables into inputs
                             if mtg_element_properties.get('age') == 0:  # First time element passes into hydraulics model
@@ -329,6 +356,9 @@ class hydraulicsFacade(object):
                                     mtg_element_data_value = mtg_element_properties.get(hydraulics_element_data_name)
                                     hydraulics_element_data_dict[hydraulics_element_data_name] = mtg_element_data_value
                                 hydraulics_element.__dict__.update(hydraulics_element_data_dict)
+                                # Nitrate (from cnmetabolism, read only) and previous smoothed nitrate osmotic term, kept out of the required inputs
+                                hydraulics_element.nitrates = mtg_element_properties.get('nitrates', 0.)
+                                hydraulics_element.nitrate_osmotic_water_potential_previous = mtg_element_properties.get('nitrate_osmotic_water_potential')
                                 # add element to organ
                                 setattr(hydraulics_organ, hydraulics_converter.DATAFRAME_TO_hydraulics_ELEMENTS_NAMES_MAPPING[mtg_element_label], hydraulics_element)
 

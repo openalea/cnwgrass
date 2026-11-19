@@ -18,7 +18,7 @@ class Simulation(object):
     """The Simulation class permits to initialize and run a simulation.
     """
 
-    def __init__(self, delta_t=1, update_parameters=None):
+    def __init__(self, delta_t=1, update_parameters=None, cnwgrass_roots=True):
 
         #: The inputs of Senescence.
         #:
@@ -41,6 +41,7 @@ class Simulation(object):
         if update_parameters:
             parameters.__dict__.update(update_parameters)
 
+        self.cnwgrass_roots = cnwgrass_roots
     def initialize(self, inputs):
         """
         Initialize :attr:`inputs` from `inputs`.
@@ -71,24 +72,25 @@ class Simulation(object):
         all_axes_inputs = self.inputs['axes']
 
         # Roots
-        all_roots_inputs = self.inputs['roots']
-        all_roots_outputs = self.outputs['roots']
-        for roots_inputs_id, roots_inputs_dict in all_roots_inputs.items():
-            # Temperature-compensated time (delta_teq)
-            delta_teq = all_axes_inputs[roots_inputs_id]['delta_teq_roots']
+        if self.cnwgrass_roots:
+            all_roots_inputs = self.inputs['roots']
+            all_roots_outputs = self.outputs['roots']
+            for roots_inputs_id, roots_inputs_dict in all_roots_inputs.items():
+                # Temperature-compensated time (delta_teq)
+                delta_teq = all_axes_inputs[roots_inputs_id]['delta_teq_roots']
 
-            # loss of mstruct and Nstruct
-            rate_mstruct_death, rate_Nstruct_death = model.SenescenceModel.calculate_roots_senescence(roots_inputs_dict['mstruct'], roots_inputs_dict['Nstruct'], postflowering_stages)
-            relative_delta_mstruct = model.SenescenceModel.calculate_relative_delta_mstruct_roots(rate_mstruct_death, roots_inputs_dict['mstruct'], delta_teq)
-            delta_mstruct, delta_Nstruct = model.SenescenceModel.calculate_delta_mstruct_root(rate_mstruct_death, rate_Nstruct_death, delta_teq)
-            # loss of cytokinins (losses of nitrates, amino acids and sucrose are neglected)
-            loss_cytokinins = model.SenescenceModel.calculate_remobilisation(roots_inputs_dict['cytokinins'], relative_delta_mstruct)
-            # Update of root outputs
-            all_roots_outputs[roots_inputs_id] = {'mstruct': roots_inputs_dict['mstruct'] - delta_mstruct,
-                                                  'senesced_mstruct': roots_inputs_dict['senesced_mstruct'] + delta_mstruct,
-                                                  'rate_mstruct_death': rate_mstruct_death,
-                                                  'Nstruct': roots_inputs_dict['Nstruct'] - delta_Nstruct,
-                                                  'cytokinins': roots_inputs_dict['cytokinins'] - loss_cytokinins}
+                # loss of mstruct and Nstruct
+                rate_mstruct_death, rate_Nstruct_death = model.SenescenceModel.calculate_roots_senescence(roots_inputs_dict['mstruct'], roots_inputs_dict['Nstruct'], postflowering_stages)
+                relative_delta_mstruct = model.SenescenceModel.calculate_relative_delta_mstruct_roots(rate_mstruct_death, roots_inputs_dict['mstruct'], delta_teq)
+                delta_mstruct, delta_Nstruct = model.SenescenceModel.calculate_delta_mstruct_root(rate_mstruct_death, rate_Nstruct_death, delta_teq)
+                # loss of cytokinins (losses of nitrates, amino acids and sucrose are neglected)
+                loss_cytokinins = model.SenescenceModel.calculate_remobilisation(roots_inputs_dict['cytokinins'], relative_delta_mstruct)
+                # Update of root outputs
+                all_roots_outputs[roots_inputs_id] = {'mstruct': roots_inputs_dict['mstruct'] - delta_mstruct,
+                                                    'senesced_mstruct': roots_inputs_dict['senesced_mstruct'] + delta_mstruct,
+                                                    'rate_mstruct_death': rate_mstruct_death,
+                                                    'Nstruct': roots_inputs_dict['Nstruct'] - delta_Nstruct,
+                                                    'cytokinins': roots_inputs_dict['cytokinins'] - loss_cytokinins}
 
         # Elements
         all_elements_inputs = self.inputs['elements']

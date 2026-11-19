@@ -154,6 +154,7 @@ def run(simulation_length, forced_start_time=0, run_simu=True, run_postprocessin
 
     # precision of floats used to write and format the output CSV files
     OUTPUTS_PRECISION = 8
+    # TODO check csv writing
 
     # number of seconds in 1 hour
     HOUR_TO_SECOND_CONVERSION_FACTOR = 3600

@@ -136,9 +136,9 @@ class HiddenZone:
     def calculate_conc_solutes_vol(sucrose, fructan, amino_acids, volume):
         """Volumic concentration of solutes used for osmotic water potential calculation
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float fructan: Amount of fructan (µmol` C)
+        :param float sucrose: Amount of sucrose (µmol C)
+        :param float amino_acids: Amount of amino acids (µmol N)
+        :param float fructan: Amount of fructan (µmol C)
         :param float volume: Volume (m3)
 
         :return: Solutes volumic concentration (mol m-3)
@@ -153,9 +153,9 @@ class HiddenZone:
     def calculate_conc_solutes_mass(fructan, sucrose, amino_acids, mstruct):
         """Massic concentration of solutes used for osmotic water potential calculation
 
-        :param float sucrose: Amount of sucrose (µmol` C)
-        :param float amino_acids: Amount of amino acids (µmol` N)
-        :param float fructan: Amount of fructan (µmol` C)
+        :param float sucrose: Amount of sucrose (µmol C)
+        :param float amino_acids: Amount of amino acids (µmol N)
+        :param float fructan: Amount of fructan (µmol C)
 
         :param float mstruct: Structural mass (g)
 
