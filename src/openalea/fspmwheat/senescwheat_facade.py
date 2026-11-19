@@ -209,7 +209,7 @@ class SenescWheatFacade(object):
                                 self._shared_mtg.property(senescwheat_element_data_name)[mtg_element_vid] = senescwheat_element_data_value
                                 # Temporaire avant de trouver une solution pour :
                                 # 1) piloter la senescence des feuilles par green_area plutot que par senesced_length,
-                                # 2) updater les organes � partir des �l�ments et non l'inverse.
+                                # 2) updater les organes à partir des éléments et non l'inverse.
                                 if senescwheat_element_data_name == 'senesced_length_element' and mtg_element_label in ['LeafElement1', 'StemElement']:
                                     self._shared_mtg.property('senesced_length')[mtg_organ_vid] = np.nan_to_num(self._shared_mtg.property(senescwheat_element_data_name).get(mtg_element_vid, 0.))
 

@@ -74,7 +74,7 @@ class FarquharWheatFacade(object):
         Run the model and update the MTG and the dataframes shared between all models.
 
         :param float Ta: air temperature at t (degree Celsius)
-        :param float ambient_CO2: air CO2 at t (�mol mol-1)
+        :param float ambient_CO2: air CO2 at t (µmol mol-1)
         :param float RH: relative humidity at t (decimal fraction)
         :param float Ur: wind speed at the top of the canopy at t (m s-1)
         :param bool update_shared_df: if 'True', update the shared dataframes at this time step.

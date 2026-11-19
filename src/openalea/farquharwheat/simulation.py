@@ -72,7 +72,7 @@ class Simulation(object):
         the results in :attr:`outputs`.
 
         :param float Ta: air temperature at t (degree Celsius)
-        :param float ambient_CO2: air CO2 at t (�mol mol-1)
+        :param float ambient_CO2: air CO2 at t (µmol mol-1)
         :param float RH: relative humidity at t (decimal fraction)
         :param float Ur: wind speed at the top of the canopy at t (m s-1)
         """
@@ -92,7 +92,7 @@ class Simulation(object):
                 Ag, An, Rd, Tr, gs = 0., 0., 0., 0., 0.
                 Ts = self.inputs['axes'][axis_id]['SAM_temperature']
             else:
-                PARa = element_inputs['PARa']  #: Amount of absorbed PAR per unit area (�mol m-2 s-1)
+                PARa = element_inputs['PARa']  #: Amount of absorbed PAR per unit area (µmol m-2 s-1)
                 height_canopy = self.inputs['axes'][axis_id]['height_canopy']
 
                 if parameters.SurfacicProteins:
@@ -123,7 +123,7 @@ class Simulation(object):
                 else:
                     #:  Computation at primitive scale
                     Ag_prim_list = []
-                    for PARa_prim in element_inputs['PARa_prim']:  #: Amount of absorbed PAR per unit area (�mol m-2 s-1)
+                    for PARa_prim in element_inputs['PARa_prim']:  #: Amount of absorbed PAR per unit area (µmol m-2 s-1)
                         Ag_prim, An, Rd, Tr, Ts, gs = model.run(surfacic_nitrogen,
                                                                 parameters.NSC_Retroinhibition,
                                                                 surfacic_NSC,

@@ -132,8 +132,8 @@ class CNWheatFacade(object):
         Run the model and update the MTG and the dataframes shared between all models.
 
         :param update_shared_df:
-        :param float Tair: air temperature (�C)
-        :param float Tsoil: soil temperature (�C)
+        :param float Tair: air temperature (°C)
+        :param float Tsoil: soil temperature (°C)
         :param dict [str, float] tillers_replications: a dictionary with tiller id as key, and weight of replication as value.
         :param bool update_shared_df: if 'True', update the shared dataframes at this time step.
         """
@@ -211,8 +211,8 @@ class CNWheatFacade(object):
         """
         Initialize the inputs of the model from the MTG shared between all models and the soils.
 
-        :param float Tair: air temperature (�C)
-        :param float Tsoil: soil temperature (�C)
+        :param float Tair: air temperature (°C)
+        :param float Tsoil: soil temperature (°C)
         :param dict [str, float] tillers_replications: a dictionary with tiller id as key, and weight of replication as value.
         """
 

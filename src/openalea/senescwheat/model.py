@@ -21,9 +21,9 @@ class SenescenceModel(object):
     def calculate_N_content_total(cls, proteins, amino_acids, nitrates, Nstruct, max_mstruct, Nresidual):
         """ N content in the whole element (both green and senesced tissues).
 
-        :param float proteins: protein concentration (�mol N proteins g-1 mstruct)
-        :param float amino_acids: amino acids concentration (�mol N amino acids g-1 mstruct)
-        :param float nitrates: nitrates concentration (�mol N nitrates g-1 mstruct)
+        :param float proteins: protein concentration (µmol N proteins g-1 mstruct)
+        :param float amino_acids: amino acids concentration (µmol N amino acids g-1 mstruct)
+        :param float nitrates: nitrates concentration (µmol N nitrates g-1 mstruct)
         :param float Nstruct: structural N mass (g). Should be constant during leaf life.
         :param float max_mstruct: structural mass maximal of the element i.e. structural mass of the whole element before senescence (g)
         :param float Nresidual: residual mass of N in the senescent tissu (g)
@@ -54,8 +54,8 @@ class SenescenceModel(object):
 
         :param str organ_name: name of the organ to which belongs the element (used to distinguish lamina from stem organs)
         :param float prev_green_area: previous value of an organ green area (m-2)
-        :param float proteins: protein concentration (�mol N proteins g-1 mstruct)
-        :param float max_proteins: maximal protein concentrations experienced by the organ (�mol N proteins g-1 mstruct)
+        :param float proteins: protein concentration (µmol N proteins g-1 mstruct)
+        :param float max_proteins: maximal protein concentrations experienced by the organ (µmol N proteins g-1 mstruct)
         :param float delta_t: value of the timestep (s)
         :param bool update_max_protein: whether to update the max proteins or not.
 
@@ -93,12 +93,12 @@ class SenescenceModel(object):
         :param str organ_name: name of the organ to which belongs the element (used to distinguish lamina from stem organs)
         :param float prev_senesced_length: previous senesced length of an organ (m-2)
         :param float length: organ length (m)
-        :param float proteins: protein concentration (�mol N proteins g-1 mstruct)
-        :param float max_proteins: maximal protein concentrations experienced by the organ (�mol N proteins g-1 mstruct)
+        :param float proteins: protein concentration (µmol N proteins g-1 mstruct)
+        :param float max_proteins: maximal protein concentrations experienced by the organ (µmol N proteins g-1 mstruct)
         :param float delta_t: value of the timestep (s)
         :param bool update_max_protein: whether to update the max proteins or not.
 
-        :return: new_senesced_length (m), relative_delta_senesced_length (dimensionless), max_proteins (�mol N proteins g-1 mstruct)
+        :return: new_senesced_length (m), relative_delta_senesced_length (dimensionless), max_proteins (µmol N proteins g-1 mstruct)
         :rtype: tuple [float, float, float]
         
         .. todo:: remove update_max_protein
@@ -144,12 +144,12 @@ class SenescenceModel(object):
 
     @classmethod
     def calculate_remobilisation(cls, metabolite, relative_delta_structure):
-        """Metabolite remobilisation due to senescence over DELTA_T (�mol).
+        """Metabolite remobilisation due to senescence over DELTA_T (µmol).
         
-        :param float metabolite: amount of any metabolite to be remobilised (�mol) 
+        :param float metabolite: amount of any metabolite to be remobilised (µmol) 
         :param float relative_delta_structure: could be relative variation of a photosynthetic element green area or relative variation of mstruct
         
-        :return: metabolite remobilisation (�mol)
+        :return: metabolite remobilisation (µmol)
         :rtype: float
         """
         return metabolite * relative_delta_structure
@@ -172,17 +172,17 @@ class SenescenceModel(object):
 
     @classmethod
     def calculate_remobilisation_proteins(cls, organ, element_index, proteins, relative_delta_green_area, ratio_N_mstruct_max, full_remob):
-        """Protein remobilisation due to senescence over DELTA_T. Part is remobilized as amino_acids (�mol N), the rest is increasing Nresidual (g).
+        """Protein remobilisation due to senescence over DELTA_T. Part is remobilized as amino_acids (µmol N), the rest is increasing Nresidual (g).
         
         :param str organ: name of the organ
         :param int element_index: phytomer rank
-        :param float proteins: amount of proteins (�mol N)
+        :param float proteins: amount of proteins (µmol N)
         :param float relative_delta_green_area: relative variation of a photosynthetic element green area
         :param float ratio_N_mstruct_max: N content in the whole element (both green and senesced tissues).
         :param bool full_remob: whether all proteins should be remobilised
         
-        :return: Quantity of proteins remobilised either in amino acids, either in residual N (�mol),
-                 Quantity of proteins converted into amino_acids (�mol N), 
+        :return: Quantity of proteins remobilised either in amino acids, either in residual N (µmol),
+                 Quantity of proteins converted into amino_acids (µmol N), 
                  Increment of Nresidual (g)
         :rtype: tuple [float, float, float]
         """
